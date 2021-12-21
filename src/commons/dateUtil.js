@@ -1,0 +1,21 @@
+
+import { regularExpData } from "../constants";
+import moment from "moment";
+const { DateTime } = require("luxon");
+
+const dateUtil = {};
+let dateFormat = "DD MMM YYYY";
+
+dateUtil.toISODateFormat = (input, dateFormat) => {
+  if (!input) return ""
+  if (!dateFormat) dateFormat = "DD-MM-YYYY";
+  return DateTime.fromISO(input, { zone: "UTC" }).toFormat(dateFormat);
+};
+
+dateUtil.toDateFormat = (input, dateFormat) => {
+  if (!input) return "";
+  if (!dateFormat) dateFormat = "DD-MM-YYYY";
+  return moment(new Date(input)).format(dateFormat);
+};
+
+export default dateUtil;
