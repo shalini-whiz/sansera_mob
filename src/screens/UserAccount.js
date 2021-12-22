@@ -11,6 +11,7 @@ import { SvgCss } from "react-native-svg"
 import { MachineOp, ForkOp } from "../svgs/UserOp"
 import { LogoutIcon } from "../svgs/GenericIcon"
 import App from '../../App';
+import CustomModal from '../components/CustomModal';
 const styles = StyleSheet.create({
   container: {
    flex: 1,
@@ -58,9 +59,12 @@ const styles = StyleSheet.create({
 });
 
 
-const UserAccount = ({navigation,route}) => {
+const UserAccount = (props) => {
   let [user,setUser] = React.useState({})
   const userState= React.useContext(UserContext);
+  const [dialog, showDialog] = React.useState(false);
+  const [dialogTitle, setDialogTitle] = React.useState('')
+  const [dialogMessage, setDialogMessage] = React.useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -71,15 +75,50 @@ const UserAccount = ({navigation,route}) => {
       mounted = false; 
     }
   },[])
+  const closeDialog = () => {
+    showDialog(false)
+    setDialogTitle('')
+    setDialogMessage('')
+  }
+  const openDialog = () => {
+    showDialog(true);
+    setDialogTitle('Confirm Logout');
+    let message = "Are you sure you want to log out ?"
+    setDialogMessage(message);
+  }
 
+  const removeBatch = async () => {
+    let apiData = {}
+    let batchDetails = { ...batchDet };
+    apiData.batch_num = batchDetails.batch_num;
+    apiData.status = "REMOVED"
+    apiData.op = "update_material_fifo";
+    apiData.fifo = [];
+    console.log("apiData " + JSON.stringify(apiData))
+    setApiStatus(true);
+    ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
+      console.log("on remove :  " + JSON.stringify(apiRes))
+      setApiStatus(false);
+      if (apiRes && apiRes.status) {
+        if (apiRes.response.message) {
+          closeDialog();
+          loadBatches();
+          setBatchDet({})
+        }
+      }
+    });
+
+  }
  
   const logout = async() => {
     await AsyncStorage.clear();
     setUser(null);
     clearTopics(userState && userState.user && userState.user.id);
     clearTopics("fifo-push");
+   /// console.log("navigation : " + navigation)
+    console.log(props)
+    props.navigation.navigate('Login',{screen:"Login"})
     //navigation.push('Login');
-    console.log(navigation)
     // navigation.reset({
     //   index: 0,
     //   routes: [{ name: 'Login' }],
@@ -101,12 +140,20 @@ const UserAccount = ({navigation,route}) => {
       
           <TouchableOpacity style={[styles.canButtonContainer, { width: '40%', justifyContent: 'center',
           flexDirection:'row' }]}
-            onPress={(e) => logout(e)} >
+            onPress={(e) => openDialog(e)} >
             <Text style={styles.canButtonTxt}>LOGOUT</Text>
             <SvgCss xml={LogoutIcon(appTheme.colors.cancelActionTxt)} width={20} height={20} style={{margin:2}}/>
 
           </TouchableOpacity>
       </View>
+          {dialog ? <CustomModal
+            modalVisible={dialog}
+            dialogTitle={dialogTitle}
+            dialogMessage={dialogMessage}
+            closeDialog={closeDialog}
+            okDialog={logout}
+          /> : <View></View>}
+
       <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
 
        

@@ -66,6 +66,7 @@ function App() {
 
   return (
     <UserContext.Provider value={{ user, saveUser }}>
+      {/* {isLoggedIn ? <TopBar/> : <Login/>} */}
       <NavigationContainer independent={true} ref={navigationRef}>
         <Stack.Navigator
           initialRouteName={isLoggedIn ? 'Home' : 'Login'}

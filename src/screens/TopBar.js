@@ -17,8 +17,10 @@ import {
 } from '@react-navigation/drawer';
 import { NavigationContainer } from "@react-navigation/native";
 import BatchHome from "./batch/BatchHome";
+
 import { Dimensions } from 'react-native'
 import UserAccount from "./UserAccount";
+import ProcessHome from "./process/ProcessHome";
 
 function GenericHome({ navigation }) {
   return (
@@ -46,13 +48,14 @@ function MyDrawer() {
   let homePage = GenericHome;
   if (userState && userState.user && userState.user.role == "QA")
      homePage = BatchHome
-
+  if (userState && userState.user && userState.user.role == "PA")
+    homePage = ProcessHome
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions= {{
         drawerStyle: {
-          width: Dimensions.get('window').width
+         // width: Dimensions.get('window').width
         },
       }}
     >
@@ -78,18 +81,10 @@ function MyDrawer() {
    
    return (
      <>
-     {user ? 
+       {userState.user ? 
       <NavigationContainer independent={true}>
           
           <MyDrawer/>
-           <View style={{ display: 'flex' }}>
-             <View style={{
-               flexDirection: 'row', padding: 5, display: 'flex',
-               backgroundColor: appTheme.colors.topBarBackground,
-               borderBottomColor: appTheme.colors.cardTitle, borderBottomWidth: 2
-             }}>  
-             </View>
-            </View>
            
 
           {/* <View style={{

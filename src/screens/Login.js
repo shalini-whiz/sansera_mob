@@ -75,6 +75,7 @@ export default function Login() {
       let apiData = await util.filterFormData([...loginData]);
       apiData.op = "login"
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "login");
+      console.log("login response "+JSON.stringify(apiRes))
       if(!apiRes)
         setApiError("Please load again!")
       if (apiRes && apiRes.status) {
