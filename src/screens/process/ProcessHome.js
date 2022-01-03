@@ -5,6 +5,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import TopBar from '../TopBar';
 import ProcessDetails from './ProcessDetails';
 import { appTheme } from '../../lib/Themes';
+import ProcessList from './ProcessList';
 
 
 
@@ -24,6 +25,15 @@ export default function ProcessHome() {
             lazy: true
           })}
         >
+         
+          <Tab.Screen name="View Process" component={ProcessList}
+            listeners={({ navigation, route }) => ({
+              tabPress: e => {
+                if (route.state && route.state.routeNames.length > 0) {
+                  navigation.navigate('Edit Process')
+                }
+              },
+            })} />
           <Tab.Screen name="Create Process" component={ProcessDetails}
             listeners={({ navigation, route }) => ({
               tabPress: e => {
@@ -33,22 +43,7 @@ export default function ProcessHome() {
               },
             })}
           />
-          <Tab.Screen name="Edit Process" component={ProcessDetails}
-            listeners={({ navigation, route }) => ({
-              tabPress: e => {
-                if (route.state && route.state.routeNames.length > 0) {
-                  navigation.navigate('Edit Process')
-                }
-              },
-            })} />
-          <Tab.Screen name="Historical Process" component={ProcessDetails}
-            listeners={({ navigation, route }) => ({
-              tabPress: e => {
-                if (route.state && route.state.routeNames.length > 0) {
-                  navigation.navigate('Historical Process')
-                }
-              },
-            })} />
+         
          
 
         </Tab.Navigator>

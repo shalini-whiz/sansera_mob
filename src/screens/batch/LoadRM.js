@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl,Alert, ActivityIndicator } from "react-native";
 import { util } from "../../commons";
 import { appTheme } from "../../lib/Themes";
-import FormGen from "../../lib/FormGen"
 import CustomHeader from "../../components/CustomHeader";
 import { Picker } from '@react-native-picker/picker';
 import CustomCard from "../../components/CustomCard";
@@ -32,6 +31,7 @@ export default function LoadRM() {
   const [listeningEvent,setListeningEvent] = useState(false);
   const [connectionStatus,setConnectionStatus] = useState(0);
   const [client,setClient] = useState(undefined);
+  const [newFifo,setNewFifo] = useState([])
 
 
   const [batchOptions, setBatchOptions] = useState({ keyName: "_id", valueName: "batch_num", options: [], })
@@ -99,6 +99,7 @@ export default function LoadRM() {
   const addToDelRacks = (e,fifoItem) => {
     console.log("entered add to del racks "+fifoItem);
     let racks_to_del = [...delRacks]
+    let racks_to_add = [...addRacks]
     let element_num = fifoItem.element_num;
     const selectedIndex = racks_to_del.indexOf(element_num);
     console.log(selectedIndex)
@@ -107,16 +108,40 @@ export default function LoadRM() {
     } else if (selectedIndex !== -1) {
       racks_to_del.splice(selectedIndex, 1);
     }
+
+    const selectedIndex1 = racks_to_add.indexOf(element_num);
+    if (selectedIndex1 === -1) {
+      racks_to_add.push(element_num);
+    } else if (selectedIndex1 !== -1) {
+      racks_to_add.splice(selectedIndex1, 1);
+    }
+    let mergeArr = [...racks_to_del,...racks_to_add]
     setDelRacks(racks_to_del);
+    setAddRacks(racks_to_add)
+
+    
+
     console.log("racks_to_del : "+racks_to_del)
 
   }
 
   const startListening = () => {
-    let options = {...mqttOptions};
-    console.log("options here " + JSON.stringify(options))
+    
+    let apiData = {op:"list_topics",type:"rack"}
+    let topics = [{ topic_name: "MWPI2/2E-17-AE-3C/get/switch"},{topic_name:"MWPI2/2E-17-AE-1A/get/switch"}]
+    connectMQTT(topics)
+    // ApiService.getAPIRes(apiData,"POST","topics").then(apiRes => {
+    //   if(apiRes && apiRes.status){
+    //     console.log("apiRes here "+JSON.stringify(apiRes))
+    //   }
+    // })
 
-    MQTT.createClient(options).then((client) => {
+    
+  }
+
+  const connectMQTT = (topics) => {
+   
+    MQTT.createClient(mqttOptions).then((client) => {
       setClient(client)
       client.connect();
 
@@ -133,20 +158,32 @@ export default function LoadRM() {
       client.on('message', (msg) => {
         console.log('mqtt.event.message', msg);
         //this.setState({ message: JSON.stringify(msg) });
+
+         let batchDetails = { ...batchDet };
+        let rackDevices = Object.keys(batchDetails.device_map);
+        let deviceId = msg.topic.split("/")[1];
+        let deviceExists = rackDevices.indexOf(deviceId);
+        let fifoExists = batchDetails.fifo.findIndex(item => item.element_id === deviceId);
+        if(deviceExists > -1 && fifoExists === -1){
+          const selectedIndex = addRacks.indexOf(batchDetails.device_map[deviceId]);
+          if(selectedIndex === -1){
+            addRacks.push(batchDetails.device_map[deviceId]);
+            let newRacks = [...newFifo]
+            newRacks.push({ "element_num": batchDetails.device_map[deviceId],"element_id":deviceId})
+            setNewFifo(newRacks)
+          }
+        }
+      
       });
 
       client.on('connect', () => {
         console.log('connected');
         setConnectionStatus(1)
         setListeningEvent(true);
-        let batchDetails = {...batchDet};
-        console.log("Batch details "+JSON.stringify(batchDetails))
-        let rackDevices = Object.keys(batchDetails.device_map);
-        rackDevices.map(item => {
-          let topic = 'MWPI1/' + item + "/set/led1";
-          console.log(topic)
-          client.subscribe(topic,2)
+        topics.map(item => {
+          client.subscribe(item.topic_name, 2)
         })
+       
       });
       this.state = ({ "client": client })
 
@@ -155,7 +192,6 @@ export default function LoadRM() {
       setConnectionStatus(3);
     });
   }
-
   const stopLoading = () => {
     let { client } = this.state
     
@@ -168,40 +204,48 @@ export default function LoadRM() {
   const saveRacks = () => {
     let racks_to_del = [...delRacks];
     let racks_to_add = [...addRacks];
+    let apiData = {
+      "op": "update_material_fifo",
+      "batch_num": batchDet.batch_num,
+    }
+    let invokeApi = false;
     if(racks_to_add.length && racks_to_del.length){
       stopLoading();
+      
     }
     else if(racks_to_add.length){
       stopLoading();
+      apiData.fifo = newFifo
+      invokeApi = true;
+    
     }
     else if(racks_to_del.length){
 
-      console.log("racks to be deleted "+JSON.stringify(racks_to_del))
       let updatedFifo = batchDet.fifo.filter(ar => !racks_to_del.find(rm => (rm === ar.element_num)))
-      console.log("updatedFifo : " + JSON.stringify(updatedFifo));
-      let apiData = {
-        "op":"update_material_fifo",
-        "batch_num":batchDet.batch_num,
-        "fifo":updatedFifo
-      }
-      console.log("apiData here "+JSON.stringify(apiData))
+      apiData.fifo = updatedFifo
+      invokeApi = true;
+    }
+    if(invokeApi){
+      console.log("apiData here " + JSON.stringify(apiData))
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
         console.log("apiRes : " + JSON.stringify(apiRes))
         setApiStatus(false);
-        if(apiRes && !apiRes.status){
+        if (apiRes && !apiRes.status) {
           Alert.alert('Could not update racks')
           setDelRacks([]);
           setAddRacks([]);
           showDialog(false)
           setDialogMessage("");
           setDialogTitle("");
+          setNewFifo([])
 
         }
         if (apiRes && apiRes.status) {
           Alert.alert("Racks updated !")
           setDelRacks([]);
           setAddRacks([]);
+          setNewFifo([])
           showDialog(false)
           setDialogMessage("");
           setDialogTitle("");
@@ -211,7 +255,6 @@ export default function LoadRM() {
           setBatchOptions(bOptions)
         }
       })
-
     }
   }
 
@@ -293,8 +336,6 @@ export default function LoadRM() {
                     onPress={(e) => handleEditRack(e)  } >
                     <MaterialIcons name="edit" size={25} style={{ marginLeft: 10 }}></MaterialIcons>
                   </TouchableOpacity>
-                  
-
                 </View>
                 {console.log(JSON.stringify(batchDet.fifo))}
                 <View style={{ flexDirection: 'row', }}>
@@ -302,11 +343,26 @@ export default function LoadRM() {
                    
                     let fifoRack = (fifoIndex === 0) ? fifoItem.element_num : "  |   " + fifoItem.element_num
                     return (
-                      <TouchableOpacity style={{}} key={fifoIndex} onPress={(e) => addToDelRacks(e, fifoItem)} >  
+                      <TouchableOpacity style={{}} key={fifoIndex} 
+                      onPress={(e) => addToDelRacks(e, fifoItem)} >  
                         <Text style={{  fontSize: 14,
                         color:delRacks.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black' 
                           
                           }} key={fifoIndex} >{fifoRack}</Text>
+                      </TouchableOpacity>
+                    )
+                  })}
+                  {newFifo.map((fifoItem, fifoIndex) => {
+
+                    let fifoRack = (fifoIndex === 0 && batchDet.fifo.length ? " | "+fifoItem.element_num : (fifoIndex === 0 ? fifoItem.element_num : "  |   " + fifoItem.element_num))
+                    return (
+                      <TouchableOpacity style={{}} key={fifoIndex}
+                        onPress={(e) => addToDelRacks(e, fifoItem)} >
+                        <Text style={{
+                          fontSize: 14,
+                          color: delRacks.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black'
+
+                        }} key={fifoIndex} >{fifoRack}</Text>
                       </TouchableOpacity>
                     )
                   })}
@@ -332,7 +388,7 @@ export default function LoadRM() {
                     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                       <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]}
                     onPress={(e) => computeRacks(e)} >
-                    <Text>Save</Text>
+                    <Text>SAVE</Text>
                     </TouchableOpacity>
                     </View> : false}
 
@@ -340,7 +396,7 @@ export default function LoadRM() {
                 <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                   <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]}
                     onPress={(e) => startListening(e)} >
-                    <Text>Add To Rack</Text>
+                    <Text>ADD TO RACK</Text>
                   </TouchableOpacity>
                  
                 </View> :false }
@@ -349,11 +405,11 @@ export default function LoadRM() {
                 <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                   <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]}
                     onPress={(e) => startListening(e)} >
-                  <Text>Add To Rack</Text>
+                  <Text>ADD TO RACK</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]}
                     onPress={(e) => computeRacks(e)} >
-                  <Text>Save</Text></TouchableOpacity>
+                  <Text>SAVE</Text></TouchableOpacity>
                 </View> : false}
 
               </View>

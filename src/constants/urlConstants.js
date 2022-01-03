@@ -1,22 +1,18 @@
 //var liveAddress = "http://192.168.0.107:7000/";
 var liveAddress_old = "https://p-san-forge-feature.herokuapp.com/";
-var liveAddress = 'https://p-san-forge-mobile.herokuapp.com/'
+var liveAddress1 = 'https://p-san-forge-mobile.herokuapp.com/'
+var liveAddress = 'http://103.162.246.110:8081/'
 
-var mqttHost = "mqtt.meti.in"
-var mqttUrl = "mqtt" + "://" + mqttHost + ":1884";
-var mqttUser = "quickiot_wd"
-var mqttUserPwd = "whiz1234!"
-var mqttClientId = "clientId"
+
 
 const  mqttOptions = {
-    uri: mqttUrl,
-    clientId: mqttClientId,
-    user: mqttUser,
-    pass: mqttUserPwd,
+    uri: "mqtt" + "://mqtt.meti.in:1884",
+    clientId: "clientId",
+    user: "quickiot_wd",
+    pass: "whiz1234!",
     auth: true,
     keepalive: 60
 }
-
 
 
 
@@ -34,8 +30,12 @@ const urls = {
     list_raw_material_by_status: SERVER_URL +"api/raw-materials",
     update_batch: SERVER_URL +"api/raw-materials",
     batch: SERVER_URL +"api/raw-materials",
-    
-
+    process:SERVER_URL+"api/process-line",
+    forgeMachine:SERVER_URL+"api/forge-machine",
+    customer: SERVER_URL +"api/customer",
+    fifo:SERVER_URL+"api/fifo",
+    "process-master": SERVER_URL +"api/process-master",
+    topics:SERVER_URL+"api/mqtt"
 };
 
 

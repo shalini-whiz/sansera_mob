@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-native";
 import { appTheme } from "./Themes";
 import { Picker } from '@react-native-picker/picker';
+import { util } from '../commons';
 
 export default class FormGen extends Component {
     constructor(props) {
@@ -30,16 +31,17 @@ export default class FormGen extends Component {
                       </Text> : false}
                       {item.select ?
                         <Picker
-                          selectedValue={item.value}
+                          selectedValue={item.titleCase ? util.capitalizeWord(item.value) : item.value}
                           onValueChange={this.props.handleChange(item.key)}
                           mode="dialog"
                           style={{ backgroundColor: "#ECF0FA" }}
                           itemStyle={{}}
                           dropdownIconColor={appTheme.colors.cardTitle}
                         >
-                          {item.options.map((pickerItem, pickerIndex) => {
+                          {item.options && item.options.map((pickerItem, pickerIndex) => {
                             let labelV = (item.keyName && pickerItem[item.keyName]) ? pickerItem[item.keyName] : (pickerItem.key ? pickerItem.key : "");
                             let label = (item.valueName && pickerItem[item.valueName]) ? pickerItem[item.valueName] : (pickerItem.value ? pickerItem.value : "");
+                            if (item.titleCase) labelV = util.titleCase(labelV)
                             return (<Picker.Item style={{ backgroundColor: "#ECF0FA" }} label={label} value={labelV} key={pickerIndex} />)
                           })}
                         </Picker>
@@ -54,7 +56,7 @@ export default class FormGen extends Component {
                           onChangeText={this.props.handleChange(item.key)}
                           keyboardType={item.type ? 'numeric' : 'default'}
                           editable={this.props.editMode}
-                          value={item.value}
+                          value={item.value+""}
                         />}
                       {item.error && item.error.length ? (<Text style={styles.error}> {item.error} </Text>) : (false)}
 
@@ -72,43 +74,49 @@ export default class FormGen extends Component {
       { 
         content = this.props.formData.map((item, index) => {
           return (
-            <View style={{ margin: 1, flexDirection: 'row', }} key={index}>
+            <View style={{ margin: 1, flexDirection: 'column', }} key={index}>
                 <View style={[this.props.labelDataInRow ? styles.formDataItemRow : styles.formItem,{
                   }]} >
                     
                 {item.displayName && item.displayName.length ? <Text 
-                  style={[this.props.labelDataInRow ? styles.formLabelInRow : styles.formLabel, {flex:1 }]}
+                  style={[this.props.labelDataInRow ? styles.formLabelInRow : styles.formLabel, { 
+                    flex: this.props.labelFlex ? this.props.labelFlex : 1 }]}
                 >
                   {item.displayName}
                 </Text> : false}
-                <View style={{flex:2}}>
+                <View style={{
+                  flex: this.props.dataFlex ? this.props.dataFlex : 2
+}}>
                 {item.select ?
                   <Picker
-                    selectedValue={item.value}
+                    selectedValue={item.titleCase ? util.capitalizeWord(item.value) : item.value}
                     onValueChange={this.props.handleChange(item.key)}
                     mode="dialog"
                     style={[this.props.labelDataInRow ? styles.pickerItemInRow : styles.pickerItem, { backgroundColor: this.props.editMode === false ? "red" : '#ECF0FA' }]}
                     itemStyle={{}}
                     dropdownIconColor={appTheme.colors.cardTitle}
                   >
-                    {item.options.map((pickerItem, pickerIndex) => {
+                    {item.options && item.options.map((pickerItem, pickerIndex) => {
                       let labelV = (item.keyName && pickerItem[item.keyName]) ? pickerItem[item.keyName] : (pickerItem.key ? pickerItem.key : "");
                       let label = (item.valueName && pickerItem[item.valueName]) ? pickerItem[item.valueName] : (pickerItem.value ? pickerItem.value : "");
+                      if (item.titleCase) label = util.titleCase(label); 
                       return (<Picker.Item style={{ backgroundColor: "#ECF0FA" }} label={label} value={labelV} key={pickerIndex} />)
                     })}
                   </Picker>
                   :
                   <TextInput name={item.key}
-                    style={[this.props.labelDataInRow ? styles.textInputInRow : styles.TextInput, { backgroundColor: this.props.editMode === false ? "white" : '#ECF0FA'}]}
+                    style={[this.props.labelDataInRow ? styles.textInputInRow : styles.TextInput, 
+                      { backgroundColor: this.props.editMode === false ? "white" : '#ECF0FA',
+                    }]}
                     placeholder={item.placeholder}
                     placeholderTextColor="#fafafa"
                     onChangeText={this.props.handleChange(item.key)}
                     keyboardType={item.type && item.type === "number" ? 'numeric' : 'default'}
                     editable={this.props.editMode}
-                    value={item.value}
+                    value={item.value+""}
                   />}
                 </View>
-                  </View>
+                </View>
                   {item.error && item.error.length ? (<Text style={styles.error}> {item.error} </Text>) : (false)}
 
             </View>

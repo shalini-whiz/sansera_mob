@@ -6,7 +6,8 @@ export const appTheme = {
    
   },
   colors:{
-    topBarBackground:'white',
+    topBarBackground:'#1A237E',
+    topBarTxt:'white',
     stageTitle:"#424242",
     cardTitle:"#1A237E",
     successAction: '#8BC34A',

@@ -47,7 +47,7 @@ const StagingTopBar = () => {
           {/* {user && user.role ? (user.role === "manager" ? <SvgCss xml={MachineOp('#FFC107')} width={35} height={35} />
             : <SvgCss xml={ForkOp('#FFC107')} width={35} height={35} />) : false} */}
           {user && user.memberName ? 
-          <Text style={{ color: appTheme.colors.cardTitle, fontSize: 10,alignSelf:'center',fontFamily:appTheme.fonts.semiBold }}>Welecome {util.capitalize(user.memberName)}</Text> : false}
+          <Text style={{ color: appTheme.colors.cardTitle, fontSize: 10,alignSelf:'center',fontFamily:appTheme.fonts.semiBold }}>Welcome {util.capitalize(user.memberName)}</Text> : false}
 
 
         </View>

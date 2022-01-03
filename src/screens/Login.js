@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity,ImageBackground } from "react-native";
+import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, ImageBackground, ActivityIndicator } from "react-native";
 import { util } from "../commons";
 import { ApiService } from "../httpservice";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,22 +8,29 @@ import UserContext from "./UserContext";
 import { subscribeToTopic } from './notification/NotifyHandler';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { SvgCss } from "react-native-svg"
-import {EmailIcon, PasswordIcon, TickIcon } from "../svgs/GenericIcon"
+import { EmailIcon, PasswordIcon, TickIcon } from "../svgs/GenericIcon"
 import { appTheme } from "../lib/Themes";
 import TopBar from "./TopBar";
+import Home from "./Home";
 
 let loginSchema = [
-  { "key": "emp_id", displayName: "", placeholder: "Your Employee ID", value: "", error: "", required: true, lowerCase: true, "label": "Employee ID",
-icon: <SvgCss xml={EmailIcon(appTheme.colors.cardTitle)} width={20} height={20} style={{margin:5}}/> },
-  { "key": "password", displayName: "", placeholder: "Password", secureTextEntry: true, value: "", error: "",
-   required: true, label: "password",
-    icon: <SvgCss xml={PasswordIcon(appTheme.colors.cardTitle)} width={20} height={20} style={{margin:5}} /> },
+  {
+    "key": "emp_id", displayName: "", placeholder: "Your Employee ID", value: "", error: "", required: true, lowerCase: true, "label": "Employee ID",
+    icon: <SvgCss xml={EmailIcon(appTheme.colors.cardTitle)} width={20} height={20} style={{ margin: 5 }} />
+  },
+  {
+    "key": "password", displayName: "", placeholder: "Password", secureTextEntry: true, value: "", error: "",
+    required: true, label: "password",
+    icon: <SvgCss xml={PasswordIcon(appTheme.colors.cardTitle)} width={20} height={20} style={{ margin: 5 }} />
+  },
 ]
 export default function Login() {
   const [loginData, setLoginData] = useState([])
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState({})
   const [apiError, setApiError] = useState('')
+  const [apiStatus, setApiStatus] = useState(false);
+
   const { saveUser } = React.useContext(UserContext)
   useEffect(() => {
     getUser().then(uExists => {
@@ -72,26 +79,61 @@ export default function Login() {
     setLoginData(validFormData);
     console.log(isError)
     if (!isError) {
+      setApiStatus(true)
       let apiData = await util.filterFormData([...loginData]);
       apiData.op = "login"
-      let apiRes = await ApiService.getAPIRes(apiData, "POST", "login");
-      console.log("login response "+JSON.stringify(apiRes))
-      if(!apiRes)
+      console.log("apiData " + JSON.stringify(apiData))
+      let apiRes = await ApiService.getAPIRes(apiData, "POST", "login")
+      console.log("login response " + JSON.stringify(apiRes))
+      setApiStatus(false)
+      if (!apiRes)
         setApiError("Please load again!")
       if (apiRes && apiRes.status) {
-        if(apiRes.response.role === "QA") apiRes.response.roleName = "Quality Operator";
-        //apiRes.response.roleName = apiRes.response.role === "manager" ? "Machine Operator" : "Fork Operator"
-        await AsyncStorage.setItem("userInfo", JSON.stringify(apiRes.response.message))
-        await AsyncStorage.setItem('token', apiRes.response.message.accessToken)
+        if (apiRes.response.role === "QA") apiRes.response.roleName = "Quality Operator";
+        AsyncStorage.setItem("userInfo", JSON.stringify(apiRes.response.message))
+        AsyncStorage.setItem('token', apiRes.response.message.accessToken)
         subscribeToTopic(apiRes.response.message.id);
         subscribeToTopic("fifo-push");
         setUser(apiRes.response.message)
         saveUser(apiRes.response.message);
         setIsLoggedIn(true)
+
+        let topicPaylaod = { op: "list_topics" }
+        ApiService.getAPIRes(topicPaylaod, "POST", "topics").then(apiRes => {
+          if (apiRes.status) {
+            let rackSwitch = []
+            let binSwitch = []
+            let switchPressedRacks = apiRes.response.message.reduce(function (acc, obj) {
+              let key = obj["topic_name"]
+              if (key.includes("/get/switch")) {
+                if (obj.type === 'rack') {
+                  rackSwitch.push(obj)
+                  acc.push(obj)
+                }
+                else if (obj.type === "bin")
+                  binSwitch.push(obj)
+              }
+              return acc
+            }, []);
+            console.log(switchPressedRacks)
+            AsyncStorage.setItem("racks", JSON.stringify(switchPressedRacks));
+            AsyncStorage.setItem("bins", JSON.stringify(binSwitch));
+
+            let emptyBinReq = [
+              { "topic_name": "MWPI2/2E-17-AE-3F", "element_id": "2E-17-AE-3F", "element_num": "B1" },
+              { "topic_name": "MWPI2/8F-11-99-25", "element_id": "8F-11-99-25", "element_num": "B2" },
+            ]
+            AsyncStorage.setItem("emptyBinReq", JSON.stringify(emptyBinReq));
+
+          }
+        })
       }
       else {
-        if(apiRes && apiRes.response) setApiError(apiRes.response.message)
+        if (apiRes && apiRes.response) setApiError(apiRes.response.message)
       }
+
+
+
     }
   }
   const getUser = async () => {
@@ -107,58 +149,63 @@ export default function Login() {
   };
 
   return (
-      <>
-      {isLoggedIn ? <TopBar user={user} /> : (
-      <View style={styles.loginContainer}>
-          <Image source={require("../images/sansera.png")} style={{ alignSelf: 'center' }}/>
-        {loginData.map((item, index) => {
-          return (
-            <View style={{ margin: 10, marginLeft: 20, marginRight: 20, }} key={index}>
-              <View style={{ flexDirection: 'column', width: '50%',alignSelf:'center'}}>
+    <>
+      {isLoggedIn ? <Home user={user} /> : (
+        <View style={styles.loginContainer}>
+          <Image source={require("../images/sansera.png")} style={{ alignSelf: 'center' }} />
+          <ActivityIndicator size="large" animating={apiStatus} />
 
-              <View style={{  flexDirection: 'row',
-               borderBottomColor:'#1A237E', 
-               borderBottomWidth:1,
-               borderRadius: 10,
-                }} key={index}>
-                {item.icon ? item.icon: false}
-                
-                <TextInput name={item.key} 
-                style={[styles.TextInput,{opacity:(item.value && item.value.length) ? 1 : 0.6}]} 
-                placeholder={item.placeholder}
-                  placeholderTextColor="grey"
-                  onChangeText={handleChange(item.key)}
-                  secureTextEntry={item.secureTextEntry ? true : false} />
-                {item.secureTextEntry != undefined && item.value && item.value.length ?
-                  <Icon
-                    name={item.secureTextEntry ? 'eye-slash' : 'eye'}
-                    size={20} color={appTheme.colors.cardTitle} onPress={(e) => setVisibility(item.key)}
-                    style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', margin: 5, padding: 5 }}
-                  /> : false}
+          {loginData.map((item, index) => {
+            return (
+              <View style={{ margin: 10, marginLeft: 20, marginRight: 20, }} key={index}>
+
+                <View style={{ flexDirection: 'column', width: '50%', alignSelf: 'center' }}>
+
+                  <View style={{
+                    flexDirection: 'row',
+                    borderBottomColor: '#1A237E',
+                    borderBottomWidth: 1,
+                    borderRadius: 10,
+                  }} key={index}>
+                    {item.icon ? item.icon : false}
+
+                    <TextInput name={item.key}
+                      style={[styles.TextInput, { opacity: (item.value && item.value.length) ? 1 : 0.6 }]}
+                      placeholder={item.placeholder}
+                      placeholderTextColor="grey"
+                      onChangeText={handleChange(item.key)}
+                      secureTextEntry={item.secureTextEntry ? true : false} />
+                    {item.secureTextEntry != undefined && item.value && item.value.length ?
+                      <Icon
+                        name={item.secureTextEntry ? 'eye-slash' : 'eye'}
+                        size={20} color={appTheme.colors.cardTitle} onPress={(e) => setVisibility(item.key)}
+                        style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', margin: 5, padding: 5 }}
+                      /> : false}
+                  </View>
+                  {item.error && item.error.length ? (<Text style={{ color: 'red', fontSize: 12, marginLeft: 20, padding: 2 }}> {item.error} </Text>) : (false)}
+
+                </View>
               </View>
-                {item.error && item.error.length ? (<Text style={{ color: 'red', fontSize: 12, marginLeft: 20, padding: 2 }}> {item.error} </Text>) : (false)}
+            )
+          })}
 
-              </View>
-            </View>
-          )
-        })}
+          {apiError && apiError.length ? (<Text style={{ color: 'red', fontSize: 12, padding: 2, margin: 10 }}> {apiError} </Text>) : (false)}
+          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+            <TouchableOpacity style={[styles.loginBtn, { flexDirection: 'row' }]} onPress={(e) => handleSubmit(e)} >
+              <Text style={styles.loginText}>LOGIN</Text>
+              <SvgCss xml={TickIcon('black')} width={15} height={15} style={{ marginLeft: 5 }} />
 
-        {apiError && apiError.length ? (<Text style={{ color: 'red', fontSize: 12, padding: 2, margin: 10 }}> {apiError} </Text>) : (false)}
-        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-          <TouchableOpacity style={[styles.loginBtn,{flexDirection:'row'}]} onPress={(e) => handleSubmit(e)} >
-            <Text style={styles.loginText}>LOGIN</Text>
-            <SvgCss xml={TickIcon('black')} width={15} height={15} style={{marginLeft:5}}/>
+            </TouchableOpacity>
 
-          </TouchableOpacity>
-
+          </View>
         </View>
-      </View>
 
 
-        )}
-        </>
+      )}
+
+    </>
   )
-      }
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -168,7 +215,7 @@ const styles = StyleSheet.create({
   loginContainer: {
     flex: 1,
     //marginTop:150,
-   // backgroundColor: "#fff",
+    // backgroundColor: "#fff",
     justifyContent: "center",
   },
   image: {
@@ -187,8 +234,8 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     fontSize: 14,
     flex: 1,
-    color:'black',
-    fontFamily:appTheme.fonts.regular
+    color: 'black',
+    fontFamily: appTheme.fonts.regular
   },
   forgot_button: {
     height: 30,

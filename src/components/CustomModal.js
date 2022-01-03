@@ -17,11 +17,13 @@ const CustomModal = (props) => {
         }}
       >
         <View style={[styles.centeredView,{width:'100%'}]}>
-            <View style={[styles.modalView]}>
-            <Text style={styles.modalTitle}>{props.dialogTitle}</Text>
-            <Text style={styles.modalMessage}>{props.dialogMessage}</Text>
+            <View style={[styles.modalView,{}]}>
+            <Text style={[styles.modalTitle,{}]}>{props.dialogTitle}</Text>
+          {props.dialogMessage ? 
+          <Text style={[styles.modalMessage, {  }]}>{props.dialogMessage}</Text>
+ : false}
 
-            <View style={{flex:1}}>
+            <View style={{}}>
             {props.container}
             </View>
 
@@ -29,7 +31,7 @@ const CustomModal = (props) => {
           {props.okDialog && props.closeDialog ?
             <View style={{
               flexDirection: 'row', display: 'flex', marginRight: 20, marginLeft: 20,
-              alignSelf: 'center',marginBottom:20
+              alignSelf: 'center',marginBottom:10
             }}>
               <TouchableOpacity
                 style={[styles.canButtonContainer, { flexDirection: 'row' }]}
@@ -48,7 +50,7 @@ const CustomModal = (props) => {
 
           {props.okDialog && !props.closeDialog ? <View style={{
             flexDirection: 'row', display: 'flex', marginRight: 20, marginLeft: 20,
-            alignSelf: 'center', marginBottom: 20,width:'50%'
+            alignSelf: 'center', marginBottom: 10,width:'50%'
           }}>
             
             <TouchableOpacity
@@ -58,6 +60,18 @@ const CustomModal = (props) => {
             </TouchableOpacity>
           </View> : false }
           
+
+          {!props.okDialog && props.closeDialog ? <View style={{
+            flexDirection: 'row', display: 'flex', marginRight: 20, marginLeft: 20,
+            alignSelf: 'center', marginBottom: 10, width: '50%',
+          }}>
+
+            <TouchableOpacity
+              style={[styles.sucButtonContainer, { flexDirection: 'row', backgroundColor: appTheme.colors.successAction }]}
+              disabled={false} activeOpacity={.5} onPress={(e) => props.closeDialog(e)} >
+              <Text style={styles.sucButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View> : false}
           </View>
           </View>
       </Modal>
@@ -71,7 +85,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     alignItems: "center",
     //marginTop: 12,
-    marginBottom:52,
+    marginBottom:10,
   
   },
   modalView: {
@@ -89,7 +103,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     width:'90%',
-    height:400
+    //height:''
   },
   modalTitle: {
     padding: 20,
@@ -112,7 +126,7 @@ const styles = StyleSheet.create({
     padding: 5,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 40,
+    marginTop: 100,
     backgroundColor: appTheme.colors.successAction,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
@@ -127,7 +141,7 @@ const styles = StyleSheet.create({
     padding: 5,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 40,
+    marginTop: 100,
     backgroundColor: appTheme.colors.cancelAction,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },

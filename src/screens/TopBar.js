@@ -1,137 +1,93 @@
 
-
- import React, { useEffect } from "react";
- import {   StyleSheet, View,Image,Text } from 'react-native';
- import  UserContext  from "./UserContext";
+import React, { useEffect } from "react";
+import { StyleSheet, Text, View, Image,TouchableOpacity } from 'react-native';
+import { util } from "../commons";
+import UserContext from "./UserContext";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons"
 import { SvgCss } from 'react-native-svg';
 import { AppIcon } from '../svgs/AppIcon';
-import { MachineOp,ForkOp } from "../svgs/UserOp"
-import App from "../../App";
-import { util } from "../commons";
+import { MachineOp, ForkOp } from "../svgs/UserOp"
+import { DownArrow } from "../svgs/ArrowIcon"
 import { appTheme } from "../lib/Themes";
-import {
-  createDrawerNavigator,
-  DrawerContentScrollView,
-  DrawerItemList,
-  DrawerItem,
-} from '@react-navigation/drawer';
-import { NavigationContainer } from "@react-navigation/native";
-import BatchHome from "./batch/BatchHome";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+import CustomModal from "../components/CustomModal";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { clearTopics } from './notification/NotifyHandler';
+import Login from "./Login";
 
-import { Dimensions } from 'react-native'
-import UserAccount from "./UserAccount";
-import ProcessHome from "./process/ProcessHome";
+const TopBar = (props) => {
+  const userState = React.useContext(UserContext);
+  let [user, setUser] = React.useState({})
+  let [stage,setStage] = React.useState('')
 
-function GenericHome({ navigation }) {
+
+  useEffect(() => {
+    let isMounted = true;
+    setUser(userState.user);
+    console.log(JSON.stringify(userState))
+    AsyncStorage.getItem("stage").then(stage => 
+      setStage(stage))
+    return () => {
+      isMounted = false;
+    }
+  }, [])
+
+  
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Home Screen</Text>
-    </View>
-  );
-}
-
-
-
-function CustomDrawerContent(props) {
-  return (
-    <DrawerContentScrollView {...props}
-    >
-      <DrawerItemList {...props} />
-     
-    </DrawerContentScrollView>
-  );
-}
-
-  const Drawer = createDrawerNavigator();
-function MyDrawer() {
-  const userState = React.useContext(UserContext)
-  let homePage = GenericHome;
-  if (userState && userState.user && userState.user.role == "QA")
-     homePage = BatchHome
-  if (userState && userState.user && userState.user.role == "PA")
-    homePage = ProcessHome
-  return (
-    <Drawer.Navigator
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
-      screenOptions= {{
-        drawerStyle: {
-         // width: Dimensions.get('window').width
-        },
-      }}
-    >
-      <Drawer.Screen name="Home" component={homePage} />
-      <Drawer.Screen name="Logout" component={UserAccount} />
-    </Drawer.Navigator>
-  );
-}
-
- const TopBar = () => {
-   const userState = React.useContext(UserContext);
-   let [user,setUser] = React.useState({}) 
-   useEffect(() => {
-     let isMounted = true;
-     setUser(userState.user);
-     return () => { 
-       isMounted = false; 
-     }
-    },[])
-
-
- 
-   
-   return (
-     <>
-       {userState.user ? 
-      <NavigationContainer independent={true}>
-          
-          <MyDrawer/>
-           
-
-          {/* <View style={{
-            flexDirection: "column", flex: 4, justifyContent: 'center', alignContent: 'center',
-            alignItems: 'center'
-          }}>
+    <>{user ?
+    <View style={{ display: 'flex' }}>
+      <View style={{ flexDirection: 'row', padding: 10, display: 'flex',
+       backgroundColor: appTheme.colors.topBarBackground }}>
+        <SvgCss xml={AppIcon} width={40} height={40} />
+          {stage && stage.length ? <Text style={{
+            color: appTheme.colors.topBarTxt, fontSize: 16, alignSelf: 'center',
+            fontFamily: appTheme.fonts.semiBold,marginLeft:10
+          }}>{stage}</Text>:false}
+        <View style={{
+          flexDirection: "column", flex: 4, justifyContent: 'center', alignContent: 'center',
+          alignItems: 'center'
+        }}>
             <Image
-              style={styles.tinyLogo}
-              source={require('../images/sansera.png')} />
-          </View>
-          <View style={{
-            justifyContent: 'center', alignContent: 'center', flexDirection: 'column', alignItems: 'center'
-          }}>
-           
-            {user && user.memberName ? 
-            <Text style={{color:appTheme.colors.cardTitle,fontSize:10,fontFamily:appTheme.fonts.semiBold}}>Welcome {util.capitalize(user.memberName)}</Text> :false }
-
-
-           </View>
-
+            style={styles.tinyLogo}
+            source={require('../images/sansera.png')} />
         </View>
-   </View>  */}
 
-      </NavigationContainer>
-   :false}
-     </>
-   )
- }
- 
- const styles = StyleSheet.create({
-   sectionContainer: {
-     marginTop: 32,
-     paddingHorizontal: 24,
-   },
-   sectionTitle: {
-     fontSize: 24,
-     fontWeight: '600',
-   },
-   sectionDescription: {
-     marginTop: 8,
-     fontSize: 18,
-     fontWeight: '400',
-   },
-   highlight: {
-     fontWeight: '700',
-   },
- });
- 
- export default TopBar;
- 
+        <View style={{
+          justifyContent: 'center', alignContent: 'center', flexDirection: 'row', alignItems: 'center'
+        }}> 
+          {user && user.memberName ?
+            <Text style={{ color: appTheme.colors.topBarTxt, fontSize: 10, alignSelf: 'center', 
+            fontFamily: appTheme.fonts.semiBold }}>Welcome {util.capitalize(user.memberName)}</Text> : false}
+            <TouchableOpacity onPress={(e) => props.openLogOut(e)} style={{marginLeft:20}}>
+              <FontAwesome name="sign-out" size={30} color={appTheme.colors.topBarTxt} ></FontAwesome>
+            </TouchableOpacity></View>
+        </View>
+      </View>
+       : <Login />}
+
+      
+    </>
+  )
+   
+}
+
+const styles = StyleSheet.create({
+  sectionContainer: {
+    marginTop: 32,
+    paddingHorizontal: 24,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+  },
+  sectionDescription: {
+    marginTop: 8,
+    fontSize: 18,
+    fontWeight: '400',
+  },
+  highlight: {
+    fontWeight: '700',
+  },
+});
+
+export default TopBar;

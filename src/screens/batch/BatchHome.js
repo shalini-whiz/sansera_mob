@@ -52,11 +52,11 @@ export default function BatchHome() {
                 }
               },
             })}/>
-        <Tab.Screen name="Clear Inventory" component={ClearInventory}
+        <Tab.Screen name="Inventory" component={ClearInventory}
             listeners={({ navigation, route }) => ({
               tabPress: e => {
                 if (route.state && route.state.routeNames.length > 0) {
-                  navigation.navigate('Clear Inventory')
+                  navigation.navigate('Inventory')
                 }
               },
             })} />

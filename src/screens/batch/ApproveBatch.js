@@ -11,6 +11,8 @@ import { RadioButton } from "react-native-paper";
 import UserContext from "../UserContext";
 import { useIsFocused } from '@react-navigation/native';
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
+import CustomHeader from "../../components/CustomHeader";
+import { act } from "react-test-renderer";
 
 
 
@@ -51,9 +53,9 @@ export default function ApproveBatch() {
   })
   useEffect(() => {
     if (isFocused) {
-      console.log("load batches on approve batch")
       setApiStatus(true);
       loadBatches();
+      setAction('')
     }
     return () => { }
   }, [status,isFocused])
@@ -72,11 +74,9 @@ export default function ApproveBatch() {
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length) {
           let bOptions = { ...batchOptions }
-          console.log("bOptions : "+JSON.stringify(bOptions))
-          console.log(apiRes.response.message)
+         
           bOptions.options = apiRes.response.message;
           setBatchOptions(bOptions);
-          console.log(bOptions.options[0])
           if (bOptions.options[0]){
             setBatchNum(bOptions.options[0]._id)
             setBatchDet(bOptions.options[0])
@@ -102,7 +102,6 @@ export default function ApproveBatch() {
   }, []);
 
   const handleChange = (name) => (value, index) => {
-    console.log(name+" .... "+value)
     if (name === "batchNum") {
       setBatchNum(value)
       let bOptions = [...batchOptions.options]
@@ -136,7 +135,6 @@ export default function ApproveBatch() {
     let batchDetails = { ...batchDet };
     let dialogTitle = "";
     let dialogMessage = "";
-    console.log(action)
     if(action === "rejected") {
       dialogTitle = "Reject Batch";
       dialogMessage = "Are you sure you wish to REJECT "+batchDetails.batch_num
@@ -154,18 +152,18 @@ export default function ApproveBatch() {
   }
   const updateBatch = () => {
     let apiData = {}
-    if(action === "rejected") apiData.reason = reason
+    if (action === "rejected") apiData.material_reject_reason = reason
     let batchDetails = { ...batchDet };
 
     apiData.batch_num = batchDetails.batch_num;
     apiData.status = action.toUpperCase()
-    apiData.approved_by = userState.user.id;
+    //apiData.approved_by = userState.user.id;
     apiData.op = "update_raw_material";
-    apiData.reject_weight = 0;
-    console.log("apiData "+JSON.stringify(apiData))
+    if (action === "rejected")
+      apiData.reject_weight = 0;
     setApiStatus(true);
+
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
-      console.log(JSON.stringify(apiRes))
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
@@ -190,11 +188,11 @@ export default function ApproveBatch() {
       >
       <View style={styles.container}>
         <View style={{ flexDirection: 'row' }}>
-          <View style={{ flex: 4, margin: 2,flexDirection:'row',alignItems:'center' }}>
+          <View style={{ flex: 3,flexDirection:'row',alignItems:'center' }}>
             <Text style={styles.filterLabel}>Select Batch</Text>
             <Picker
               selectedValue={batchNum}
-              onValueChange={(e) => handleChange("batchNum")}
+              onValueChange={handleChange("batchNum")}
               mode="dialog"
               style={{ backgroundColor: "#ECF0FA",flex:1 }}
               itemStyle={{}}
@@ -206,55 +204,83 @@ export default function ApproveBatch() {
                 return (<Picker.Item style={{ backgroundColor: "#ECF0FA" }} label={label} value={labelV} key={pickerIndex} />)
               })}
             </Picker>
-            <FontAwesome5 name="filter" size={30} style={{margin:2,padding:5,marginLeft:10}}  ></FontAwesome5>
-            <TouchableOpacity style={{ 
+            
+
+          </View>
+          <View style={{ flex: 3, flexDirection: 'row', alignItems: 'center'}}>
+            <FontAwesome5 name="filter" size={20} style={{ margin: 2, padding: 5, marginLeft: 10 }}  ></FontAwesome5>
+            <TouchableOpacity style={{
               flexDirection: 'row', padding: 5, borderRadius: status === "NEW" ? 15 : 0,
-              paddingLeft:10,paddingRight:10,
+              paddingLeft: 10, paddingRight: 10,
               backgroundColor: status === "NEW" ? appTheme.colors.cardTitle : 'white'
-            
-            
             }}
 
-              
-             onPress={(e) => setStatus("NEW")} >
-              <Text style={[styles.filterText, { 
-               
-                fontFamily:status === "NEW" ? appTheme.fonts.bold : appTheme.fonts.regular,
-                color:status === "NEW" ? 'white' : appTheme.colors.cardTitle,
-                
-                }]}>Hold</Text>
+
+              onPress={(e) => setStatus("NEW")} >
+              <Text style={[styles.filterText, {
+
+                fontFamily: status === "NEW" ? appTheme.fonts.bold : appTheme.fonts.regular,
+                color: status === "NEW" ? 'white' : appTheme.colors.cardTitle,
+
+              }]}>Hold</Text>
             </TouchableOpacity>
             <Text style={{}}> / </Text>
-            <TouchableOpacity 
-            style={{  flexDirection: 'row', padding: 5, 
+            <TouchableOpacity
+              style={{
+                flexDirection: 'row', padding: 5,
                 borderRadius: status === "APPROVED" ? 15 : 0,
                 backgroundColor: status === "APPROVED" ? appTheme.colors.cardTitle : 'white'
-            }} 
+              }}
               onPress={(e) => setStatus("APPROVED")} >
-              <Text style={[styles.filterText, { 
-                fontFamily: status === "APPROVED" ? appTheme.fonts.bold : appTheme.fonts.regular ,
+              <Text style={[styles.filterText, {
+                fontFamily: status === "APPROVED" ? appTheme.fonts.bold : appTheme.fonts.regular,
                 color: status === "APPROVED" ? 'white' : appTheme.colors.cardTitle,
-                }]}>Approved</Text>
+              }]}>Approved</Text>
             </TouchableOpacity>
             <Text style={{}}> / </Text>
-            <TouchableOpacity style={{ flexDirection: 'row',padding:5,
+            <TouchableOpacity style={{
+              flexDirection: 'row', padding: 5,
               backgroundColor: status === "REJECTED" ? appTheme.colors.cardTitle : 'white',
               borderRadius: status === "REJECTED" ? 15 : 0,
 
 
-          }} onPress={(e) => setStatus("REJECTED")} >
-              <Text style={[styles.filterText, { color: appTheme.colors.cancelAction,
+            }} onPress={(e) => setStatus("REJECTED")} >
+              <Text style={[styles.filterText, {
+                color: appTheme.colors.cancelAction,
                 fontFamily: status === "REJECTED" ? appTheme.fonts.bold : appTheme.fonts.regular,
                 color: status === "REJECTED" ? 'white' : appTheme.colors.cardTitle,
               }]}>Rejected</Text>
             </TouchableOpacity>
-
           </View>
-          <View style={{flex:1}}></View>
 
         </View>
 
         <ActivityIndicator size="large" animating={apiStatus} />
+
+        <View style={{flex:1,flexDirection:'row'}}>
+          <View style={{
+            flexDirection: 'row', justifyContent: 'center', flex: 1, flexDirection: 'column', margin: 10, marginTop: 20,
+            borderColor: 'grey', borderWidth: 0.5, padding: 10, borderRadius: 10 }}>
+            <CustomHeader title={"Rack Numbers"} size={18} style={{}} />
+            <View style={{ flexDirection: 'row', flex: 1 }}>
+              {batchDet && batchDet.fifo && batchDet.fifo.map((fifoItem, fifoIndex) => {
+                let fifoRack = (fifoIndex === 0) ? fifoItem.element_num : "  |   " + fifoItem.element_num
+                return (
+                    <Text style={{
+                      fontSize: 14,
+                      color:  'black'
+
+                    }} key={fifoIndex} >{fifoRack}</Text>
+                )
+              })}
+            </View>
+
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'center', flex: 1 }}>
+          </View>
+
+        </View>
+       
         {batchDet && batchDet._id ?
           <View style={{ flexDirection: 'row', margin: 1, padding: 1 }}>
            

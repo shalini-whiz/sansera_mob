@@ -1,6 +1,5 @@
 
 import React, { useEffect } from "react";
-import SwapBin from "./SwapBin";
 import UserAccount from "./UserAccount";
 // import ProcessStages from "./StagingList";
 import ProcessStages from "./ProcessStages";
@@ -66,11 +65,7 @@ const ForgeHome = ({ navigation, route }) => {
         }} 
       /> */}
 
-      {/* <Tab.Screen name="Swap Bin" component={SwapBin}
-        options={{
-          tabBarLabel: 'Swap Bin',
-        }}
-      /> */}
+     
 
 
       <Tab.Screen name="Batch" component={BatchHome}

@@ -1,11 +1,19 @@
 
 import { regularExpData } from "../constants"
+
 const util = {};
 
 util.capitalize = (str) =>{
     if(str ===null || str === "" || str === undefined) return str;
     return str.charAt(0).toUpperCase()+str.slice(1)
 }
+
+util.titleCase = (str) => {
+    if (str === null || str === "" || str === undefined) return str;
+    str = str.toLowerCase()
+    return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
 util.capitalizeWord = (str) => {
     if (str === null || str === "" || str === undefined) return str;
     return str.split(' ').map(w => w.substring(0, 1).toUpperCase() + w.substring(1)).join(' ')
@@ -60,8 +68,9 @@ util.filterFormData = async obj => {
 util.resetForm = formData => {
     let inputForm = [...formData]
     let mergedArr = [];
-    inputForm.forEach(value => {
-        mergedArr.push({ ...value });
+    inputForm.forEach(item => {
+        item.value = item.defaultValue ? item.defaultValue :""
+        mergedArr.push({ ...item });
     });
 
     return mergedArr;
@@ -84,12 +93,14 @@ util.validateFormData = async (obj) => {
             item.value = (typeof (item["value"]) == "string") ? item["value"].trim() : item["value"]
         }
         let value = item["value"];
-        if (item.type === "number" && item.value.toString().length > 0)
+        if (item.type === "number" && item.value.toString().length > 0){
             item.value = parseInt(value)
-        if (item.type === "number" && item.value.toString().length == 0 && (item.key === "pinCode" ))
+        }
+        if (item.type === "number" && item.value.toString().length == 0)
             item.value = 0
 
         item.error = ""
+
         if (item.required) {
             if (item.value == undefined || item.value.toString() === "NaN" || item.value.toString() === NaN ||
                 (item.value != undefined && item.value.toString().length === 0)
@@ -97,6 +108,7 @@ util.validateFormData = async (obj) => {
                 item["error"] = "Please enter "+item.label + "";
             }
         }
+        if (item.nonZero && item.value === 0 && item.type === "number") item.error = "Please enter valid " + item.label + "";
 
         let validValue = true;
         if (item.type === "number") {

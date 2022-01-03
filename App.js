@@ -71,7 +71,7 @@ function App() {
         <Stack.Navigator
           initialRouteName={isLoggedIn ? 'Home' : 'Login'}
           screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Home" component={TopBar} />
+          <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="Login" component={Login} />
         </Stack.Navigator>
       </NavigationContainer>
