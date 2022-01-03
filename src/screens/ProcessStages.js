@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native';
+import {  StyleSheet,  View, TouchableOpacity,  ScrollView } from 'react-native';
 import { ApiService } from "../httpservice";
 import { util } from '../commons';
 import UserContext from "./UserContext";
-import StagingTopBar from './StagingTopBar';
 import { useIsFocused } from "@react-navigation/native";
 import { SvgCss } from 'react-native-svg';
-import { BinInIcon, BinOutIcon, BinIndicator} from "../svgs/BinIcon"
 import { HexaStageSingle, HexaStageDouble } from "../svgs/HexaStage"
 import { appTheme } from '../lib/Themes';
-import { createAppContainer } from "react-navigation"
 import ShearingHome from './shearing/ShearingHome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ForgingHome from './forging/ForgingHome';
@@ -65,14 +62,10 @@ const ProcessStages = (props) => {
       getStagingProcess();
     }
     return () => {
-      clearInterval(interval);
     };
   }, [isFocusedHistory])
 
-  const _onRefresh = () => {
-    setRefreshing(true);
-    getStagingProcess();
-  };
+ 
   const getStagingProcess = async () => {
     let apiData = {
       "op": "get_process_master"
@@ -80,13 +73,11 @@ const ProcessStages = (props) => {
     let apiRes = await ApiService.getAPIRes(apiData, "POST", "process-master");
     console.log("api response "+JSON.stringify(apiRes))
 
-    setRefreshing(false);
     if (apiRes.status) {
       let stages = [...apiRes.response.message]
       if (apiRes.response.message && apiRes.response.message.length) {
+        console.log(stages[0].process_stages)
         setStagingData(stages[0].process_stages)  
-        let stage_nav;
-       console.log("props here "+JSON.stringify(props))
       }
     }
   }
@@ -121,7 +112,7 @@ const ProcessStages = (props) => {
         {stagingData.map((item, index) => {
           return (
             <TouchableOpacity style={styles.stageContainer} key={index}
-              onPress={(e) => stageNavigation(item)}>
+              onPress={() => stageNavigation(item)}>
               <SvgCss
                 xml={HexaStageSingle(appTheme.colors.cardTitle, util.capitalizeWord(item.stage_name))} width={300}
                 height={150} />
