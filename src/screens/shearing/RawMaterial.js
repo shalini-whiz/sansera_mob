@@ -16,6 +16,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { mqttOptions } from "../../constants";
 import MQTT from 'sp-react-native-mqtt';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ErrorModal from "../../components/ErrorModal";
 
 
 let rejection_schema = [
@@ -58,7 +59,7 @@ export default function RawMaterial(props) {
       loadForm();
     }
     return () => { }
-  }, [isFocused,batchDet])
+  }, [isFocused])
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -118,20 +119,18 @@ export default function RawMaterial(props) {
     let partialWeightErr = (!partialWeight.length || partialWeight === 0) ? 'Please enter valid partial weight return' : ''
     setPartialErr(partialWeightErr)
 
-    if(!rackErr.length && !partialErr.length){
+    if (!rackErr.length && !partialWeightErr.length){
       openDialog(type)
     }
   }
   const validateForm = async (e,type) => {
     let formDataInput = [...formData]
-    console.log(JSON.stringify(formDataInput))
 
     let validFormData = await util.validateFormData(formDataInput);
     let isError = validFormData.find(item => {
       if (item.error.length) return item;
     });
     if(!isError){
-      console.log(JSON.stringify(validFormData))
       //setFormData(validFormData)
       openDialog(type)
     }
@@ -147,20 +146,18 @@ export default function RawMaterial(props) {
     apiData.op = "update_material_fifo"
     apiData.partial_return_weight = partialWeight
     apiData.batch_num = props.processEntity.batch_num
-    console.log("newFifo .. "+JSON.stringify(curFifo));
-    console.log("batch details ... "+JSON.stringify(batchDetails));
     let curFifoArr = [curFifo]
     apiData.fifo = [...curFifoArr,...batchDetails.fifo]
-    console.log("apiData here "+JSON.stringify(apiData))
     setApiStatus(true);
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
       setApiStatus(false);
-      console.log("partial return weight  " + JSON.stringify(apiRes))
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
           props.setProcessEntity(apiRes.response.message)
         }
       }
+      else if (apiRes && apiRes.response.message)
+        setApiError(apiRes.response.message)
     });
   }
 
@@ -168,21 +165,21 @@ export default function RawMaterial(props) {
     let apiData = await util.filterFormData([...formData]);
     apiData.op = "update_raw_material"
     apiData.batch_num = props.processEntity.batch_num
-    console.log("set reject weight here "+JSON.stringify(apiData))
     setApiStatus(true);
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
       setApiStatus(false);
-      console.log("rejection weigth  " + JSON.stringify(apiRes))
       if (apiRes && apiRes.status) {
-        console.log("reject batch response "+JSON.stringify(apiRes))
         if (apiRes.response.message) {
           props.setProcessEntity(apiRes.response.message)
-          // setBatchDet(apiRes.response.message);
+          setBatchDet(apiRes.response.message);
           //openDialog(apiRes.response.message);
           util.resetForm(formData);
           closeDialog();
         }
       }
+      
+      else if (apiRes && apiRes.response.message)
+        setApiError(apiRes.response.message)
     });
 
   }
@@ -201,22 +198,20 @@ export default function RawMaterial(props) {
 
   }
   const startListening = () => {
+    console.log("partial start listening")
+    console.log(batchDet._id)
+
     if(!batchDet._id){
       let apiData = {
-        "op": "list_raw_material_by_heat_num",
-        "heat_num": props.processEntity.heat_num
+        "op": "get_batch_details",
+        "batch_num": props.processEntity.batch_num
       }
       ApiService.getAPIRes(apiData,"POST","batch").then(apiRes => {
-        if(apiRes.status){
-          let batchList = apiRes.response.message;
-          let batch = batchList.find(item => item.batch_num === props.processEntity.batch_num)
-          console.log("received batch "+JSON.stringify(batch));
+        if(apiRes.status && apiRes.response.message){
+          let batch = apiRes.response.message         
           if(batch){
             setBatchDet(batch)
             AsyncStorage.getItem("racks").then(topics => {
-              console.log(JSON.parse(topics));
-              console.log("batchDet on first : "+JSON.stringify(batchDet));
-
               connectMQTT(JSON.parse(topics),batch)
             })
           }
@@ -224,10 +219,8 @@ export default function RawMaterial(props) {
       })
     }
     else{
-      console.log("batchDet on second : " + batchDet)
 
       AsyncStorage.getItem("racks").then(topics => {
-        console.log(JSON.parse(topics))
         connectMQTT(JSON.parse(topics),batchDet)
       })
     }
@@ -256,7 +249,6 @@ export default function RawMaterial(props) {
         console.log('mqtt.event.message', msg);
         //this.setState({ message: JSON.stringify(msg) });
 
-       console.log(batchDetails)
         let rackDevices = Object.keys(batchDetails.device_map);
         let deviceId = msg.topic.split("/")[1];
         let deviceExists = rackDevices.indexOf(deviceId);
@@ -272,7 +264,6 @@ export default function RawMaterial(props) {
       client.on('connect', () => {
         console.log('connected');
         setListeningEvent(true);
-        console.log("swtich racks "+JSON.stringify(topics));
         topics.map(item => {
           client.subscribe(item.topic_name, 2)
         })
@@ -281,9 +272,13 @@ export default function RawMaterial(props) {
       setClient(client)
 
     }).catch((err) => {
-      console.log(err);
+      console.log("raw naterial "+err);
       setListeningEvent(false);
     });
+  }
+
+  const errOKAction = () => {
+    setApiError('')
   }
  
   return (
@@ -329,15 +324,16 @@ export default function RawMaterial(props) {
           </View>
             : <View style={{ flex: 2, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <View style={{ display: 'flex', flexDirection: 'row' }}>
-                {!listeningEvent ? <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]}
+                {!listeningEvent ? <TouchableOpacity style={[AppStyles.warnButtonContainer, { flexDirection: 'row' }]}
                   onPress={(e) => startListening(e)}
                 >
-                  <Text style={AppStyles.successText}>ADD TO RACKS</Text>
+                  <Text style={AppStyles.warnButtonTxt}>ADD TO RACKS</Text>
                 </TouchableOpacity> :
 
                   <TouchableOpacity style={{ flexDirection: 'row', padding: 10 }}
                   >
-                    <Text style={{ color: appTheme.colors.warnAction, marginRight: 10, fontFamily: appTheme.fonts.bold }}>MQTT Connected
+                    <Text style={{ color: appTheme.colors.warnAction, marginRight: 10, fontFamily: appTheme.fonts.bold }}>
+                      Listening to Rack Switch
                     </Text>
                     <MaterialCommunityIcons name="cast-connected" size={20} color={appTheme.colors.warnAction} style={{}} />
 
@@ -397,107 +393,11 @@ export default function RawMaterial(props) {
 
           </View>
         </View>
-        {tab === "rejection1" ? 
-          <View style={{flexDirection:'row'}}>
-            <View style={{ flex: 3, backgroundColor: 'white', margin: 5,padding:5}}>
-              <FormGen handleChange={handleChange} formData={formData} labelDataInRow={true} />
-              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center',marginTop:20 }}>
-                <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]} onPress={(e) => validateForm(e,tab)} >
-                  <Text style={AppStyles.successText}>SAVE</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={{ flex: 3, flexDirection: 'row', }}>
-              <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
-                <ProcessDetails
-                  title="Process Details"
-                  processEntity={props && props.processEntity ? props.processEntity : {}} />
-              </View>
-              <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
-                <WeightDetails title="Weight Details"
-                  processEntity={props && props.processEntity ? props.processEntity : {}} />
-              </View>
+     
 
-            </View>
-          </View> :false}
+       
 
-        {tab === "partial1" ?
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 3, backgroundColor: 'white', margin: 5, padding: 5 }}>
-              <View style={{ display: 'flex', flexDirection: 'row'}}>
-                {!listeningEvent ? <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]}
-                  onPress={(e) => startListening(e)}
-                >
-                  <Text style={AppStyles.successText}>ADD TO RACKS</Text>
-                </TouchableOpacity> : 
-               
-                <TouchableOpacity style={{ flexDirection: 'row',padding:10 }}
-                >
-                  <Text style={{color:appTheme.colors.warnAction,marginRight:10,fontFamily:appTheme.fonts.bold}}>MQTT Connected                     
-                    </Text>                      
-                    <MaterialCommunityIcons name="cast-connected" size={20} color={appTheme.colors.warnAction} style={{  }} />
-
-                </TouchableOpacity>
-                }
-                
-              </View>
-              <View style={{ display: 'flex', flexDirection: 'row',padding:5,margin:5 }}>
-               <CustomHeader title="Rack"/>
-                {curFifo && curFifo.element_num ? <Text style={{
-                  fontSize: 20,
-                  color:  'green',
-                  paddingLeft:10,
-                  fontFamily:appTheme.fonts.bold
-
-                }}  >{curFifo.element_num}</Text> : false}
-              </View>
-              {rackErr && rackErr.length ? (<Text style={AppStyles.error}> {rackErr} </Text>) : false}
-
-              <View style={{ display: 'flex', flexDirection: 'row', padding: 10 }}>
-                <Text style={[AppStyles.filterLabel,{flex:1,padding:10}]}>Enter Weight</Text>
-                <TextInput style={[AppStyles.filterText, { flex: 2, padding:10,}]}
-                keyboardType="numeric"
-                  onChangeText={(text) => setPartialWeight(text)}
-
-                
-                >{partialWeight}</TextInput>
-              </View>
-              <View style={{ display: 'flex', flexDirection: 'column', padding: 10 }}>
-
-              {partialErr && partialErr.length ? (<Text style={AppStyles.error}> {partialErr} </Text>) : false}
-              </View>
-              <View style={{ display: 'flex', flexDirection: 'row', padding: 10,justifyContent:'center',marginTop:10 }}>
-                <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row',marginRight:10 }]}
-                onPress={(e) => validatePartialReturn(e,tab)}
-                >
-                  <Text style={AppStyles.successText}>CONFIRM</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[AppStyles.canButtonContainer, { flexDirection: 'row' }]}
-                onPress={(e) => stopListening(e)}
-                >
-                  <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={{ flex: 3, flexDirection: 'row', }}>
-              <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
-
-                <ProcessDetails
-                  title="Process Details"
-                  processEntity={props && props.processEntity ? props.processEntity : {}} />
-
-              </View>
-              <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
-                <WeightDetails title="Weight Details"
-                  processEntity={props && props.processEntity ? props.processEntity : {}} />
-              </View>
-
-            </View>
-
-
-          </View> : false}
-
-        {dialog ? <CustomModal
+        {dialog && dialogType === "rejection" ? <CustomModal
           modalVisible={dialog}
           dialogTitle={dialogTitle}
           dialogMessage={dialogMessage}
@@ -505,7 +405,7 @@ export default function RawMaterial(props) {
             closeDialog={closeDialog}
            /> : false}
 
-        {dialog ? <CustomModal
+        {dialog && dialogType === "partial" ? <CustomModal
           modalVisible={dialog}
           dialogTitle={dialogTitle}
           dialogMessage={dialogMessage}
@@ -515,6 +415,7 @@ export default function RawMaterial(props) {
            
       </View>
 
+      {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
 
     </ScrollView>
   )

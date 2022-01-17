@@ -69,6 +69,7 @@ const UserAccount = (props) => {
   useEffect(() => {
     let mounted = true;
     if(mounted){
+      if(userState && userState.user)
       setUser(userState.user)
     }
     return () => { 
@@ -94,10 +95,8 @@ const UserAccount = (props) => {
     apiData.status = "REMOVED"
     apiData.op = "update_material_fifo";
     apiData.fifo = [];
-    console.log("apiData " + JSON.stringify(apiData))
     setApiStatus(true);
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
-      console.log("on remove :  " + JSON.stringify(apiRes))
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
@@ -115,8 +114,6 @@ const UserAccount = (props) => {
     setUser(null);
     clearTopics(userState && userState.user && userState.user.id);
     clearTopics("fifo-push");
-   /// console.log("navigation : " + navigation)
-    console.log(props)
     props.navigation.navigate('Login',{screen:"Login"})
     //navigation.push('Login');
     // navigation.reset({

@@ -23,7 +23,8 @@ export const appTheme = {
     backActionTxt:"#424242",
     backAction:"#CFD8DC",
     screenBackground:"#E3F2FD",
-    message:"black"
+    message:"black",
+    textInputCont: "#ECF0FA"
   },
   fonts:{
     regular:'Poppins-Regular',

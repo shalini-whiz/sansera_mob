@@ -100,6 +100,7 @@ const ProcessStages = ({ navigation, route }) => {
 
   useEffect(() => {
     if (isFocusedHistory) {
+      if(userState && userState.user)
       setUser(userState.user)
       getStagingProcess();
     }

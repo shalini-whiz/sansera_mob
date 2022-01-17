@@ -9,6 +9,7 @@ import { ApiService } from "../../httpservice";
 import { useIsFocused } from '@react-navigation/native';
 import CustomHeader from "../../components/CustomHeader";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import ErrorModal from "../../components/ErrorModal";
 
 
 
@@ -21,6 +22,7 @@ export default function ProcessFifo(props) {
   const [editBin, setEditBin] = useState(false);
   const [delBin, setDelBin] = useState([]);
   const [isConfirm,setConfirm] = useState(false)
+  const [apiError, setApiError] = useState('')
 
   useEffect(() => {
     if (isFocused) {
@@ -79,6 +81,7 @@ export default function ProcessFifo(props) {
   }
   const updateBin = () => {
     let elementIndex = nextStage.fifo.findIndex(item => item.element_num === delBin[0]);
+    console.log(elementIndex+" .. "+delBin.length)
     if(elementIndex > 0 && delBin.length){
       let apiData = {};
       apiData.op = "remove_element"
@@ -87,11 +90,15 @@ export default function ProcessFifo(props) {
       apiData.element_id = nextStage.fifo[elementIndex].element_id 
      
       ApiService.getAPIRes(apiData,"POST","fifo").then(apiRes => {
+        console.log("remove element "+JSON.stringify(apiRes));
         if(apiRes){
           if(apiRes.status){
+            Alert.alert("Bin removed");
+            props.okDialog();
+
           }
           else{
-            Alert.alert("Could not update. try again!")
+            setApiError("Could not update. try again!")
           }
         }
       })
@@ -110,6 +117,10 @@ export default function ProcessFifo(props) {
     //     setProcess([])
     //   }
     // }); 
+  }
+
+  const errOKAction = () => {
+    setApiError('')
   }
   return (
     <ScrollView
@@ -164,6 +175,7 @@ export default function ProcessFifo(props) {
                 </Text></TouchableOpacity>)
               })}
               </View>
+
             {delBin.length ? <Text style={{color:'red',fontSize:14,padding:10}}>Only one bin can be removed at a time</Text>:false}
             {delBin.length ?
             <View style={{ display: 'flex', flexDirection: 'row', alignSelf: 'center',width:"50%" }}>
@@ -192,7 +204,8 @@ export default function ProcessFifo(props) {
                   <Text style={styles.canButtonTxt}>CLOSE</Text>
                 </TouchableOpacity>
             </View>: false}
-           
+            {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
+
           </View>
         </View>
 

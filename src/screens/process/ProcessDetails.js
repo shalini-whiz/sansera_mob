@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert } from "react-native";
 import { dateUtil, util } from "../../commons";
 import { appTheme } from "../../lib/Themes";
 import FormGen from "../../lib/FormGen"
@@ -11,6 +11,9 @@ import { useIsFocused } from '@react-navigation/native';
 import { RadioButton } from "react-native-paper";
 import BatchDetails from "../batch/BatchDetails";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import FormGrid from "../../lib/FormGrid";
+import ErrorModal from "../../components/ErrorModal";
+import AppStyles from "../../styles/AppStyles";
 
 
 let batchSchema = [
@@ -32,7 +35,7 @@ let batchSchema = [
   },
   {
     "key": "component_count", displayName: "Components Required (Count)", placeholder: "", value: "",
-    error: "", required: true, label: "components", type: "number"
+    error: "", required: true, label: "components", type: "number",nonZero:true
   },
 ]
 
@@ -120,12 +123,20 @@ export default function ProcessDetails(props) {
           //convert date here
           item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
         }
+        if (item.key === "created_by") {
+          item.value = props.processEntity["created_by_emp_name"] + " (" + props.processEntity[item.key] + ")"
+        }
         if(props.processEntity && props.processEntity.process && props.processEntity.process.length){
           AsyncStorage.getItem("stage").then(value => {
             let ok_comp_index = created_process_schema.findIndex(item => item.key === "ok_component")
             let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === value)
-            created_process_schema[ok_comp_index].value = props.processEntity.process[stage_ok_comp_index].ok_component + ""
-            setBatchFormData(created_process_schema);
+             if(value && value.toLowerCase() != "shearing"){
+              created_process_schema[ok_comp_index].value = props.processEntity.process[stage_ok_comp_index].ok_component + ""
+             }
+             else{
+               created_process_schema[ok_comp_index].value = "0"
+             }
+              setBatchFormData(created_process_schema); 
           })
         }
         
@@ -161,7 +172,7 @@ export default function ProcessDetails(props) {
 
   }
 
-  const loadData = async () => {
+  const loadData =  () => {
     setApiStatus(true);
     setRefreshing(false);
 
@@ -184,6 +195,8 @@ export default function ProcessDetails(props) {
           updateForm({ key:"customer_id",options:apiRes.response.message}) 
         } 
       }
+      else if(apiRes && apiRes.response.message)
+        setApiError(apiRes.response.message)
     })
     ApiService.getAPIRes(forge_apiData, "POST", "forgeMachine").then(apiRes => {
       if (apiRes && apiRes.status) {
@@ -257,8 +270,8 @@ export default function ProcessDetails(props) {
   }
   const openDialog = (batchDetails) => {
     showDialog(true);
-    let dialogTitle = "Confirm Batch Creation";
-    let dialogMessage = batchDetails.process_name + " is the new process generated. Please click ok to confirm";
+    let dialogTitle = "Confirm Process Creation";
+    let dialogMessage = batchDetails.process_name + " is the new process generated.";
     setDialogTitle(dialogTitle);
     setDialogMessage(dialogMessage);
   }
@@ -282,6 +295,7 @@ export default function ProcessDetails(props) {
       apiData.forge_machine_id  = forgeId;
       setForgeErr('')
       setApiStatus(true);
+      console.log("apiData "+JSON.stringify(apiData))
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "process");
       setApiStatus(false);
       if (apiRes && apiRes.status) {
@@ -291,6 +305,8 @@ export default function ProcessDetails(props) {
           util.resetForm(batchFormData);
         }
       }
+      else if(apiRes && apiRes.response.message)
+        setApiError(apiRes.response.message)
     }
 
    
@@ -319,6 +335,11 @@ export default function ProcessDetails(props) {
       }
     }
   } 
+
+  const errOKAction = () => {
+    setApiError('')
+  }
+
   return (
     <ScrollView
 
@@ -356,28 +377,31 @@ export default function ProcessDetails(props) {
                   </View>
                 </RadioButton.Group>
                 {forgeErr && forgeErr.length ? (<Text style={{ color: 'red', fontSize: 12, padding: 2, margin: 10 }}> {forgeErr} </Text>) : (false)}
+               
+              {props && props.processEntity && props.processEntity._id ? <FormGrid formData={batchFormData} labelFlex={1}
+                dataFlex={2} />:
                 <FormGen
                   handleChange={handleChange}
                   editMode={props._id ? props.editMode : true}
                   formData={batchFormData} labelDataInRow={true}
-                  style={{ backgroundColor: 'blue' }}
-                labelFlex={props._id ? 1 : 1}
-                dataFlex={props._id ? 1 : 2}
+                  labelFlex={props._id ? 1 : 1}
+                  dataFlex={props._id ? 1 : 2}
                 />
+                
+                }
 
 
 
               </View>
 
-              <View style={{ flex: 2 }}>
-                {/* 
-              <CustomHeader title="BATCH DETAILS" align="center"/>
-              {batchDet && batchDet._id ? <BatchDetails
-                content={batchDet}
-                editMode={false}
-                _id={batchDet._id}
-                noTitle={true}
-              /> : false} */}
+              <View style={{ flex: 2,marginTop:20 }}>
+                
+               {batchDet && batchDet._id ? <BatchDetails
+                 content={batchDet}
+                 editMode={false}
+                 _id={batchDet._id}
+                 title="BATCH DETAILS"
+               /> : false} 
              
               </View>
             </View>
@@ -386,7 +410,6 @@ export default function ProcessDetails(props) {
           handleChange={handleChange}
           editMode={false}
           formData={batchFormData} labelDataInRow={true}
-          style={{ backgroundColor: 'blue' }}
         /> : false}
             
 
@@ -402,11 +425,12 @@ export default function ProcessDetails(props) {
 
         <ActivityIndicator size="large" animating={apiStatus} />
 
-        {apiError && apiError.length ? (<Text style={{ color: 'red', fontSize: 12, padding: 2, margin: 10 }}> {apiError} </Text>) : (false)}
+        {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
 
-        {props.processEntity ? <></> : <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-          <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]} onPress={(e) => handleSubmit(e)} >
-            <Text style={styles.successText}>SAVE</Text>
+        {props.processEntity ? <></> : 
+        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+          <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]} onPress={(e) => handleSubmit(e)} >
+            <Text style={AppStyles.successText}>SAVE</Text>
           </TouchableOpacity>
         </View>}
 

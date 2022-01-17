@@ -50,7 +50,6 @@ import { forwardRef, useImperativeHandle } from 'react'
           if(currentProcess) {
             if (processName.length > 0) {
               let currentProObj = apiRes.response.message.find(item => item.process_name === processName)
-              console.log("currentProOBj "+JSON.stringify(currentProObj))
               props.processEntity(currentProObj)
               setProcessName(currentProObj.process_name)
             }
@@ -85,7 +84,6 @@ import { forwardRef, useImperativeHandle } from 'react'
     setProcessName(value)  
     if(index != -1){
       props.processEntity(process[index])
-      console.log(process[index])
     }
   };
 
@@ -94,9 +92,8 @@ import { forwardRef, useImperativeHandle } from 'react'
   }
 
   return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" animating={apiStatus} />
-      <View style={{ flexDirection: 'row' }} >
+      <View style={[styles.container],{}}>
+      <View style={{ flexDirection: 'row',padding:5 }} >
           <Text style={styles.filterLabel}>Process</Text>
           <RadioButton.Group 
             onValueChange={handleChange("process") }

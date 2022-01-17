@@ -13,15 +13,15 @@ import FormGrid from "../../lib/FormGrid";
 let created_process_schema = [
   {
     "key": "hold_materials_weight", displayName: "Hold Weight", placeholder: "", value: "", error: "",
-     "label": "Hold Weight", type: "number"
+     "label": "Hold Weight", type: "string"
   },
   {
     "key": "reject_weight", displayName: "Rejected Weight", placeholder: "", value: "", error: "",
-    required: true, "label": "batch created on", type: "number"
+    required: true, "label": "batch created on", type: "string"
   },
   {
-    "key": "end_billets_weight", displayName: "End Billet Weight", placeholder: "", value: "", error: "",
-    required: true, type:"number"
+    "key": "ok_component", displayName: "End Billet Weight", placeholder: "", value: "", error: "",
+    required: true, type:"string"
   },
   {
     "key": "updated_on", displayName: "Last Updated", placeholder: "", value: "",
@@ -38,7 +38,7 @@ export default function WeightDetails(props) {
   const [batchDet, setBatchDet] = useState({})
   const [refreshing, setRefreshing] = useState(false)
   const isFocused = useIsFocused();
- 
+
 
   useEffect(() => {
     if (isFocused) {
@@ -55,69 +55,43 @@ export default function WeightDetails(props) {
   }, []);
 
   const loadForm = async() => {
-    if (props && props.processEntity) {
+    let value = await AsyncStorage.getItem("stage");
+
+    if (props && props.processEntity && props.processEntity.process) {
+      let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === value)
+
       created_process_schema.map(item => {
         item["value"] = props.processEntity[item.key] ? props.processEntity[item.key] + "" : "";
         if (item.type === "date") {
-          //convert date here
           item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
         }
+        if (item.key === "hold_materials_weight"){
+          item.value = props.processEntity.process[stage_ok_comp_index][item.key]+ ""
+        }
+        if (value.toLowerCase() === "shearing" && item.key === "ok_component") {
+          item.value = props.processEntity.process[stage_ok_comp_index][item.key] + ""
+        }
       });
-
-      setBatchFormData(created_process_schema);
     }
-    if (props.processEntity && props.processEntity.process && props.processEntity.process.length) {
-      let value = await AsyncStorage.getItem("stage");
-        let hold_weight_index = created_process_schema.findIndex(item => item.key === "hold_materials_weight")
-        let end_billets_weight_index = created_process_schema.findIndex(item => item.key === "end_billets_weight");
-        let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === value)
-        console.log(props.processEntity.process[stage_ok_comp_index])
-        created_process_schema[hold_weight_index].value = props.processEntity.process[stage_ok_comp_index].hold_materials_weight+""
-        created_process_schema[end_billets_weight_index].value = props.processEntity.process[stage_ok_comp_index].end_billets_weight+""
-        setBatchFormData(created_process_schema);
-      
-    }
-    
+    setBatchFormData(created_process_schema); 
   }
-  const handleChange = (name) => value => {
-    
-  };
+  
   
 
   return (
-    <ScrollView
-
-      contentContainerStyle={styles.scrollView}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-        />
-      }
-    >
+    <ScrollView contentContainerStyle={styles.scrollView} 
+    refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> } >
       <View style={styles.container}>
-        {props.noTitle ? false
-          : <CustomHeader title={props.title ? props.title : ""} align={"center"} />}
-        
-        {props && props.processEntity ? <FormGrid
-          editMode={false}
+        {props.noTitle ? false : <CustomHeader title={props.title ? props.title : ""} align={"center"} />}
+         <FormGrid
           formData={batchFormData} 
           labelDataInRow={true}
           labelFlex={1}
           dataFlex={1}
-          
-          style={{ backgroundColor: 'blue' }}
-        /> : false}
-
-        <ActivityIndicator size="large" animating={apiStatus} />
-
+        /> 
+        {/* <ActivityIndicator size="large" animating={apiStatus} /> */}
         {apiError && apiError.length ? (<Text style={{ color: 'red', fontSize: 12, padding: 2, margin: 10 }}> {apiError} </Text>) : (false)}
-
-       
-
       </View>
-
-
     </ScrollView>
   )
 }
@@ -128,25 +102,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     justifyContent: "center",
     margin: 1
-  },
-  successBtn: {
-    width: "40%",
-    borderRadius: 25,
-    padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 40,
-    backgroundColor: appTheme.colors.warnAction,
-  },
-  successText: {
-    color: appTheme.colors.warnActionTxt
-  },
-
-
-  title: {
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: "bold"
-  },
-
+  }
 });

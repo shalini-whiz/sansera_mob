@@ -8,11 +8,15 @@ import CustomCard from "../../components/CustomCard";
 import { ApiService } from "../../httpservice";
 import BatchDetails from "./BatchDetails";
 import { useIsFocused } from '@react-navigation/native';
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import MaterialIcons from "react-native-vector-icons/MaterialIcons"
 import CustomModal from "../../components/CustomModal";
 import { mqttOptions } from "../../constants";
 import MQTT from 'sp-react-native-mqtt';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
+import AppStyles from "../../styles/AppStyles";
+import ErrorModal from "../../components/ErrorModal";
+
 
 
 export default function LoadRM() {
@@ -28,8 +32,8 @@ export default function LoadRM() {
   const [dialog, showDialog] = useState(false);
   const [dialogTitle, setDialogTitle] = useState('')
   const [dialogMessage, setDialogMessage] = useState('');
+  const [dialogType,setDialogType] = useState('')
   const [listeningEvent,setListeningEvent] = useState(false);
-  const [connectionStatus,setConnectionStatus] = useState(0);
   const [client,setClient] = useState(undefined);
   const [newFifo,setNewFifo] = useState([])
 
@@ -37,9 +41,16 @@ export default function LoadRM() {
   const [batchOptions, setBatchOptions] = useState({ keyName: "_id", valueName: "batch_num", options: [], })
   useEffect(() => {
     if(isFocused){
-      console.log("load raw materials")
       setApiStatus(true);
+      setDelRacks([]);
+      //setAddRacks([]);
+      showDialog(false)
+      setDialogMessage("");
+      setDialogType("")
+      setDialogTitle("");
+      setListeningEvent(false)
       loadBatches();
+      setEditRack(false)
     }
     return () => { }
   }, [isFocused])
@@ -51,58 +62,86 @@ export default function LoadRM() {
     }
     setRefreshing(false)
     ApiService.getAPIRes(apiData, "POST", "list_raw_material_by_status").then(apiRes => {
-      console.log("apiRes : "+JSON.stringify(apiRes))
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length) {
           let bOptions = {...batchOptions}
           bOptions.options = apiRes.response.message;
           setBatchOptions(bOptions)
-          setBatchNum(apiRes.response.message[0]._id);
-          setBatchDet(apiRes.response.message[0]);
+          console.log(batchNum)
+          console.log(batchDet._id)
+          if (bOptions.options[0] && batchNum === '') {
+            setBatchNum(bOptions.options[0]._id)
+            setBatchDet(bOptions.options[0])
+          }
+          
         }
       }
+      else if(apiRes && apiRes.response.message)
+        setApiError(apiRes.response.message)
     });
    
   }
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+     console.log("on refresh "+batchNum)
     loadBatches();
-  }, []);
+  });
 
   const handleEditRack = () =>{
     setEditRack(prevState => !prevState)
     setDelRacks([]);
+    setAddRacks([]);
+    setNewFifo([])
   }
 
   const handleChange = (name) => (value,index) => {
     if(name === "batchNum") {
-      setBatchNum(value)
-      console.log(value)
-      let bOptions = [...batchOptions.options]
-      let bDet = bOptions[index];
-      console.log(bDet.batch_num)
-      if(bDet.batch_num === "select") setBatchDet(undefined)
-      else setBatchDet(bDet);
+      if(addRacks.length){  
+        showDialog(true);
+        setDialogTitle("Confirm new racks")
+        setDialogMessage("Data unsaved, please confirm");
+        setDialogType("newRacks")
+
+      }
+      else{
+        setBatchNum(value)
+        let bOptions = [...batchOptions.options]
+        let bDet = bOptions[index];
+        console.log("value here " + value)
+        console.log("value id  here " + bDet._id)
+        setBatchDet(bDet);
+
+      }
+     
     }
   };
   const closeDialog = () => {
     showDialog(false)
     setDialogTitle('')
     setDialogMessage('')
+    setDialogType('')
+  }
+
+  const clearNewRacks = () => {
+    setAddRacks([])
+    setNewFifo([]);
+    showDialog(false)
+    setDialogTitle('')
+    setDialogMessage('')
+    setDialogType('')
   }
   
   const removeRacks = () => {
     
   }
   const addToDelRacks = (e,fifoItem) => {
-    console.log("entered add to del racks "+fifoItem);
     let racks_to_del = [...delRacks]
     let racks_to_add = [...addRacks]
+    console.log("racks_t0_ddd"+racks_to_add)
     let element_num = fifoItem.element_num;
     const selectedIndex = racks_to_del.indexOf(element_num);
-    console.log(selectedIndex)
     if (selectedIndex === -1) {
       racks_to_del.push(element_num);
     } else if (selectedIndex !== -1) {
@@ -110,49 +149,49 @@ export default function LoadRM() {
     }
 
     const selectedIndex1 = racks_to_add.indexOf(element_num);
-    if (selectedIndex1 === -1) {
-      racks_to_add.push(element_num);
-    } else if (selectedIndex1 !== -1) {
+    // if (selectedIndex1 === -1) {
+    //   racks_to_add.push(element_num);
+    // } else 
+    if (selectedIndex1 !== -1) {
       racks_to_add.splice(selectedIndex1, 1);
     }
     let mergeArr = [...racks_to_del,...racks_to_add]
     setDelRacks(racks_to_del);
+    console.log("racks to add "+racks_to_add)
+
     setAddRacks(racks_to_add)
-
-    
-
-    console.log("racks_to_del : "+racks_to_del)
 
   }
 
   const startListening = () => {
     
-    let apiData = {op:"list_topics",type:"rack"}
-    let topics = [{ topic_name: "MWPI2/2E-17-AE-3C/get/switch"},{topic_name:"MWPI2/2E-17-AE-1A/get/switch"}]
-    connectMQTT(topics)
-    // ApiService.getAPIRes(apiData,"POST","topics").then(apiRes => {
-    //   if(apiRes && apiRes.status){
-    //     console.log("apiRes here "+JSON.stringify(apiRes))
-    //   }
-    // })
-
-    
+    AsyncStorage.getItem("racks").then(topics => {
+      if(topics)
+        connectMQTT(JSON.parse(topics))
+    }) 
   }
 
   const connectMQTT = (topics) => {
-   
-    MQTT.createClient(mqttOptions).then((client) => {
+    if(client) {
+      client.disconnect()
+      setClient(null)
+    }
+    let options = { ...mqttOptions }
+
+    MQTT.createClient(options).then((client) => {
       setClient(client)
       client.connect();
 
       client.on('closed', () => {
         console.log('mqtt.event.closed');
-        setConnectionStatus(2);
+        setListeningEvent(false)
+        if(client) client.disconnect()
+
       });
 
       client.on('error', (msg) => {
         console.log('mqtt.event.error', msg);
-        setConnectionStatus(3);
+        setListeningEvent(false)
       });
 
       client.on('message', (msg) => {
@@ -161,15 +200,35 @@ export default function LoadRM() {
 
          let batchDetails = { ...batchDet };
         let rackDevices = Object.keys(batchDetails.device_map);
+        console.log("rack devices "+rackDevices)
         let deviceId = msg.topic.split("/")[1];
+        console.log(deviceId)
         let deviceExists = rackDevices.indexOf(deviceId);
         let fifoExists = batchDetails.fifo.findIndex(item => item.element_id === deviceId);
+        console.log(fifoExists+" .... "+deviceExists)
         if(deviceExists > -1 && fifoExists === -1){
           const selectedIndex = addRacks.indexOf(batchDetails.device_map[deviceId]);
           if(selectedIndex === -1){
+            console.log("addRacks before "+JSON.stringify(addRacks))
             addRacks.push(batchDetails.device_map[deviceId]);
-            let newRacks = [...newFifo]
-            newRacks.push({ "element_num": batchDetails.device_map[deviceId],"element_id":deviceId})
+            console.log("addRacks after " + JSON.stringify(addRacks))
+            let newRacks = []
+            addRacks.map(itemV => {
+              console.log(itemV)
+              let key = Object.keys(batchDetails.device_map).find(k => batchDetails.device_map[k] === itemV);
+              console.log(key+" .. "+itemV)
+              let obj = { element_num: itemV, element_id: key }
+              console.log(obj)
+              newRacks.push({ element_num: itemV,element_id:key})
+            })
+
+            console.log("newRacks before.. " + JSON.stringify(newRacks))
+
+           // let newRack = { "element_num": batchDetails.device_map[deviceId],"element_id":deviceId}
+            //newRacks.push(newRack)
+            console.log("newRacks after .. " + JSON.stringify(newRacks))
+
+
             setNewFifo(newRacks)
           }
         }
@@ -178,25 +237,22 @@ export default function LoadRM() {
 
       client.on('connect', () => {
         console.log('connected');
-        setConnectionStatus(1)
         setListeningEvent(true);
+        
         topics.map(item => {
           client.subscribe(item.topic_name, 2)
         })
        
       });
-      this.state = ({ "client": client })
+      setClient(client)
 
     }).catch((err) => {
-      console.log(err);
-      setConnectionStatus(3);
+      console.log("load raw naterial " + err);
     });
   }
   const stopLoading = () => {
-    let { client } = this.state
     
-    client.disconnect();
-    setConnectionStatus(0)
+    if(client) client.disconnect();
     setClient(undefined)
 
   }
@@ -211,11 +267,19 @@ export default function LoadRM() {
     let invokeApi = false;
     if(racks_to_add.length && racks_to_del.length){
       stopLoading();
-      
+      let updatedFifo = batchDet.fifo.filter(ar => !racks_to_del.find(rm => (rm === ar.element_num)))
+      mergeFifo = [...batchDet.fifo, ...updatedFifo]
+      apiData.fifo = mergeFifo;
     }
     else if(racks_to_add.length){
       stopLoading();
-      apiData.fifo = newFifo
+      if(batchDet.fifo && batchDet.fifo.length)
+        {
+          let mergeFifo = [...batchDet.fifo,...newFifo]
+          console.log("merge .. "+JSON.stringify(mergeFifo))
+        apiData.fifo = mergeFifo 
+        }
+      else apiData.fifo = newFifo
       invokeApi = true;
     
     }
@@ -225,29 +289,35 @@ export default function LoadRM() {
       apiData.fifo = updatedFifo
       invokeApi = true;
     }
+    console.log("apiData here "+JSON.stringify(apiData))
     if(invokeApi){
-      console.log("apiData here " + JSON.stringify(apiData))
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
         console.log("apiRes : " + JSON.stringify(apiRes))
         setApiStatus(false);
         if (apiRes && !apiRes.status) {
-          Alert.alert('Could not update racks')
+          
+          setApiError(apiRes.response.message)
           setDelRacks([]);
           setAddRacks([]);
           showDialog(false)
           setDialogMessage("");
+          setDialogType("")
           setDialogTitle("");
+          setEditRack(false)
           setNewFifo([])
 
         }
         if (apiRes && apiRes.status) {
           Alert.alert("Racks updated !")
+          setListeningEvent(false)
+          if(client) client.disconnect()
           setDelRacks([]);
           setAddRacks([]);
           setNewFifo([])
           showDialog(false)
           setDialogMessage("");
+          setDialogType("")
           setDialogTitle("");
           let bOptions = { ...batchOptions }
           let batchIndex = bOptions.options.findIndex(batchItem => batchItem.batch_num === batchDet.batch_num)
@@ -260,32 +330,39 @@ export default function LoadRM() {
 
   const computeRacks = () => {
     let racks_to_del = [...delRacks];
-    console.log(racks_to_del)
-    console.log(racks_to_del.length)
+   console.log(racks_to_del.length)
+   console.log(addRacks.length)
+   console.log(addRacks)
+   console.log(racks_to_del)
     if(racks_to_del.length && addRacks.length){
-      console.log("add & del racks");
       showDialog(true);
-      setDialogTitle('Add To Racks');
+      setDialogTitle('Save Racks');
       let message = "Please confirm to delete the selected racks and add new racks"
       setDialogMessage(message);
+      setDialogType('saveRacks')
     }
     else if (racks_to_del.length) {
-      console.log("del racks")
       showDialog(true);
       setDialogTitle('Delete Racks');
       let message = "Please confirm to delete the selected racks"
       setDialogMessage(message);
+      setDialogType('saveRacks')
+
     }
     else if(addRacks.length){
-      console.log("add racks")
       showDialog(true);
-      setDialogTitle('Add To Racks');
+      setDialogTitle('Save Racks');
       let message = "Please confirm newly added racks"
       setDialogMessage(message);
+      setDialogType('saveRacks')
+
     }
     else{
       setListeningEvent(false);
     }
+  }
+  const errOKAction = () => {
+    setApiError('')
   }
   return (
     <ScrollView
@@ -298,10 +375,9 @@ export default function LoadRM() {
       }
     >
       <View style={styles.container}>
-        <View style={{flexDirection:'row'}}>
-          <View style={{flex:2,flexDirection:'row',alignItems:'center',margin:5}}>
-            <Text style={[styles.filterLabel,{flex:1}]}>Select Batch</Text>
-
+        <View style={[styles.sectionContainer,{flexDirection:'row'}]}>
+          <View style={{flex:2,flexDirection:'row',alignItems:'center',margin:1}}>
+            <Text style={[AppStyles.filterLabel,{flex:1}]}>Select Batch</Text>
             <Picker
               selectedValue={batchNum}
               onValueChange={handleChange("batchNum")}
@@ -320,31 +396,43 @@ export default function LoadRM() {
           <View style={{ flex: 3 }}></View>
 
         </View>
-        <ActivityIndicator size="large" animating={apiStatus} />
-
+        {apiStatus ? <ActivityIndicator size="large" animating={apiStatus} /> : false}
           {batchDet && batchDet._id ? 
-          <View style={{ flexDirection: 'row',margin:5,padding:5}}>
+          <View style={{ flexDirection: 'row',padding:5}}>
              
-            <View style={{flex:2}}>
+            <View style={[styles.sectionContainer,{flex:2}]}>
               <View style={{
                 flexDirection: 'column', margin: 10, marginTop: 20,
                 borderColor: 'grey', borderWidth: 0.5, padding: 10, borderRadius: 10
               }}>
+                {listeningEvent ?
+                  <View style={{ flexDirection: 'row' }}>
+
+                    <Text style={{ color: appTheme.colors.warnAction, marginRight: 10, fontFamily: appTheme.fonts.bold }}>Listening to Rack Switch
+                    </Text>
+                    <MaterialCommunityIcons name="cast-connected" size={20} color={appTheme.colors.warnAction} style={{}} />
+                  </View> : false}
+
                 <View style={{flexDirection:'row',justifyContent:'center'}}>
                   <CustomHeader title={"Rack Numbers"} size={18}  style={{}}/>
                   <TouchableOpacity style={{}}
-                    onPress={(e) => handleEditRack(e)  } >
-                    <MaterialIcons name="edit" size={25} style={{ marginLeft: 10 }}></MaterialIcons>
+                    onPress={(e) => handleEditRack(e)  } 
+                    >
+                    <MaterialIcons name="edit" size={25} style={{ marginLeft: 10 }} color={editRack ? 'red' : 'green'}
+></MaterialIcons>
                   </TouchableOpacity>
                 </View>
-                {console.log(JSON.stringify(batchDet.fifo))}
+                
                 <View style={{ flexDirection: 'row', }}>
                   {batchDet.fifo.map((fifoItem, fifoIndex) => {
                    
                     let fifoRack = (fifoIndex === 0) ? fifoItem.element_num : "  |   " + fifoItem.element_num
                     return (
                       <TouchableOpacity style={{}} key={fifoIndex} 
-                      onPress={(e) => addToDelRacks(e, fifoItem)} >  
+                      onPress={(e) => addToDelRacks(e, fifoItem)} 
+                        disabled={!editRack}
+
+                      >  
                         <Text style={{  fontSize: 14,
                         color:delRacks.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black' 
                           
@@ -357,88 +445,96 @@ export default function LoadRM() {
                     let fifoRack = (fifoIndex === 0 && batchDet.fifo.length ? " | "+fifoItem.element_num : (fifoIndex === 0 ? fifoItem.element_num : "  |   " + fifoItem.element_num))
                     return (
                       <TouchableOpacity style={{}} key={fifoIndex}
-                        onPress={(e) => addToDelRacks(e, fifoItem)} >
+                        onPress={(e) => addToDelRacks(e, fifoItem)} 
+                        disabled={!editRack}
+                        >
                         <Text style={{
                           fontSize: 14,
-                          color: delRacks.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black'
+                          color: delRacks.indexOf(fifoItem.element_num) > -1 ? 'red' : 'green'
 
                         }} key={fifoIndex} >{fifoRack}</Text>
                       </TouchableOpacity>
                     )
                   })}
                 </View>
-
-                {/* {editRack && batchDet ? 
-                <TouchableOpacity style={[ {color:'red', flexDirection: 'row',width:'20%',
-                alignSelf:'flex-end',marginTop:20 }]} onPress={(e) => removeRacks(e)} >
-                  <Text style={[styles.successText,{color:appTheme.colors.cancelAction}]}>REMOVE</Text>
-                </TouchableOpacity> : false} */}
+                <View style={{ flexDirection: 'row', }}>
+                {delRacks.length ? <Text style={{color:'red',fontSize:14,paddingTop:10}}>Racks to be deleted are red in color</Text>
+                  : false}
+                  </View>
+                <View style={{ flexDirection: 'row', }}>
+                  {addRacks.length ? <Text style={{ color: 'green', fontSize: 14, paddingTop: 10 }}>Switched racks to be saved are green in color</Text>
+                    : false}
+                </View>
               </View>
               
               {batchNum && batchNum.length &&
                 delRacks.length && listeningEvent ?
                   <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-                    <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]}
+                    <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]}
                     onPress={(e) => computeRacks(e)} >
-                      <Text style={styles.successText}>SAVE</Text>
+                      <Text style={AppStyles.successText}>SAVE</Text>
                     </TouchableOpacity>
                     </View> : false}
 
               {batchNum && batchNum.length && delRacks.length === 0 && listeningEvent ?
                     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-                      <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]}
+                      <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]}
                     onPress={(e) => computeRacks(e)} >
-                    <Text>SAVE</Text>
+                    <Text style={AppStyles.successText}>SAVE</Text>
                     </TouchableOpacity>
                     </View> : false}
 
               {batchNum && batchNum.length && delRacks.length === 0 && listeningEvent === false ? 
                 <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-                  <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]}
+                  <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]}
                     onPress={(e) => startListening(e)} >
-                    <Text>ADD TO RACK</Text>
+                    <Text style={AppStyles.successText}>ADD TO RACK</Text>
                   </TouchableOpacity>
                  
                 </View> :false }
               
               {batchNum && batchNum.length && delRacks.length  && listeningEvent === false ?
                 <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-                  <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]}
+                  <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]}
                     onPress={(e) => startListening(e)} >
                   <Text>ADD TO RACK</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]}
+                  <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]}
                     onPress={(e) => computeRacks(e)} >
                   <Text>SAVE</Text></TouchableOpacity>
                 </View> : false}
 
               </View>
-            <View style={{ flex: 2 }}>
-              <CustomCard title={"BATCH DETAILS"} cardContent={
+            <View style={[styles.sectionContainer,{ flex: 2 }]}>
                 <BatchDetails
                   content={batchDet}
                   editMode={false}
                   _id={batchDet._id}
-                  noTitle={true}
+                  title="BATCH DETAILS"
                 />
-              }></CustomCard>
             </View> 
               </View>
               : false}
+
               
-        {dialog ? <CustomModal
+        {dialog  && dialogType === "saveRacks" ? <CustomModal
           modalVisible={dialog}
           dialogTitle={dialogTitle}
           dialogMessage={dialogMessage}
           closeDialog={closeDialog}
           okDialog={saveRacks}
-        /> : <View></View>}
+        /> : false}
+
+        {dialog && dialogType === "newRacks" ? <CustomModal
+          modalVisible={dialog}
+          dialogTitle={dialogTitle}
+          dialogMessage={dialogMessage}
+          closeDialog={closeDialog}
+          okDialog={clearNewRacks}
+        /> : false}
         
 
-
-       
-
-        {apiError && apiError.length ? (<Text style={{ color: 'red', fontSize: 12, padding: 2, margin: 10 }}> {apiError} </Text>) : (false)}
+        {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
        
       </View>
 
@@ -450,32 +546,13 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+  //  backgroundColor: "#fff",
     //justifyContent: "center",
     margin: 5
   },
-  successBtn: {
-    width: "40%",
-    borderRadius: 25,
-    padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    //marginTop: 40,
-    backgroundColor: appTheme.colors.warnAction,
-  },
-  successText: {
-    color: appTheme.colors.warnActionTxt
-  },
-
-
-  title: {
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: "bold"
-  },
-  filterLabel: {
-    fontSize: 14,
-    fontFamily: appTheme.fonts.regular,
+  sectionContainer:{
+    backgroundColor: 'white', 
+    margin: 5,
     padding: 5
-  },
+  }
 });

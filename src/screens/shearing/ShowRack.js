@@ -24,23 +24,19 @@ export default function ShowRack(props) {
 
  
   const closeDialog = () => {
-    console.log("close dialog")
     props.closeDialog();
   }
 
-  const handleSubmit = async () => {
-    console.log(bundleWeight)
+  const handleSubmit =  () => {
     if (bundleWeight && bundleWeight > 0){
       setApiStatus(true);
       let apiData = {};
       apiData.batch_num = props.processEntity.batch_num
       apiData.bundle_weight = bundleWeight
       apiData.op = "pop_material"
-      console.log("apiData h ere "+JSON.stringify(apiData))
 
       ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
         setApiStatus(false);
-        console.log("create process res: " + JSON.stringify(apiRes))
         if (apiRes && apiRes.status) {
           props.closeDialog()
           props.reloadPage();
@@ -48,7 +44,7 @@ export default function ShowRack(props) {
       });
     }
     else{
-      setBundleWeightErr('Please enter bundle weight')
+      setBundleWeightErr('Please enter valid bundle weight')
     }
   }
 
@@ -59,7 +55,7 @@ export default function ShowRack(props) {
       refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }>
       <View style={[styles.container,{alignItems:'center',flexDirection:'column'}]}>
         <View style={{flexDirection:'row',width:'60%',flex:2}}>
-          <Text style={[AppStyles.filterLabel,{flex:1}]}>Bundle Weight</Text>
+          <Text style={[AppStyles.filterLabel,{flex:1}]}>Bundle Weight (Kg)</Text>
           <TextInput 
             style={[AppStyles.filterText,{flex:2}]}
             onChangeText={value => setBundleWeight(value)}

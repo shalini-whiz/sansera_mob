@@ -7,6 +7,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { RadioButton } from "react-native-paper";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { forwardRef, useImperativeHandle } from 'react'
+import AppStyles from "../../styles/AppStyles";
 
  function ProcessFilter(props,ref) {
   const userState = React.useContext(UserContext);
@@ -43,14 +44,12 @@ import { forwardRef, useImperativeHandle } from 'react'
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length) {
-          let temp = []
           let currentProcess = apiRes.response.message[0];
          
 
           if(currentProcess) {
             if (processName.length > 0) {
               let currentProObj = apiRes.response.message.find(item => item.process_name === processName)
-              console.log("currentProOBj "+JSON.stringify(currentProObj))
               props.processEntity(currentProObj)
               setProcessName(currentProObj.process_name)
             }
@@ -58,11 +57,9 @@ import { forwardRef, useImperativeHandle } from 'react'
               props.processEntity(apiRes.response.message[0])
               setProcessName(apiRes.response.message[0].process_name)
             }
-            temp.push(currentProcess)
           }
-          if(apiRes.response.message[1]) temp.push(apiRes.response.message[1])
-          if(apiRes.response.message[2]) temp.push(apiRes.response.message[2])
-          setProcess(temp)
+         
+          setProcess(apiRes.response.message)
          
 
         }
@@ -85,7 +82,6 @@ import { forwardRef, useImperativeHandle } from 'react'
     setProcessName(value)  
     if(index != -1){
       props.processEntity(process[index])
-      console.log(process[index])
     }
   };
 
@@ -95,19 +91,28 @@ import { forwardRef, useImperativeHandle } from 'react'
 
   return (
       <View style={[styles.container,{}]}>
-        <ActivityIndicator size="large" animating={apiStatus} />
-      <View style={{ flexDirection: 'row' ,margin:0,padding:0}} >
-          <Text style={styles.filterLabel}>Process</Text>
+      {apiStatus ? <ActivityIndicator size="large" animating={apiStatus} /> : false}
+      <View style={{ flexDirection: 'row' ,margin:2,padding:5,backgroundColor:'white'}} >
+          <Text style={[AppStyles.filterLabel,{margin:1}]}>Process</Text>
           <RadioButton.Group 
             onValueChange={handleChange("process") }
           value={processName}
-            style={{ flexDirection: 'row',  color: "blue", }}>
+            style={{ flexDirection: 'row',   }}>
       
-            <View style={{ flexDirection: 'row'  }} >
+          <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', alignSelf: 'center'   }} >
               {process.map((item, index) => {
-                return(<View style={{ flexDirection: 'row' }} key={index}>
+                return(
+                <View style={{ flexDirection: 'row',justifyContent:'center',alignItems:'center',
+                alignSelf:'center',margin:1,
+               // backgroundColor:item.process_name === processName ? appTheme.colors.cardTitle : 'white',
+                
+                }} key={index}>
                   <RadioButton value={item.process_name} />
-                  <Text style={[styles.radioText, { color: appTheme.colors.warnAction, marginLeft: 15, }]}>{item.process_name}</Text>    
+                    <Text style={[styles.radioText, {
+                      marginRight: 10, 
+                      color: item.process_name === processName ? appTheme.colors.cardTitle : appTheme.colors.warnAction,
+                      fontFamily : appTheme.fonts.bold 
+ }]}>{item.process_name}</Text>    
                 </View>)
               })}
               </View>
@@ -118,9 +123,8 @@ import { forwardRef, useImperativeHandle } from 'react'
 }
 export default React.forwardRef(ProcessFilter)
 const styles = StyleSheet.create({
-
   container: {
-    margin: 5,
+    //margin: 5,
    // height:100,
     //flex:1
   },

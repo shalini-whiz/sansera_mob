@@ -1,47 +1,46 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert } from "react-native";
 import { dateUtil, util } from "../../commons";
-import { appTheme } from "../../lib/Themes";
 import FormGen from "../../lib/FormGen"
 import CustomHeader from "../../components/CustomHeader";
 import { ApiService } from "../../httpservice";
 import UserContext from "../UserContext";
 import CustomModal from "../../components/CustomModal";
 import { useIsFocused } from '@react-navigation/native';
-import { min } from "moment";
-const { DateTime } = require("luxon");
+import FormGrid from "../../lib/FormGrid";
+import AppStyles from "../../styles/AppStyles";
+import ErrorModal from "../../components/ErrorModal";
 
 let batchSchema = [
   {
     "key": "supplier_id", displayName: "Supplier", placeholder: "", value: "", error: "",
     required: true, "label": "supplier", select: true,
     options: [],
-    keyName: "_id", valueName: "supplier_name",titleCase:true
+    keyName: "_id", valueName: "supplier_name", titleCase: true
   },
   {
     "key": "material_code", displayName: "Material Code", placeholder: "", value: "", error: "",
     required: true, lowerCase: true, "label": "Material Code", select: true,
     options: [],
-    keyName: "material_code", valueName: "material_code",lowerCase:false
+    keyName: "material_code", valueName: "material_code", lowerCase: false
   },
-  {
-    "key": "type", displayName: "Type", placeholder: "", value: "steel", error: "",
-    required: true, lowerCase: true, "label": "type", select: true, options: [
-      { "_id": "steel", "value": "Steel" },
-      { "_id": "aluminium", "value": "Aluminium" }
-    ],
-    keyName: "_id", valueName: "value"
-  },
+  // {
+  //   "key": "type", displayName: "Type", placeholder: "", value: "steel", error: "",
+  //   required: true, lowerCase: true, "label": "type", select: true, options: [
+  //     { "_id": "steel", "value": "Steel" },
+  //     { "_id": "aluminium", "value": "Aluminium" }
+  //   ],
+  //   keyName: "_id", valueName: "value"
+  // },
   {
     "key": "heat_num", displayName: "Heat Number", placeholder: "", value: "",
     error: "", required: true, label: "heat number", type: "string"
   },
   {
     "key": "total_weight", displayName: "Total Quantity (in Kg)", placeholder: "", value: "",
-    error: "", required: true, label: "quantity", type: "number"
+    error: "", required: true, label: "quantity", type: "number", nonZero: true
   },
 ]
-
 
 let createdBatch = [
   {
@@ -56,10 +55,10 @@ let createdBatch = [
     "key": "supplier", displayName: "Supplier", placeholder: "", value: "", error: "",
     required: true, lowerCase: true, "label": "supplier", type: "string"
   },
-  {
-    "key": "type", displayName: "Type", placeholder: "", value: "", error: "",
-    required: true, lowerCase: true, "label": "type", type: "string"
-  },
+  // {
+  //   "key": "type", displayName: "Type", placeholder: "", value: "", error: "",
+  //   required: true, lowerCase: true, "label": "type", type: "string"
+  // },
   {
     "key": "heat_num", displayName: "Heat Number", placeholder: "", value: "",
     error: "", required: true, label: "heat number", type: "string"
@@ -77,6 +76,7 @@ let createdBatch = [
     required: true, lowerCase: true, "label": "status", type: "string"
   }
 ]
+
 export default function BatchDetails(props) {
   const [batchFormData, setBatchFormData] = useState([])
   const [apiError, setApiError] = useState('')
@@ -89,15 +89,15 @@ export default function BatchDetails(props) {
   const [batchDet, setBatchDet] = useState({})
   const [refreshing, setRefreshing] = useState(false)
   const isFocused = useIsFocused();
-  const [materials,setMaterials] = useState([]);
+  const [materials, setMaterials] = useState([]);
   const [count, setCount] = useState(0);
 
   useEffect(() => {
     if (isFocused) {
-       loadForm();
+      loadForm();
     }
     return () => { }
-  }, [isFocused])
+  }, [isFocused, (props.content && props.content._id)])
 
   useEffect(() => {
     if (!props._id) {
@@ -113,9 +113,11 @@ export default function BatchDetails(props) {
       getSuppliers();
   }, []);
 
-  
-  const loadForm =  () => {
+
+  const loadForm = () => {
     let batchSchemaData = [];
+    console.log(props._id)
+
     if (props._id) {
       batchSchemaData = [...createdBatch];
       batchSchemaData.map(item => {
@@ -123,6 +125,11 @@ export default function BatchDetails(props) {
         if (item.type === "date") {
           //convert date here
           item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
+        }
+        if (item.key === "status" && props.content[item.key].toLowerCase() === "new")
+          item.value = "HOLD"
+        if(item.key === "created_by"){
+          item.value = props.content["created_by_emp_name"] + " (" + props.content[item.key]+")"
         }
       });
       setBatchFormData(batchSchemaData);
@@ -174,7 +181,7 @@ export default function BatchDetails(props) {
     if (mIndex != -1 && sIndex != -1) {
       let selectedSupplierIndex = sItem.options.findIndex(item => item._id === sItem.value);
       let updatedItem = formData[mIndex];
-      if(selectedSupplierIndex != -1){
+      if (selectedSupplierIndex != -1) {
         let material_details = sItem.options[selectedSupplierIndex].material_details
         if (material_details) {
           setMaterials(material_details)
@@ -185,7 +192,7 @@ export default function BatchDetails(props) {
         }
       }
     }
-  } 
+  }
 
   const handleChange = (name) => value => {
     let formData = [...batchFormData]
@@ -195,8 +202,8 @@ export default function BatchDetails(props) {
       updatedItem["value"] = value;
       let updatedBatchData = [...formData.slice(0, index), updatedItem, ...formData.slice(index + 1)];
       setBatchFormData([...updatedBatchData]);
-      if (name === "supplier_id"){
-        loadSupplierMaterials();        
+      if (name === "supplier_id") {
+        loadSupplierMaterials();
       }
     }
   };
@@ -233,61 +240,51 @@ export default function BatchDetails(props) {
       apiData.total_weight = parseFloat(apiData.total_weight)
       apiData.created_by = userState.user.id;
       apiData.op = "add_raw_material";
+      apiData.type = "Steel";
       setApiStatus(true);
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "batch");
       setApiStatus(false);
+      console.log(apiRes)
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
           setBatchDet(apiRes.response.message);
           openDialog(apiRes.response.message);
         }
       }
+      else if (apiRes && apiRes.response.message)
+        setApiError(apiRes.response.message)
     }
   }
 
+  const errOKAction = () => {
+    setApiError('')
+  }
 
   return (
     <ScrollView
-
       contentContainerStyle={styles.scrollView}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-        />
-      }
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={styles.container}>
-        {props.noTitle ? false
-          : <CustomHeader title={props.title ? props.title : ""} />}
+        {props.noTitle ? false : <CustomHeader title={props.title ? props.title : ""} align="center" />}
 
-        {props._id ? <FormGen
-          handleChange={handleChange}
-          editMode={props._id ? props.editMode : true}
+        {props._id ? <FormGrid labelDataInRow={true} formData={batchFormData} /> :
+          <View style={{ width: '70%', margin: 10, padding: 5 }}>
+            <FormGen handleChange={handleChange}
+              editMode={true} formData={batchFormData} labelDataInRow={true} />
+          </View>}
+        {dialog ?
+          <CustomModal modalVisible={dialog} dialogTitle={dialogTitle} dialogMessage={dialogMessage}
+            okDialog={closeDialog} />
+          : false}
 
-          labelDataInRow={true}
-          formData={batchFormData}
+        {apiStatus ? <ActivityIndicator size="large" animating={apiStatus} /> : false}
 
-        /> :
-          <View style={{ width: '70%', margin: 10, padding: 5 }}><FormGen
-            handleChange={handleChange}
-            editMode={props._id ? props.editMode : true}
-            formData={batchFormData} labelDataInRow={true}
-          /></View>}
-        {dialog ? <CustomModal
-          modalVisible={dialog}
-          dialogTitle={dialogTitle}
-          dialogMessage={dialogMessage}
-          okDialog={closeDialog}
-        /> : <View></View>}
-
-        <ActivityIndicator size="large" animating={apiStatus} />
-
-        {apiError && apiError.length ? (<Text style={{ color: 'red', fontSize: 12, padding: 2, margin: 10 }}> {apiError} </Text>) : (false)}
+        {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
 
         {props._id ? <></> : <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-          <TouchableOpacity style={[styles.successBtn, { flexDirection: 'row' }]} onPress={(e) => handleSubmit(e)} >
-            <Text style={styles.successText}>SAVE</Text>
+          <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]} onPress={(e) => handleSubmit(e)} >
+            <Text style={AppStyles.successText}>SAVE</Text>
           </TouchableOpacity>
         </View>}
 
@@ -304,25 +301,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     justifyContent: "center",
     margin: 1
-  },
-  successBtn: {
-    width: "40%",
-    borderRadius: 25,
-    padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 40,
-    backgroundColor: appTheme.colors.warnAction,
-  },
-  successText: {
-    color: appTheme.colors.warnActionTxt
-  },
-
-
-  title: {
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: "bold"
-  },
-
+  }
 });

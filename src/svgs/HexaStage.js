@@ -1,4 +1,4 @@
-const HexaStageSingle = (color, name) => `<svg xmlns="http://www.w3.org/2000/svg"  width="250" height="300" >
+const HexaStageSingle = (color, name) => `<svg xmlns="http://www.w3.org/2000/svg">
   <polygon fill="white" stroke=${color}  
   points="60 13, 110 38, 110 85,60 110, 13 85, 13 35" 
   stroke-width="6"/>

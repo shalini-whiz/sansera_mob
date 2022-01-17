@@ -6,9 +6,9 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { appTheme } from '../../lib/Themes';
 import ProcessFilter from '../process/ProcessFilter';
 import WorkPlan from './WorkPlan';
-import RawMaterial from './Rejection';
-import TaskList from '../tasks/TaskList';
 import Rejection from "./Rejection";
+import BinMqtt from "../mqtt/BinMqtt";
+import TaskHome from "../tasks/TaskHome";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -20,14 +20,10 @@ export default function ForgingHome() {
   const [processDet, setProcessDet] = React.useState({});
 
   const setProcess = (data) => {
-    console.log("while setting process .. " + JSON.stringify(data))
     setProcessDet(data)
   }
 
   const updateProcess = e => {
-    console.log(processRef)
-    console.log(processRef.current)
-
     processRef.current.setFromOutside('HELLO from Parent')
   }
 
@@ -67,13 +63,13 @@ export default function ForgingHome() {
           listeners={({ navigation, route }) => ({
             tabPress: e => {
               if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Create Process')
+                navigation.navigate('Rejection')
               }
             },
           })}
         />
         <Tab.Screen name="Tasks"
-          children={() => <TaskList
+          children={() => <TaskHome
             processEntity={processDet}
             setProcessEntity={setProcess}
             updateProcess={updateProcess}
@@ -93,9 +89,10 @@ export default function ForgingHome() {
     </NavigationContainer>)
   }
   return (
-    <View style={{ flex: 1 }}>
-      <ProcessFilter processEntity={setProcess} ref={processRef} />
-      <TabNavigation style={{ flex: 1 }} />
+    <View style={{ flex: 1, flexDirection: 'column' }}>
+      <BinMqtt />
+      <ProcessFilter processEntity={setProcess} ref={processRef} style={{ margin: 5 }} />
+      <TabNavigation style={{ flex: 2 }} />
 
     </View>
   );

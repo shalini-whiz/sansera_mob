@@ -3,13 +3,13 @@ import React, { useState, useEffect,useRef } from "react";
 import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import TopBar from '../TopBar';
-import ProcessDetails from '../process/ProcessDetails';
 import { appTheme } from '../../lib/Themes';
 import ProcessFilter from './ProcessFilter';
 import WorkPlan from './WorkPlan';
 import RawMaterial from './RawMaterial';
-import TaskList from '../tasks/TaskList';
+import BinMqtt from "../mqtt/BinMqtt";
+import { useIsFocused } from '@react-navigation/native';
+import TaskHome from "../tasks/TaskHome";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -17,18 +17,20 @@ const Tab = createMaterialTopTabNavigator();
 
 export default function ShearingHome() {
   const processRef = useRef()
-
+  const isFocused = useIsFocused();
   const [processDet, setProcessDet] = React.useState({});
+  useEffect(() => {
+    if (isFocused) {
+     
+    }
+    return () => { }
+  }, [])
 
   const setProcess = (data) => {
-    console.log("while setting process .. " + JSON.stringify(data))
     setProcessDet(data)
   }
 
   const updateProcess = e => {
-    console.log(processRef)
-    console.log(processRef.current)
-
     processRef.current.setFromOutside('HELLO from Parent')
   }
   
@@ -53,7 +55,7 @@ export default function ShearingHome() {
           listeners={({ navigation, route }) => ({
             tabPress: e => {
               if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Edit Process')
+                navigation.navigate('Work Plan')
               }
             },
           })} />
@@ -68,13 +70,13 @@ export default function ShearingHome() {
           listeners={({ navigation, route }) => ({
             tabPress: e => {
               if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Create Process')
+                navigation.navigate('Raw Material')
               }
             },
           })}
         />
         <Tab.Screen name="Tasks"
-          children={() => <TaskList 
+          children={() => <TaskHome 
             processEntity={processDet}
             setProcessEntity={setProcess}
             updateProcess={updateProcess}
@@ -83,7 +85,7 @@ export default function ShearingHome() {
           listeners={({ navigation, route }) => ({
             tabPress: e => {
               if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Create Process')
+                navigation.navigate('Tasks')
               }
             },
           })}
@@ -95,7 +97,8 @@ export default function ShearingHome() {
   }
   return (
     <View style={{flex:1,flexDirection:'column'}}>
-      <ProcessFilter processEntity={setProcess} ref={processRef}/>
+      <BinMqtt />
+      <ProcessFilter processEntity={setProcess} ref={processRef} style={{margin:5}}/>
       <TabNavigation style={{flex:2}}/>
       
     </View>

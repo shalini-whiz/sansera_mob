@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert } from "react-native";
 import { dateUtil, util } from "../../commons";
 import { appTheme } from "../../lib/Themes";
 import FormGen from "../../lib/FormGen"
@@ -15,15 +15,17 @@ import App from "../../../App";
 import WeightDetails from "../process/WeightDetails";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ShowRack from "./ShowRack";
+import ErrorModal from "../../components/ErrorModal";
+
 
 let stageWeightSchema = [
   {
     "key": "hold_materials_weight", displayName: "Hold Material Weight (kg)", placeholder: "", value: 0, error: "",
-    required: true, "label": "Hold Material Weight", type: "number",defaultValue:0,nonZero:true
+    required: true, "label": "Hold Material Weight", type: "number", defaultValue: 0, nonZero: true
   },
   {
-    "key": "end_billet_weight", displayName: "End Billet Weight (kg)", placeholder: "", value: 0, error: "",
-    required: true, "label": "Billet Weight", type: "number",defaultValue:0,nonZero:true
+    "key": "ok_component", displayName: "End Billet Weight (kg)", placeholder: "", value: 0, error: "",
+    required: true, "label": "Billet Weight", type: "number", defaultValue: 0, nonZero: true
   },
   // {
   //   "key": "ok_component", displayName: "OK Component (Count)", placeholder: "", value: 0,
@@ -45,8 +47,8 @@ export default function WorkPlan(props) {
   const [refreshing, setRefreshing] = useState(false)
   const isFocused = useIsFocused();
   const [count, setCount] = useState(0);
-  const [rackData,setRackData] = useState({})
-  
+  const [rackData, setRackData] = useState({})
+
 
   useEffect(() => {
     if (isFocused) {
@@ -72,7 +74,8 @@ export default function WorkPlan(props) {
     setCount(previousCount => previousCount + 1);
   }
 
-  const loadData =  () => {
+  const loadData = () => {
+    setRefreshing(false)
   }
 
   const handleChange = (name) => value => {
@@ -82,7 +85,7 @@ export default function WorkPlan(props) {
       let updatedItem = formData[index]
       updatedItem["value"] = value;
       let updatedBatchData = [...formData.slice(0, index), updatedItem, ...formData.slice(index + 1)];
-      setBatchFormData([...updatedBatchData]);      
+      setBatchFormData([...updatedBatchData]);
     }
   };
 
@@ -103,20 +106,18 @@ export default function WorkPlan(props) {
     setDialogMessage(dialogMessage);
   }
 
-  const showRack = (e) =>{
-    let apiData = { op:"get_next_raw_material_item"}
+  const showRack = (e) => {
+    let apiData = { op: "get_next_raw_material_item" }
     apiData.batch_num = props.processEntity.batch_num
-    console.log("show rack apiData "+JSON.stringify(apiData))
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
-      console.log("show rack res: " + JSON.stringify(apiRes))
-      if(apiRes.status && apiRes.response && apiRes.response.message)
-        {
-          setRackData(apiRes.response.message);
-          setDialogTitle("SHOW RACK")
-          setDialogMessage("Rack : "+apiRes.response.message.element_num)
-          showDialog(true);
-        }
-     
+      if (apiRes && apiRes.status && apiRes.response && apiRes.response.message) {
+        setRackData(apiRes.response.message);
+        setDialogTitle("SHOW RACK")
+        setDialogMessage("Rack : " + apiRes.response.message.element_num)
+        showDialog(true);
+      }
+      else if(apiRes && apiRes.response.message)
+        setApiError(apiRes.response.message)
     });
 
   }
@@ -129,32 +130,33 @@ export default function WorkPlan(props) {
 
     let apiData = await util.filterFormData([...batchFormData]);
     apiData.op = "update_process",
-    apiData.process_name = props.processEntity.process_name
+      apiData.process_name = props.processEntity.process_name
     apiData.stage_name = await AsyncStorage.getItem("stage")
-    
 
-    console.log(isError)
+
     setBatchFormData(validFormData);
-    console.log("create workplan : " + JSON.stringify(apiData))
 
     if (!isError) {
-     
+
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
         setApiStatus(false);
-        console.log("create process res: " + JSON.stringify(apiRes))
         if (apiRes && apiRes.status) {
           if (apiRes.response.message) {
+            
+            Alert.alert("Work plan updated");
             props.setProcessEntity(apiRes.response.message)
             props.updateProcess()
 
-           // setBatchDet(apiRes.response.message);
+            // setBatchDet(apiRes.response.message);
             //openDialog(apiRes.response.message);
             util.resetForm(batchFormData);
           }
         }
+        else if (apiRes && apiRes.response.message)
+          setApiError(apiRes.response.message)
       });
-     
+
     }
 
 
@@ -164,56 +166,62 @@ export default function WorkPlan(props) {
     props.updateProcess()
   }
 
+  const errOKAction = () => {
+    setApiError('')
+  }
+
   return (
     <ScrollView
       contentContainerStyle={styles.scrollView}
-      refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }>
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       <View style={styles.mainContainer}>
-        <View style={{flexDirection:'row'}}>
-          <View style={{flex:2,backgroundColor:'white',margin:5,padding:5}}>
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ flex: 2, backgroundColor: 'white', margin: 5, padding: 5 }}>
             <TouchableOpacity
-              style={[AppStyles.successBtn, { flexDirection: 'row', marginBottom:10 }]} 
+              style={[AppStyles.warnButtonContainer, { flexDirection: 'row', marginBottom: 10 }]}
               onPress={(e) => showRack(e)} >
-              <Text style={AppStyles.successText}>SHOW RACK</Text>
+              <Text style={AppStyles.warnButtonTxt}>SHOW RACK</Text>
             </TouchableOpacity>
             <FormGen
               handleChange={handleChange}
               formData={batchFormData} labelDataInRow={false}
             />
-            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center',margin:5,marginTop:10 }}>
-              <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row', }]} 
+            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', margin: 5, marginTop: 10 }}>
+              <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row', }]}
                 onPress={(e) => handleSubmit(e)} disabled={apiStatus} >
                 <Text style={AppStyles.successText}>SAVE</Text>
               </TouchableOpacity>
             </View>
           </View>
-          <View style={{flex:3,flexDirection:'row',}}>
-            <View style={{ flex: 1, backgroundColor: 'white',margin:5,padding:5}}>
-              <ProcessDetails 
+          <View style={{ flex: 3, flexDirection: 'row', }}>
+            <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
+              <ProcessDetails
                 title="Process Details"
-                processEntity={props && props.processEntity ? props.processEntity : {}}/>
+                processEntity={props && props.processEntity ? props.processEntity : {}} />
             </View>
-            <View style={{ flex: 1,backgroundColor:'white',margin:5,padding:5 }}>
+            <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <WeightDetails title="Weight Details"
                 processEntity={props && props.processEntity ? props.processEntity : {}} />
             </View>
           </View>
         </View>
+        {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
+
         {dialog ? <CustomModal
           modalVisible={dialog}
           dialogTitle={dialogTitle}
           dialogMessage={dialogMessage}
-          container={<ShowRack rackData={rackData} processEntity={props.processEntity} 
-          reloadPage={reloadPage}
-          closeDialog={closeDialog}
-          />} />: false
-      }
+          container={<ShowRack rackData={rackData} processEntity={props.processEntity}
+            reloadPage={reloadPage}
+            closeDialog={closeDialog}
+          />} /> : false
+        }
       </View>
     </ScrollView>
   )
 }
 const styles = StyleSheet.create({
-  mainContainer:{
+  mainContainer: {
     justifyContent: "center",
     margin: 10,
   },

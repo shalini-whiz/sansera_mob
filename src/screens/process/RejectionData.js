@@ -1,34 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ActivityIndicator, ScrollView,
-   RefreshControl } from "react-native";
+import { StyleSheet, Text, View, ScrollView,RefreshControl } from "react-native";
 import { appTheme } from "../../lib/Themes";
 import { ApiService } from "../../httpservice";
 import { useIsFocused } from '@react-navigation/native';
 
-let data = [
-  {
-    stage: 'SHEARING',
-    count: 10
-  },
-  {
-    stage: 'FORGING',
-    count: 200
-  },
-  {
-    stage: 'SHOT BLASTING',
-    count: 300
-  },
-  {
-    stage: "VISUAL MPI",
-    count: 250
-  },
-  {
-    stage: "SHOT PEENING",
-    count: 400
-  }
-];
 
-export default function RejectionData() {
+
+export default function RejectionData(props) {
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false)
   const [rejectionData,setRejectionData] = useState([])
@@ -41,7 +19,22 @@ export default function RejectionData() {
   }, [isFocused])
 
   const loadRejectionData = () => {
-    setRejectionData(data)
+    let apiData = { }
+    apiData.op = "get_rejection_summary"
+    apiData.process_name = props.processEntity.process_name
+    console.log("apiData here "+JSON.stringify(apiData))
+    setRejectionData([])
+    ApiService.getAPIRes(apiData, "POST","rejection").then(apiRes => {
+      console.log("ApiRes "+JSON.stringify(apiRes))
+      if(apiRes && apiRes.status){
+        if(apiRes.response.message && apiRes.response.message.rejections)
+          setRejectionData(apiRes.response.message.rejections)
+      }
+      else if(apiRes && apiRes.response.message){
+        
+      }
+    })
+    
   }
 
   const onRefresh = React.useCallback(() => {
@@ -86,9 +79,9 @@ export default function RejectionData() {
             return(
               <View style={{ flexDirection: 'column',borderWidth:0.5,borderColor:'grey',padding:5 }} key={index}>
                 <Text style={[styles.tableHeader, { marginBottom:1,flex:1,
-                padding:5,width:'100%',borderBottomColor:'grey',borderBottomWidth:0.5}]}>{item.stage}</Text>
+                padding:5,width:'100%',borderBottomColor:'grey',borderBottomWidth:0.5}]}>{item.stage_name}</Text>
                 <Text style={[styles.tableCell, { marginTop:1,flex:1,padding:5,
-                   }]}>{item.count}</Text>
+                }]}>{item.total_rejections}</Text>
 </View>
             )
           })}

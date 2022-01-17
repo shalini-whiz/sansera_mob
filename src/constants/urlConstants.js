@@ -5,21 +5,30 @@ var liveAddress = 'http://103.162.246.110:8081/'
 
 
 
-const  mqttOptions = {
+let  mqttOptions = {
     uri: "mqtt" + "://mqtt.meti.in:1884",
     clientId: "clientId",
     user: "quickiot_wd",
     pass: "whiz1234!",
     auth: true,
-    keepalive: 60
+    keepalive:32000
+   // keepalive: 60
 }
-
+let binMqttOptions = {
+    uri: "mqtt" + "://mqtt.meti.in:1884",
+    clientId: "clientId",
+    user: "quickiot_wd",
+    pass: "whiz1234!",
+    auth: true,
+    keepalive: 32000
+    // keepalive: 60
+}
 
 
 const SERVER_URL = liveAddress;
 
 const urls = {
-    login: SERVER_URL + "api/login",
+    login: SERVER_URL + "api/auth",
     getProcess:SERVER_URL+"api/process-line",
     get_next_element:SERVER_URL+"api/process-line",
     pop_element:SERVER_URL+"api/fifo",
@@ -35,9 +44,12 @@ const urls = {
     customer: SERVER_URL +"api/customer",
     fifo:SERVER_URL+"api/fifo",
     "process-master": SERVER_URL +"api/process-master",
-    topics:SERVER_URL+"api/mqtt"
+    mqtt: SERVER_URL +"api/mqtt-service",
+    rejection: SERVER_URL +"api/rejection",
+    org: SERVER_URL +"api/org-service",
+    task: SERVER_URL +"api/operator-task"
 };
 
 
 
-export { urls, SERVER_URL, mqttOptions };
+export { urls, SERVER_URL, mqttOptions, binMqttOptions };

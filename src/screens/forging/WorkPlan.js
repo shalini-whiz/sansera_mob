@@ -13,6 +13,7 @@ import ProcessDetails from "../process/ProcessDetails";
 import { default as AppStyles } from "../../styles/AppStyles";
 import WeightDetails from "../process/WeightDetails";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import RequestBin from "./RequestBin";
 
 
 let stageSchema = [
@@ -62,8 +63,7 @@ export default function WorkPlan(props) {
 
   const handleChange = (name) => value => {
     let formDataInput = [...formData]
-    console.log(name+" ... "+value)
-    console.log(formDataInput)
+ 
     let index = formDataInput.findIndex(item => item.key === name);
     if (index != -1) {
       let updatedItem = formDataInput[index]
@@ -105,9 +105,7 @@ export default function WorkPlan(props) {
     apiData.stage_name = await AsyncStorage.getItem("stage")
 
 
-    console.log(isError)
     setFormData(validFormData);
-    console.log("create workplan : " + JSON.stringify(apiData))
     if (!isError) {
 
       setApiStatus(true);
@@ -135,6 +133,11 @@ export default function WorkPlan(props) {
     props.updateProcess()
   }
 
+  const showReqBin = (e) => {
+    setDialogTitle("REQUEST TO")
+    setDialogMessage("")
+    showDialog(true);
+  }
   return (
     <ScrollView
       contentContainerStyle={styles.scrollView}
@@ -144,14 +147,14 @@ export default function WorkPlan(props) {
           <View style={{flex:2,backgroundColor:'white',margin:5,padding:5}}>
 
             <TouchableOpacity
-              style={[AppStyles.successBtn, { width:'50%',marginBottom:20 }]} 
-              //onPress={(e) => showRack(e)} 
+              style={[AppStyles.warnButtonContainer, { width:'50%',marginBottom:20 }]} 
+              onPress={(e) => showReqBin(e)} 
               >
-              <Text style={AppStyles.successText}>REQUEST FILLED BIN</Text>
+              <Text style={AppStyles.warnButtonTxt}>REQUEST FILLED BIN</Text>
             </TouchableOpacity>
             <View style={{flexDirection:'row',margin:10}}>
               <Text style={AppStyles.filterLabel}>Empty Bin </Text>
-              <CustomHeader  title="123"></CustomHeader>
+              <CustomHeader  title=""></CustomHeader>
             </View>
             <View style={{ flexDirection: 'column', margin: 10 }}>
 
@@ -172,15 +175,27 @@ export default function WorkPlan(props) {
             <View style={{ flex: 1, backgroundColor: 'white',margin:5,padding:5}}>
               <ProcessDetails 
                 title="Process Details"
-                processEntity={props && props.processEntity ? props.processEntity : {}}/>
+                processEntity={props && props.processEntity ? props.processEntity : {}}
+                
+                
+                />
             </View>
-            <View style={{ flex: 1,backgroundColor:'white',margin:5,padding:5 }}>
-              {/* <WeightDetails title="Weight Details"
-                processEntity={props && props.processEntity ? props.processEntity : {}} /> */}
-            </View>
+            {/* <View style={{ flex: 1,backgroundColor:'white',margin:5,padding:5 }}>
+              <WeightDetails title="Weight Details"
+                processEntity={props && props.processEntity ? props.processEntity : {}} />
+            </View> */}
           </View>
         </View>
+       {dialog ? <CustomModal
+          modalVisible={dialog}
+          dialogTitle={dialogTitle}
+          dialogMessage={dialogMessage}
+          container={<RequestBin  processEntity={props.processEntity}
+            //reloadPage={reloadPage}
+            closeDialog={closeDialog}
+          />} 
        
+       /> : false}
       
       </View>
     </ScrollView>

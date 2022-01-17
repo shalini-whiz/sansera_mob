@@ -1,6 +1,7 @@
 import  HttpService  from "./HttpService";
 import { appMsgs } from "../constants";
 import Auth from "./Auth";
+import NetInfo from "@react-native-community/netinfo";
 
 let ApiService = {};
 
@@ -52,16 +53,25 @@ ApiService.getAPIRes = async(params, type, api, props) => {
         //     console.log(JSON.stringify(res.json()))
         //     return res;
         // })
+        let networkState = await NetInfo.fetch();
+        if(networkState.isConnected){
+            let token = await Auth.getToken();
+            return new Promise((resolve, reject) => {
+                HttpService.makeRequest(type, params, api, token)
+                    .then(r => r.json().then(data => ({ status: r.status, body: data })))
+                    .then(res => resolve(ApiService.handleRes(res)))
+                    .catch(res => resolve(ApiService.onFailure(res)));
+            });
+        }
+        else
+        {
+            return { "status": false, response:{ message:"No Internet"}};
+        }
 
-        let token = await Auth.getToken();
-        return new Promise((resolve, reject) => {
-            HttpService.makeRequest(type, params, api,token)
-            .then(r =>  r.json().then(data => ({status: r.status, body: data})))
-            .then(res => resolve(ApiService.handleRes(res)))
-            .catch(res => resolve(ApiService.onFailure(res)));
-        });
+        
     } catch (e) {
         console.log(e);
+        
         ApiService.genFailure({ errors: [e.toString()] });
     }
 };

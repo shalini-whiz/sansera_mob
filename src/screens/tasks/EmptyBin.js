@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert } from "react-native";
 import { util } from "../../commons";
 import FormGen from "../../lib/FormGen"
 import CustomHeader from "../../components/CustomHeader";
@@ -10,6 +10,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { appTheme } from "../../lib/Themes";
 import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ErrorModal from "../../components/ErrorModal";
 
 
 
@@ -41,9 +42,7 @@ export default function EmptyBin(props) {
   const loadData = () => {
    
     AsyncStorage.getItem("emptyBinReq").then(request => {
-      setNotifications(JSON.parse(request))
-      console.log("rq "+JSON.stringify(JSON.parse(request)))
-    
+      setNotifications(JSON.parse(request))    
     })
     AsyncStorage.getItem("stage").then(stage => {
       setStage(stage)
@@ -97,18 +96,19 @@ export default function EmptyBin(props) {
       apiData.element_id = bin.element_id
       let currentStage = props.processEntity.process.find(item => item.stage_name === stage)
       let nextStage = props.processEntity.process.find(item => item.order === currentStage.order + 1);
-      console.log(nextStage)
       apiData.stage_name = nextStage.stage_name
-      console.log("apiData here " + JSON.stringify(apiData))
 
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
         setApiStatus(false);
         console.log("create process res: " + JSON.stringify(apiRes))
         if (apiRes && apiRes.status) {
+          Alert.alert("Bin confirmed");
           closeDialog()
           props.reloadPage();
         }
+        else if(apiRes && apiRes.response.message)
+          setApiError(apiRes.response.message)
       });
       AsyncStorage.getItem("emptyBinReq").then(emptyBinReqList => {
         let binReq = JSON.parse(emptyBinReqList);
@@ -123,50 +123,49 @@ export default function EmptyBin(props) {
     }
   }
 
+  const errOKAction = () => {
+    setApiError('')
+  }
+
   return (
     <ScrollView
       contentContainerStyle={styles.scrollView}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       <View style={styles.mainContainer}>
-        <Text>{console.log(notifications)}</Text>
-        {notifications.length ? notifications.map((item,index) => {
+        {notifications &&  notifications.length ? notifications.map((item,index) => {
           return(<View style={{flexDirection:'row',padding:5,backgroundColor:'white',margin:5}} key={index}>
-            <Text style={[AppStyles.title,{flex:3,justifyContent:'flex-start',textAlign:'left'}]}>{"Confirm Bin request "+item.element_num}</Text>
-            <TouchableOpacity style={[AppStyles.successBtn, { flex:1, }]} 
+            <Text style={[AppStyles.subtitle,{flex:3,justifyContent:'flex-start',textAlign:'left',color:'black',padding:5}]}>{"Confirm Bin request "+item.element_num}</Text>
+            <TouchableOpacity style={[AppStyles.successBtn, { flex:1, margin:5}]} 
               onPress={(e) => openDialog(e, "accept", item)}
-
             >
               <Text style={AppStyles.successText}>CONFIRM</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[AppStyles.canButtonContainer, { flex: 1 }]}
+            <TouchableOpacity style={[AppStyles.canButtonContainer, { flex: 1,margin:5 }]}
             onPress={(e) => openDialog(e,"cancel",item)}
             >
               <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
             </TouchableOpacity>
           </View>)
         }) : false}
-        {dialog ? <CustomModal
-          modalVisible={dialog}
-          dialogTitle={dialogTitle}
-          dialogMessage={dialogMessage}
-          
-           okDialog={updateRequest}
-           closeDialog={closeDialog}
+        {dialog ? <CustomModal modalVisible={dialog} dialogTitle={dialogTitle} 
+        dialogMessage={dialogMessage} okDialog={updateRequest} closeDialog={closeDialog}
           container={
-            <View style={{flexDirection:'column',alignItems:'center',width:'50%'}}>
-              <View style={{flexDirection:'row',alignItems:'center',width:'50%',padding:5}}>
-                  <Text style={[AppStyles.subtitle,{flex:1,textAlign:'right',padding:5,color:'black'}]}>Stage : </Text>
-                  <CustomHeader title={stage} style={{flex:2,padding:5,marginLeft:10}}/>
+            <View style={{flexDirection:'column',alignItems:'center',width:'70%'}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
+                <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Stage : </Text>
+                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{stage} </Text>
+
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', width: '50%', padding: 5 }}>
-                <Text style={[AppStyles.subtitle, { flex: 1, textAlign: 'right', padding: 5, color: 'black' }]}>Process : </Text>
-                <CustomHeader title={props.processEntity.process_name} style={{ flex: 2, padding: 5, marginLeft: 10 }} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
+                <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Process : </Text>
+                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{props.processEntity.process_name} </Text>
               </View>
             </View>
             }
 
         /> : false}
 
+        {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
 
 
 

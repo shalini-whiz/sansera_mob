@@ -23,8 +23,8 @@ const TopBar = (props) => {
 
   useEffect(() => {
     let isMounted = true;
-    setUser(userState.user);
-    console.log(JSON.stringify(userState))
+    if(userState && userState.user)
+      setUser(userState.user);
     AsyncStorage.getItem("stage").then(stage => 
       setStage(stage))
     return () => {

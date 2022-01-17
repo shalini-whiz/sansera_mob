@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, ImageBackground, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, ImageBackground, ActivityIndicator, Alert } from "react-native";
 import { util } from "../commons";
 import { ApiService } from "../httpservice";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,6 +30,7 @@ export default function Login() {
   const [user, setUser] = useState({})
   const [apiError, setApiError] = useState('')
   const [apiStatus, setApiStatus] = useState(false);
+  const [binTopics,setBinTopics] = useState([])
 
   const { saveUser } = React.useContext(UserContext)
   useEffect(() => {
@@ -77,12 +78,10 @@ export default function Login() {
       if (item.error.length) return item;
     });
     setLoginData(validFormData);
-    console.log(isError)
     if (!isError) {
       setApiStatus(true)
       let apiData = await util.filterFormData([...loginData]);
       apiData.op = "login"
-      console.log("apiData " + JSON.stringify(apiData))
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "login")
       console.log("login response " + JSON.stringify(apiRes))
       setApiStatus(false)
@@ -99,11 +98,11 @@ export default function Login() {
         setIsLoggedIn(true)
 
         let topicPaylaod = { op: "list_topics" }
-        ApiService.getAPIRes(topicPaylaod, "POST", "topics").then(apiRes => {
-          if (apiRes.status) {
-            let rackSwitch = []
-            let binSwitch = []
-            let switchPressedRacks = apiRes.response.message.reduce(function (acc, obj) {
+        let topicRes = await ApiService.getAPIRes(topicPaylaod, "POST", "mqtt")
+        if (topicRes.status) {
+          let rackSwitch = []
+          let binSwitch = []
+          let switchPressedRacks = topicRes.response.message.reduce(function (acc, obj) {
               let key = obj["topic_name"]
               if (key.includes("/get/switch")) {
                 if (obj.type === 'rack') {
@@ -115,21 +114,23 @@ export default function Login() {
               }
               return acc
             }, []);
-            console.log(switchPressedRacks)
             AsyncStorage.setItem("racks", JSON.stringify(switchPressedRacks));
+            console.log("switch pressed racks "+switchPressedRacks)
             AsyncStorage.setItem("bins", JSON.stringify(binSwitch));
+            setBinTopics(JSON.stringify(binSwitch))
 
-            let emptyBinReq = [
-              { "topic_name": "MWPI2/2E-17-AE-3F", "element_id": "2E-17-AE-3F", "element_num": "B1" },
-              { "topic_name": "MWPI2/8F-11-99-25", "element_id": "8F-11-99-25", "element_num": "B2" },
-            ]
-            AsyncStorage.setItem("emptyBinReq", JSON.stringify(emptyBinReq));
+            // let emptyBinReq = [
+            //   { "topic_name": "MWPI2/2E-17-AE-3F", "element_id": "2E-17-AE-3F", "element_num": "B1" },
+            //   { "topic_name": "MWPI2/8F-11-99-25", "element_id": "8F-11-99-25", "element_num": "B2" },
+            // ]
+            // AsyncStorage.setItem("emptyBinReq", JSON.stringify(emptyBinReq));
 
           }
-        })
+               
       }
       else {
         if (apiRes && apiRes.response) setApiError(apiRes.response.message)
+        Alert.alert(apiRes.response.message)
       }
 
 
@@ -150,7 +151,7 @@ export default function Login() {
 
   return (
     <>
-      {isLoggedIn ? <Home user={user} /> : (
+      {isLoggedIn ? <Home user={user} binTopics={binTopics} /> : (
         <View style={styles.loginContainer}>
           <Image source={require("../images/sansera.png")} style={{ alignSelf: 'center' }} />
           <ActivityIndicator size="large" animating={apiStatus} />

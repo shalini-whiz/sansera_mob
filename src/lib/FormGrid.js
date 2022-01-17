@@ -58,10 +58,11 @@ export default class FormGrid extends Component {
               <View style={{
                 flex: this.props.dataFlex ? this.props.dataFlex : 2
               }}>
-                {console.log(item.value)}
                   <Text name={item.key}
                     style={[this.props.labelDataInRow ? styles.textInputInRow : styles.TextInput, { backgroundColor:  "white" }]}
-                  >{item.value+""}</Text>
+                  >{item.value+""}
+                  
+                  </Text>
               </View>
             </View>
             {item.error && item.error.length ? (<Text style={styles.error}> {item.error} </Text>) : (false)}

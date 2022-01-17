@@ -11,6 +11,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import RejectionData from "./RejectionData";
 import ProcessFifo from "./ProcessFifo";
 import { green100 } from "react-native-paper/lib/typescript/styles/colors";
+import ErrorModal from "../../components/ErrorModal";
 
 
 
@@ -24,10 +25,10 @@ export default function ProcessList() {
   const [dialog, showDialog] = useState(false);
   const [dialogTitle, setDialogTitle] = useState('')
   const [dialogMessage, setDialogMessage] = useState('');
-  const [dialogType,setDialogType] = useState('')
+  const [dialogType, setDialogType] = useState('')
   const [refreshing, setRefreshing] = useState(false)
-  const [process,setProcess] = useState([])
-  const [processDet,setProcessDet] = useState({})
+  const [process, setProcess] = useState([])
+  const [processDet, setProcessDet] = useState({})
 
   useEffect(() => {
     if (isFocused) {
@@ -46,11 +47,12 @@ export default function ProcessList() {
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length) {
-           setProcess(apiRes.response.message)
-          }
+          setProcess(apiRes.response.message)
         }
-        else {
-          setProcess([])
+      }
+      else if (apiRes && apiRes.response.message) {
+        setApiError(apiRes.response.message)
+        setProcess([])
       }
     });
 
@@ -61,33 +63,33 @@ export default function ProcessList() {
     loadProcess();
   }, []);
 
-  
+
   const closeDialog = () => {
     showDialog(false)
     setDialogTitle('')
     setDialogMessage('')
   }
-  const openDialog = (type,item) => {
+  const openDialog = (type, item) => {
     showDialog(true);
     let dialogTitle = "";
     let dialogMessage = "";
     let dialogType = ""
     dialogType = type;
-    if(type === "rejection"){
+    if (type === "rejection") {
       dialogTitle = "Rejection Data"
     }
-    else if(type === "processFifo"){
+    else if (type === "processFifo") {
       dialogTitle = "Update Process " + item.process_name
     }
-    else if(type === "startProcess"){
+    else if (type === "startProcess") {
       dialogTitle = "Start Process " + item.process_name
-    } 
+    }
     else if (type === "stopProcess") {
       dialogTitle = "Stop Process " + item.process_name
     }
     else if (type === "finishProcess")
-      dialogTitle = "Finish Process "+item.process_name
-    
+      dialogTitle = "Finish Process " + item.process_name
+
 
     setDialogTitle(dialogTitle);
     setDialogMessage(dialogMessage);
@@ -96,27 +98,37 @@ export default function ProcessList() {
   }
 
   const updateProcess = () => {
-    let apiData = { op : "update_process"}
+    let apiData = { op: "update_process" }
     apiData.process_name = processDet.process_name
 
-    apiData.status = (dialogType === "startProcess" ? "RUNNING" : (dialogType === "stopProcess") ? "HOLD" : (dialogType === "finishProcess" ? "FINISHED" : "") )
+    apiData.status = (dialogType === "startProcess" ? "RUNNING" : (dialogType === "stopProcess") ? "HOLD" : (dialogType === "finishProcess" ? "FINISHED" : ""))
 
-    if(apiData.status === "FINISHED"){
+    if (apiData.status === "FINISHED") {
       apiData.component_count = processDet.component_count
       apiData.finished_component = processDet.component_count
     }
-    
+
     setApiStatus(true)
     ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
-      if(apiRes){
-        if(apiRes.status){
+      if (apiRes) {
+        if (apiRes.status) {
           closeDialog()
           loadProcess();
         }
+        else if (apiRes.response.message)
+          setApiError(apiRes.response.message)
       }
     })
-    
 
+
+  }
+
+  const updateFifo = () => {
+    closeDialog()
+    loadProcess();
+  }
+  const errOKAction = () => {
+    setApiError('')
   }
 
   return (
@@ -131,24 +143,24 @@ export default function ProcessList() {
       }
     >
       <View style={styles.container}>
-         
+
 
         <ActivityIndicator size="large" animating={apiStatus} />
-        {process.map((item,index) => {
-          return(
+        {process.map((item, index) => {
+          return (
             <View style={styles.processContainer} key={index}>
               <View style={{ flexDirection: 'row' }} key={index}>
                 <Text style={[styles.title, { textAlign: 'left' }]}>{item.process_name}</Text>
-                <View style={{flexDirection:'row',flex:1,justifyContent:'flex-end'}}>
-                  
+                <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-end' }}>
+
                   {(item.status.toLowerCase() === "created" || item.status.toLowerCase() === "hold") ?
                     <TouchableOpacity style={[{ alignSelf: 'center' }]}
                       onPress={(e) => openDialog('startProcess', item)}>
-                    <Text style={{
-                      textAlign: 'right', fontSize: 20, color: 'green',
-                      fontFamily: appTheme.fonts.bold
+                      <Text style={{
+                        textAlign: 'right', fontSize: 20, color: 'green',
+                        fontFamily: appTheme.fonts.bold
                       }}>START</Text></TouchableOpacity> : false}
-                    
+
                   {item.status.toLowerCase() === "running" ?
                     <><TouchableOpacity style={[{ alignSelf: 'center' }]}
                       onPress={(e) => openDialog('stopProcess', item)}>
@@ -156,72 +168,73 @@ export default function ProcessList() {
                         textAlign: 'right', fontSize: 20, color: 'red',
                         fontFamily: appTheme.fonts.bold
                       }}>STOP</Text></TouchableOpacity>
-                      <TouchableOpacity style={[{ alignSelf: 'center',paddingLeft:20 }]}
+                      <TouchableOpacity style={[{ alignSelf: 'center', paddingLeft: 20 }]}
                         onPress={(e) => openDialog('finishProcess', item)}>
                         <Text style={{
                           textAlign: 'right', fontSize: 20, color: 'green',
                           fontFamily: appTheme.fonts.bold
                         }}>FINISH</Text></TouchableOpacity>
-                      
-                      </> : false}
-                  </View>
-                
+
+                    </> : false}
+                </View>
+
 
               </View>
-              <View style={{flexDirection:'row'}}>
-                <Text style={[styles.subtitle, { textAlign: 'center',flex:1 }]}>Batch</Text>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Batch</Text>
                 <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Total Components</Text>
                 <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Status</Text>
-                <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Rejection Data</Text> 
+                <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Rejection Data</Text>
               </View>
-            <View style={{ flexDirection: 'row' }}>
-              <Text style={[styles.tableContent, { textAjustlign: 'center', flex: 1 }]}>{item.batch_num}
-                <TouchableOpacity style={[{ alignSelf:'center'}]} 
-                onPress={(e) => openDialog('processFifo',item)} >
-                  <MaterialIcons name="edit" size={22} style={{ marginLeft: 10 }} color="green" ></MaterialIcons>
-                </TouchableOpacity>
-              
-              </Text>
-              <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.component_count}</Text>
-              <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.status}</Text>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.batch_num}
+                  <TouchableOpacity style={[{ alignSelf: 'center' }]}
+                    onPress={(e) => openDialog('processFifo', item)} >
+                    <MaterialIcons name="edit" size={22} style={{ marginLeft: 10 }} color="green" ></MaterialIcons>
+                  </TouchableOpacity>
 
-              <TouchableOpacity style={[{ flex: 1, alignItems: 'center' }]} 
-                onPress={(e) => openDialog('rejection',item)} >
-                <FontAwesome name="eye" size={20} style={{ flex: 1,justifyContent:'center' }}  ></FontAwesome>
-              </TouchableOpacity>
-            </View>
+                </Text>
+                <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.component_count}</Text>
+                <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.status}</Text>
+
+                <TouchableOpacity style={[{ flex: 1, alignItems: 'center' }]}
+                  onPress={(e) => openDialog('rejection', item)} >
+                  <FontAwesome name="eye" size={20} style={{ flex: 1, justifyContent: 'center' }}  ></FontAwesome>
+                </TouchableOpacity>
+              </View>
             </View>)
 
         })}
-       
+
 
       </View>
 
-      {dialog  && dialogType === "rejection" ? <CustomModal
+      {dialog && dialogType === "rejection" ? <CustomModal
         modalVisible={dialog}
         dialogTitle={dialogTitle}
         dialogMessage={dialogMessage}
         closeDialog={closeDialog}
-        container={<RejectionData/>}
+        container={<RejectionData processEntity={processDet} />}
       /> : <View></View>}
 
       {dialog && dialogType === "processFifo" ? <CustomModal
         modalVisible={dialog}
         dialogTitle={dialogTitle}
         dialogMessage={dialogMessage}
-        closeDialog={closeDialog}
-        container={<ProcessFifo processDet={processDet} closeDialog={closeDialog} />}
+        // closeDialog={closeDialog}
+        container={<ProcessFifo processDet={processDet} closeDialog={closeDialog} okDialog={updateFifo} />}
       /> : <View></View>}
 
-      {dialog && (dialogType === "startProcess" || dialogType === "stopProcess" || dialogType === "finishProcess")? <CustomModal
+      {dialog && (dialogType === "startProcess" || dialogType === "stopProcess" || dialogType === "finishProcess") ? <CustomModal
         modalVisible={dialog}
         dialogTitle={dialogTitle}
         dialogMessage={dialogMessage}
         closeDialog={closeDialog}
         okDialog={updateProcess}
       /> : false}
+      {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
 
-      
+
     </ScrollView>
   )
 }
@@ -233,7 +246,7 @@ const styles = StyleSheet.create({
     //justifyContent: "center",
     margin: 5
   },
-  processContainer:{
+  processContainer: {
     flexDirection: 'column', margin: 8, backgroundColor: 'white', padding: 10
   },
   successBtn: {
@@ -263,21 +276,21 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
     fontSize: 20,
-    color:appTheme.colors.cardTitle,
+    color: appTheme.colors.cardTitle,
     fontFamily: appTheme.fonts.bold
 
 
   },
-  subtitle:{
+  subtitle: {
     textAlign: 'center',
     fontSize: 16,
     //fontWeight: "bold",
     fontFamily: appTheme.fonts.regular,
-    color:appTheme.colors.cardTitle
+    color: appTheme.colors.cardTitle
   },
-  tableContent:{
-    textAlign:'center',
-    fontSize:18,
+  tableContent: {
+    textAlign: 'center',
+    fontSize: 18,
     fontFamily: appTheme.fonts.regular,
 
   }

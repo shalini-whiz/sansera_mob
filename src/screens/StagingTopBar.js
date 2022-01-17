@@ -15,7 +15,8 @@ const StagingTopBar = () => {
   let [user, setUser] = React.useState({})
   useEffect(() => {
     let isMounted = true;
-    setUser(userState.user);
+    if(userState && userState.user)
+      setUser(userState.user);
     return () => {
       isMounted = false;
     }

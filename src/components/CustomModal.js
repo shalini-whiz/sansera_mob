@@ -12,7 +12,6 @@ const CustomModal = (props) => {
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
           setModalVisible(!modalVisible);
         }}
       >
@@ -42,7 +41,7 @@ const CustomModal = (props) => {
               <TouchableOpacity
                 style={[styles.sucButtonContainer, { flexDirection: 'row', backgroundColor: appTheme.colors.successAction }]}
                 disabled={false} activeOpacity={.5} onPress={(e) => props.okDialog(e)} >
-                <Text style={styles.sucButtonText}>OK</Text>
+                <Text style={styles.sucButtonText}>{props.okTitle ? props.okTitle : 'OK'}</Text>
                 {/* <SvgCss xml={TickIcon(appTheme.colors.successActionTxt)} width={20} height={20} style={{ margin: 2 }} /> */}
 
               </TouchableOpacity>

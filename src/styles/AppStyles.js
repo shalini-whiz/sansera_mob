@@ -9,14 +9,14 @@ export default StyleSheet.create({
     padding: 5,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: appTheme.colors.warnAction,
+    backgroundColor: appTheme.colors.successAction,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.9,
     shadowRadius: 3,
   },
   successText: {
-    color: appTheme.colors.warnActionTxt,
+    color: appTheme.colors.successActionTxt,
     fontFamily: appTheme.fonts.bold
   },
   canButtonContainer: {
@@ -57,13 +57,19 @@ export default StyleSheet.create({
     fontSize: 16,
   },
   filterText: {
+    fontSize: 18,
+    backgroundColor: "#ECF0FA",
+    padding: 5,
+    fontFamily: appTheme.fonts.regular
+  },
+  pickerStyle:{
     fontSize: 16,
     backgroundColor: "#ECF0FA",
-
-   fontFamily: appTheme.fonts.regular
+    padding: 5,
+    fontFamily: appTheme.fonts.regular
   },
   filterLabel: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: appTheme.fonts.regular,
     padding: 5,
   },
@@ -76,8 +82,19 @@ export default StyleSheet.create({
     fontSize: 16,
     fontFamily: appTheme.fonts.regular,
   },
+  info:{
+    fontSize:12,
+    fontFamily: appTheme.fonts.regular,
+
+  },
+  sideMenu:{
+    fontSize: 20,
+    fontFamily: appTheme.fonts.regular,
+  },
   error: {
     color: "red",
-    fontSize: 14
+    fontSize: 14,
+    padding:2,
+    margin:2
   },
 });

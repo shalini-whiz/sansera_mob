@@ -45,13 +45,8 @@ export default function BatchHome() {
               },
             })} />
         <Tab.Screen name="Approve Batch" component={ApproveBatch} 
-            listeners={({ navigation, route }) => ({
-              tabPress: e => {
-                if (route.state && route.state.routeNames.length > 0) {
-                  navigation.navigate('Approve Batch')
-                }
-              },
-            })}/>
+        
+           />
         <Tab.Screen name="Inventory" component={ClearInventory}
             listeners={({ navigation, route }) => ({
               tabPress: e => {
