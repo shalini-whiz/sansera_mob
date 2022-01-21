@@ -111,7 +111,6 @@ export default function WorkPlan(props) {
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
         setApiStatus(false);
-        console.log("create process res: " + JSON.stringify(apiRes))
         if (apiRes && apiRes.status) {
           if (apiRes.response.message) {
             Alert.alert("Process updated");
@@ -176,8 +175,7 @@ export default function WorkPlan(props) {
               <ProcessDetails 
                 title="Process Details"
                 processEntity={props && props.processEntity ? props.processEntity : {}}
-                
-                
+                fields={["forge_machine_id","total_rejections"]}
                 />
             </View>
             {/* <View style={{ flex: 1,backgroundColor:'white',margin:5,padding:5 }}>

@@ -10,6 +10,7 @@ import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from "../../components/ErrorModal";
 import { taskState } from "../../constants/appConstants";
+import PublishMqtt from "../mqtt/PublishMqtt";
 
 
 
@@ -47,7 +48,7 @@ export default function BinTask(props) {
     apiData.process_name = props.processEntity.process_name
     apiData.stage = stage
     apiData.task_state = ["REQUESTED", "DELIVERED"]
-
+    setBinTask([])
     ApiService.getAPIRes(apiData,"POST","task").then(apiRes => {
       console.log("apiRes here "+JSON.stringify(apiRes))
       if(apiRes && apiRes.status){
@@ -73,6 +74,7 @@ export default function BinTask(props) {
   }
 
   const showBin = async (e, type, item) => {
+    console.log("Show bin clicked ")
     let dialogTitle = "";
     let dialogMessage = "";
     setDialogType(type)
@@ -84,6 +86,7 @@ export default function BinTask(props) {
     let apiRes = await ApiService.getAPIRes(apiData,"POST","process");
     console.log("get next element "+JSON.stringify(apiRes));
     if(apiRes && apiRes.status && apiRes.response.message){
+      PublishMqtt({topic: apiRes.response.message.element_id});
       setBinNo(apiRes.response.message.element_num)
       if (type === "fulfilled") {
         showDialog(true);
@@ -139,10 +142,12 @@ export default function BinTask(props) {
         let msg = "";
         if (dialogType === "fulfilled") msg = "Task fulfilled"
         if (dialogType === "cancel") msg = "Task Cancelled";
+        loadData();
         Alert.alert(msg);
         closeDialog();
-        loadData();
       }
+      else if(apiRes.response.message)
+      setApiError(apiRes.response.message)
     })
   }
 

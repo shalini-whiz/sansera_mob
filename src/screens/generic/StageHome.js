@@ -9,21 +9,26 @@ import WorkPlan from './WorkPlan';
 import Rejection from "./Rejection";
 import BinMqtt from "../mqtt/BinMqtt";
 import TaskHome from "../tasks/TaskHome";
+import AppContext from "../../context/AppContext";
+import { Badge } from "react-native-paper"
 
 const Tab = createMaterialTopTabNavigator();
 
 
 
-export default function StageHome() {
+export default function StageHome(props) {
   const processRef = useRef()
   const [processDet, setProcessDet] = React.useState({});
+  let { emptyBinCount, filledBinCount, appProcess, processStage } = React.useContext(AppContext);
 
+  let taskCount = emptyBinCount + filledBinCount;
   const setProcess = (data) => {
     setProcessDet(data)
   }
 
   const updateProcess = e => {
-    processRef.current.setFromOutside('HELLO from Parent')
+    console.log("call outside " + JSON.stringify(processDet))
+    processRef.current.setFromOutside(processDet.process_name)
   }
 
   const TabNavigation = () => {
@@ -51,6 +56,8 @@ export default function StageHome() {
               }
             },
           })} />
+        {(processStage.toLowerCase() !== "oiling") ?
+
         <Tab.Screen name="Rejection"
           children={() => <Rejection
             processEntity={processDet}
@@ -66,12 +73,14 @@ export default function StageHome() {
               }
             },
           })}
-        />
-        <Tab.Screen name="Tasks"
+        /> : false}
+        <Tab.Screen 
+        name={"Tasks "+(taskCount ? " ("+taskCount+")" : '')}
           children={() => <TaskHome
             processEntity={processDet}
             setProcessEntity={setProcess}
             updateProcess={updateProcess}
+            
           />}
 
           listeners={({ navigation, route }) => ({
@@ -89,7 +98,6 @@ export default function StageHome() {
   }
   return (
     <View style={{ flex: 1, flexDirection: 'column' }}>
-      {console.log("entered stage home")}
       <BinMqtt />
       <ProcessFilter processEntity={setProcess} ref={processRef} style={{ margin: 5 }} />
       <TabNavigation style={{ flex: 2 }} />

@@ -63,7 +63,6 @@ export default function ApproveBatch({navigation}) {
   }, [navigation,isFocused,status])
 
   const loadBatches = () => {
-    console.log("call here ")
     let apiData = {
       "op": "list_raw_material_by_status",
      // "status": "NEW"

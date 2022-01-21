@@ -16,6 +16,7 @@ import WeightDetails from "../process/WeightDetails";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ShowRack from "./ShowRack";
 import ErrorModal from "../../components/ErrorModal";
+import PublishMqtt from "../mqtt/PublishMqtt";
 
 
 let stageWeightSchema = [
@@ -111,6 +112,8 @@ export default function WorkPlan(props) {
     apiData.batch_num = props.processEntity.batch_num
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
       if (apiRes && apiRes.status && apiRes.response && apiRes.response.message) {
+        console.log("show rack "+JSON.stringify(apiRes.response.message));
+        PublishMqtt({ "topic": apiRes.response.message.element_id})
         setRackData(apiRes.response.message);
         setDialogTitle("SHOW RACK")
         setDialogMessage("Rack : " + apiRes.response.message.element_num)

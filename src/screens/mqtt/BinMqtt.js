@@ -10,6 +10,7 @@ import { ApiService } from "../../httpservice";
 import { roles } from "../../constants/appConstants";
 import { useIsFocused } from '@react-navigation/native';
 import { binMqttOptions } from "../../constants/urlConstants";
+import AppContext from "../../context/AppContext";
 
 
 
@@ -20,6 +21,7 @@ const BinMqtt = (props) => {
   const [binClient, setBinClient] = useState(undefined);
   const [binListeningEvent, setBinListeningEvent] = useState(false);
 
+  let {emptyBinCount, setEmptyBinCount,taskCount,setTaskCount} = React.useContext(AppContext);
   useEffect(() => {
     if (isFocused) {
 
@@ -58,7 +60,8 @@ const BinMqtt = (props) => {
 
   const connectBinMQTT = (topics) => {
     let options = { ...binMqttOptions }
-    options.clientId = "binclientId"
+    options.clientId = "binclientId"+Date
+    .now()
     MQTT.createClient(options).then((client) => {
       setBinClient(client)
       client.connect();
@@ -108,6 +111,12 @@ const BinMqtt = (props) => {
 
               }
               AsyncStorage.setItem("emptyBinReq", JSON.stringify(request));
+              let newEmptyBinCount = emptyBinCount + 1;
+              let newTaskCount = taskCount + 1;
+              setEmptyBinCount(newEmptyBinCount);
+              setTaskCount(newTaskCount);
+
+              
             });
 
           }

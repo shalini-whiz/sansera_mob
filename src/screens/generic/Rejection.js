@@ -59,6 +59,7 @@ export default function Rejection(props) {
     setRefreshing(false);
     setRejCount(0);
 
+    console.log("apiData .. "+JSON.stringify(apiData));
     console.log("apiData "+JSON.stringify(apiData))
     ApiService.getAPIRes(apiData, "POST", "rejection").then(async apiRes => {
       setApiStatus(false);
@@ -176,6 +177,8 @@ export default function Rejection(props) {
         setRejCount(0)
         closeDialog();
         loadData()
+        props.setProcessEntity(apiRes.response.message)
+        props.updateProcess()
       }
       else if (apiRes && apiRes.response.message)
         setApiError(apiRes.response.message)
@@ -237,8 +240,10 @@ export default function Rejection(props) {
           <View style={{ flex: 3, flexDirection: 'row', }}>
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <ProcessDetails
-                title="Process Details"
-                processEntity={props && props.processEntity ? props.processEntity : {}} />
+                title="PROCESS DETAILS"
+                processEntity={props && props.processEntity ? props.processEntity : {}}
+                fields={["total_rejections"]}                
+                />
             </View>
            
           </View>

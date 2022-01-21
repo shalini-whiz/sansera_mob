@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl,
+   ActivityIndicator } from "react-native";
+import {Badge} from"react-native-paper"
 import UserContext from "../UserContext";
 import { useIsFocused } from '@react-navigation/native';
 import { appTheme } from "../../lib/Themes";
 import { default as AppStyles } from "../../styles/AppStyles";
 import EmptyBin from "./EmptyBin";
 import BinTask from "./BinTask";
+import AppContext from "../../context/AppContext";
 
 
 
@@ -19,10 +22,12 @@ export default function TaskHome(props) {
   const [dialogType, setDialogType] = useState('')
   const [refreshing, setRefreshing] = useState(false)
   const isFocused = useIsFocused();
-  const [tab, setTab] = useState('emptyBin')
+  const [tab, setTab] = useState('')
+  let {emptyBinCount, filledBinCount,setEmptyBinCount,setFilledBinCount} = React.useContext(AppContext);
 
   useEffect(() => {
     if (isFocused) {
+      if(tab === "") setTab('emptyBin')
     }
     return () => { }
   }, [isFocused])
@@ -50,10 +55,17 @@ export default function TaskHome(props) {
           backgroundColor: tab === "emptyBin" ? appTheme.colors.cardTitle : 'white'
         }}
           onPress={(e) => tabChange("emptyBin")} >
-          <Text style={[styles.filterText, {
-            fontFamily: tab === "emptyBin" ? appTheme.fonts.bold : appTheme.fonts.regular,
-            color: tab === "emptyBin" ? 'white' : appTheme.colors.cardTitle,
-          }]}>Empty Bin Request</Text>
+            <Text style={[styles.filterText, {
+              fontFamily: tab === "emptyBin" ? appTheme.fonts.bold : appTheme.fonts.regular,
+              color: tab === "emptyBin" ? 'white' : appTheme.colors.cardTitle,
+            }]}>Empty Bin Request
+             
+            </Text>
+            {/* {emptyBinCount ?               
+            <Badge style={{ color: 'white',position:'absolute',top:-10,left:150 }}
+              containerStyle={{ top:-25,left: 40 }}>{emptyBinCount}</Badge>  : false} */}
+
+          
         </TouchableOpacity>
         <Text style={{ padding: 5 }}> / </Text>
         <TouchableOpacity
@@ -66,7 +78,7 @@ export default function TaskHome(props) {
           <Text style={[styles.filterText, {
             fontFamily: tab === "filledBin" ? appTheme.fonts.bold : appTheme.fonts.regular,
             color: tab === "filledBin" ? 'white' : appTheme.colors.cardTitle,
-          }]}>Filled Bin Request</Text>
+          }]}>Filled Bin Request  {filledBinCount > 0 ? <Badge>filledBinCount</Badge> : ''}</Text>
         </TouchableOpacity>
 
       </View>

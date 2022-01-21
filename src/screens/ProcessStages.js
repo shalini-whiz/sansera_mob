@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView, Text, Alert } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ScrollView, Text, Alert, ActivityIndicator } from 'react-native';
 import { ApiService } from "../httpservice";
 import { util } from '../commons';
 import UserContext from "./UserContext";
@@ -11,6 +11,8 @@ import ShearingHome from './shearing/ShearingHome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ForgingHome from './forging/ForgingHome';
 import StageHome from './generic/StageHome';
+import { stageColors, stageType } from '../constants/appConstants';
+import AppContext from '../context/AppContext';
 
 const styles = StyleSheet.create({
 
@@ -29,7 +31,9 @@ const styles = StyleSheet.create({
 
   container: {
     margin: 10,
-    justifyContent: 'center'
+    flex:1,
+    justifyContent: 'center',
+    backgroundColor:'white'
   },
   stageContainer: {
 
@@ -54,56 +58,61 @@ const ProcessStages = (props) => {
   const [refreshing, setRefreshing] = useState(false)
   const userState = React.useContext(UserContext);
   const [stage, setStage] = useState('')
-
+  const [apiStatus,setApiStatus] = useState(false);
+  const {processStage, setProcessStage,userEntity} = React.useContext(AppContext)
   let interval;
-
-  useEffect(() => {
+   useEffect(() => {
     if (isFocusedHistory) {
       if (userState && userState.user)
         setUser(userState.user)
-      getStagingProcess();
+      if (processStage && processStage.toLowerCase().length) {
+        setStage(processStage.toLowerCase())
+      }
+      else {
+        getStagingProcess();
+
+      }
     }
+   
     return () => {
     };
   }, [isFocusedHistory])
 
+  
 
-  const getStagingProcess = async () => {
+  const getStagingProcess =  () => {
     let apiData = {      
       "op": "get_stages",
       "type": "Steel"
     }
-    let apiRes = await ApiService.getAPIRes(apiData, "POST", "process");
-
-    if (apiRes) {
-      if (apiRes.status) {
-        let stages = [...apiRes.response.message.stages]
-        console.log("stages here "+JSON.stringify(stages))
-        if (apiRes.response.message.stages && apiRes.response.message.stages.length) {
-          setStagingData(apiRes.response.message.stages)
+    setApiStatus(true);
+    ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
+      setApiStatus(false)
+      if (apiRes) {
+        if (apiRes.status) {
+          let stages = [...apiRes.response.message.stages]
+          if (apiRes.response.message.stages && apiRes.response.message.stages.length) {
+            setStagingData(apiRes.response.message.stages)
+          }
         }
       }
-    }
-    else if (apiRes.response.message)
-      Alert.alert(apiRes.response.message)
+      else if (apiRes.response.message)
+        Alert.alert(apiRes.response.message)
+    })
+
+   
   }
 
   const stageNavigation = (stage) => {
-    console.log(stage)
-    let validStages = ["shearing", "forging", "shot blasting", "visual/mpi", "shot peening"];
-    let validStages1 = ["shearing", "forging"];
-    console.log(stage.toLowerCase())
-    console.log(validStages.includes(stage.toLowerCase()))
+    let validStages = ["shearing", "forging", "shot blasting", "visual/mpi", "shot peening","oiling"];
     if (validStages.includes(stage.toLowerCase())) {
       setStage(stage.toLowerCase())
       AsyncStorage.setItem("stage", stage)
+      console.log("set process stage here "+stage);
+      setProcessStage(stage);
+      
+
     }
-    // if(stage.stage_name.toLowerCase() === "shearing" || stage.stage_name.toLowerCase() === "forging" ||
-    //   stage.stage_name.toLowerCase() === "shot blasting" || stage.stage_name.toLowerCase() === "visual\mpi"
-    // ){
-    //   setStage(stage.stage_name.toLowerCase())
-    //   AsyncStorage.setItem("stage", stage.stage_name)
-    // }
     else {
       Alert.alert("Access Denied")
     }
@@ -111,41 +120,38 @@ const ProcessStages = (props) => {
 
   return (
     <>
-      {stage && stage.toLowerCase() === "shearing" ? <ShearingHome /> : false}
-      {stage && stage.toLowerCase() === "forging" ? <ForgingHome /> : false}
-      {console.log(stage)}
-      {stage && (stage === "shot blasting" || stage === "visual/mpi" || stage === "shot peening") ? <StageHome /> : false}
-      {console.log(stage)}
+ 
+      {processStage && processStage.toLowerCase() === stageType.shearing ? <ShearingHome stage={stage}/> : false}
+      {processStage && processStage.toLowerCase() === stageType.forging ? <ForgingHome stage={stage} /> : false}
+      {processStage && (processStage.toLowerCase() === stageType.shotblasting || 
+      processStage.toLowerCase() === stageType.visual || processStage.toLowerCase() === stageType.shotpeening || 
+        processStage.toLowerCase() === stageType.oiling) ? <StageHome stage={stage} /> : false}
 
-      {stage ? false :
-        <ScrollView>
-
-          <View style={[styles.container, {
-            flex: 1,
-            justifyContent: 'center', alignContent: 'center', alignItems: 'center', alignSelf: 'center',
-          }]}>
+      {processStage ? false :
+          <View style={styles.container}>
+            {apiStatus ? <ActivityIndicator size="large" animating={apiStatus} /> : false}
             <View style={{
-              flex: 1,
               flexDirection: 'row',
               flexWrap: 'wrap',
-              alignContent: 'center',
               justifyContent: 'center',
-              marginTop: 15
-              // marginTop:50
             }}>
               {stagingData.map((item, index) => {
+                let color1 = stageColors[item.toLowerCase()] ? stageColors[item.toLowerCase()].color1 : appTheme.colors.gradientColor1;
+                let color2 = stageColors[item.toLowerCase()] ? stageColors[item.toLowerCase()].color2 : appTheme.colors.gradientColor2
                 return (
                   <TouchableOpacity style={styles.stageContainer} key={index}
-                    onPress={() => stageNavigation(item)} style={{ margin: 20 }}>
+                    onPress={() => stageNavigation(item)} style={{ margin: 10 }}>
                     <SvgCss
-                      xml={HexaStageSingle(appTheme.colors.cardTitle, util.capitalizeWord(item))}
+                      xml={HexaStageSingle(util.capitalizeWord(item),color1,color2)}
                       width={250}
-                      height={150} />
+                      height={200}
+                      style={{justifyContent:'center'}}
+                      
+                      />
                   </TouchableOpacity>
                 )
               })}
             </View></View>
-        </ScrollView>
 
       }
     </>

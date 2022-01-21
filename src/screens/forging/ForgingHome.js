@@ -24,7 +24,9 @@ export default function ForgingHome() {
   }
 
   const updateProcess = e => {
-    processRef.current.setFromOutside('HELLO from Parent')
+    processRef.current.setFromOutside(processDet.process_name)
+
+   // processRef.current.setFromOutside('HELLO from Parent')
   }
 
   const TabNavigation = () => {

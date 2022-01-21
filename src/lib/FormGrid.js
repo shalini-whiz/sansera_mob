@@ -73,7 +73,7 @@ export default class FormGrid extends Component {
     }
 
     return (
-      <>{content}</>
+      <View style={{marginTop:20}}>{content}</View >
     )
   }
 

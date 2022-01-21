@@ -1,5 +1,4 @@
 import React from 'react'
-import { StyleSheet } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,7 +8,8 @@ import { initNotification } from './src/screens/notification/NotifyHandler';
 import { navigationRef } from "./src/screens/notification/NavigationHandler";
 import SplashScreen from 'react-native-splash-screen';
 import Home from './src/screens/Home';
-import TopBar from './src/screens/TopBar';
+import AppContextState from './src/context/AppContextState';
+import AppContext from './src/context/AppContext';
 global.Buffer = global.Buffer || require('buffer').Buffer;
 global.process.version = '';
 const Stack = createStackNavigator()
@@ -19,14 +19,24 @@ function App() {
   const [user, setUser] = React.useState({})
   const [token, setToken] = React.useState(null)
   const [isLoaded, setLoaded] = React.useState(false)
+  const { processStage, setProcessStage, userEntity,setEmptyBinCount,setFilledBinCount,setTaskCount } = React.useContext(AppContext)
+
   const saveUser = (userState) => {
     setUser(userState)
   };
   const getUserInfo = async () => {
     let user = await AsyncStorage.getItem("userInfo");
+    let stage = await AsyncStorage.getItem("stage");
+    let unreadEmptyBin = await AsyncStorage.getItem("emptyBinCount")
+    let unreadFilledBin = await AsyncStorage.getItem("filledBinCount")
     if (user) {
+      console.log("app stage " + stage);
+      setProcessStage(stage);
       setUser(JSON.parse(user))
       setIsLoggedIn(true)
+      setFilledBinCount(unreadFilledBin)
+      setEmptyBinCount(unreadEmptyBin)
+      setTaskCount(parseInt(unreadEmptyBin)+parseInt(unreadFilledBin))
     }
     setLoaded(false);
   }
@@ -66,7 +76,7 @@ function App() {
 
   return (
     <UserContext.Provider value={{ user, saveUser }}>
-      {/* {isLoggedIn ? <TopBar/> : <Login/>} */}
+      <AppContextState>
       <NavigationContainer independent={true} ref={navigationRef}>
         <Stack.Navigator
           initialRouteName={isLoggedIn ? 'Home' : 'Login'}
@@ -75,16 +85,11 @@ function App() {
           <Stack.Screen name="Login" component={Login} />
         </Stack.Navigator>
       </NavigationContainer>
+      </AppContextState>
     </UserContext.Provider>
   )
 }
 
-const styles = StyleSheet.create({
-  view: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
-})
+
 
 export default App

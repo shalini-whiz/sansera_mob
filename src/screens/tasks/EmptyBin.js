@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert } from "react-native";
-import { util } from "../../commons";
-import FormGen from "../../lib/FormGen"
-import CustomHeader from "../../components/CustomHeader";
 import { ApiService } from "../../httpservice";
 import UserContext from "../UserContext";
 import CustomModal from "../../components/CustomModal";
@@ -11,6 +8,7 @@ import { appTheme } from "../../lib/Themes";
 import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from "../../components/ErrorModal";
+import AppContext from "../../context/AppContext";
 
 
 
@@ -27,6 +25,7 @@ export default function EmptyBin(props) {
   const [notifications,setNotifications] = useState([])
   const [stage,setStage] = useState('')
   const [bin,setBin] = useState({})
+  const {setEmptyBinCount} = React.useContext(AppContext);
   useEffect(() => {
     if (isFocused) {
       loadData();
@@ -42,7 +41,8 @@ export default function EmptyBin(props) {
   const loadData = () => {
    
     AsyncStorage.getItem("emptyBinReq").then(request => {
-      setNotifications(JSON.parse(request))    
+      setNotifications(JSON.parse(request))   
+      //setEmptyBinCount(0); 
     })
     AsyncStorage.getItem("stage").then(stage => {
       setStage(stage)

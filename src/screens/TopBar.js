@@ -3,30 +3,24 @@ import React, { useEffect } from "react";
 import { StyleSheet, Text, View, Image,TouchableOpacity } from 'react-native';
 import { util } from "../commons";
 import UserContext from "./UserContext";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons"
 import { SvgCss } from 'react-native-svg';
 import { AppIcon } from '../svgs/AppIcon';
-import { MachineOp, ForkOp } from "../svgs/UserOp"
-import { DownArrow } from "../svgs/ArrowIcon"
 import { appTheme } from "../lib/Themes";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import CustomModal from "../components/CustomModal";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { clearTopics } from './notification/NotifyHandler';
 import Login from "./Login";
+import AppContext from "../context/AppContext";
 
 const TopBar = (props) => {
   const userState = React.useContext(UserContext);
   let [user, setUser] = React.useState({})
-  let [stage,setStage] = React.useState('')
-
+  let { processStage } =  React.useContext(AppContext)
 
   useEffect(() => {
     let isMounted = true;
     if(userState && userState.user)
       setUser(userState.user);
-    AsyncStorage.getItem("stage").then(stage => 
-      setStage(stage))
+    
     return () => {
       isMounted = false;
     }
@@ -39,10 +33,10 @@ const TopBar = (props) => {
       <View style={{ flexDirection: 'row', padding: 10, display: 'flex',
        backgroundColor: appTheme.colors.topBarBackground }}>
         <SvgCss xml={AppIcon} width={40} height={40} />
-          {stage && stage.length ? <Text style={{
+          {processStage && processStage.length ? <Text style={{
             color: appTheme.colors.topBarTxt, fontSize: 16, alignSelf: 'center',
             fontFamily: appTheme.fonts.semiBold,marginLeft:10
-          }}>{stage}</Text>:false}
+          }}>{processStage}</Text>:false}
         <View style={{
           flexDirection: "column", flex: 4, justifyContent: 'center', alignContent: 'center',
           alignItems: 'center'

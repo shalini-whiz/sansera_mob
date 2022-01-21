@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { appTheme } from '../../lib/Themes';
-import ProcessFilter from './ProcessFilter';
+import ProcessFilter from '../process/ProcessFilter';
 import WorkPlan from './WorkPlan';
 import RawMaterial from './RawMaterial';
 import BinMqtt from "../mqtt/BinMqtt";
@@ -15,7 +15,7 @@ const Tab = createMaterialTopTabNavigator();
 
 
 
-export default function ShearingHome() {
+export default function ShearingHome(props) {
   const processRef = useRef()
   const isFocused = useIsFocused();
   const [processDet, setProcessDet] = React.useState({});
@@ -31,7 +31,9 @@ export default function ShearingHome() {
   }
 
   const updateProcess = e => {
-    processRef.current.setFromOutside('HELLO from Parent')
+    processRef.current.setFromOutside(processDet.process_name)
+
+    //processRef.current.setFromOutside('HELLO from Parent')
   }
   
   const TabNavigation = () => {

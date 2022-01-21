@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { appTheme } from "../../lib/Themes";
 import { ApiService } from "../../httpservice";
@@ -8,6 +8,7 @@ import { RadioButton } from "react-native-paper";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { forwardRef, useImperativeHandle } from 'react'
 import AppStyles from "../../styles/AppStyles";
+import AppContext from "../../context/AppContext";
 
  function ProcessFilter(props,ref) {
   const userState = React.useContext(UserContext);
@@ -17,23 +18,26 @@ import AppStyles from "../../styles/AppStyles";
   const [apiStatus, setApiStatus] = useState(false);
   const [refreshing, setRefreshing] = useState(false)
   const [process, setProcess] = useState([])
-  const [processName, setProcessName] = useState({})
+  const [processName, setProcessName] = useState('')
+
+  const {setAppProcess,appProcess} = useContext(AppContext)
 
   useEffect(() => {
     if (isFocused) {
-      setApiStatus(true);
       loadProcess();
     }
     return () => { }
   }, [isFocused])
 
   useImperativeHandle(ref, () => ({
-    setFromOutside(msg) {
-      reload()
+    setFromOutside(selectedProcess) {
+      console.log("calling reload from child " + selectedProcess)
+      reload(selectedProcess)
     }
   }), [])
 
-  const loadProcess = () => {
+  const loadProcess = (selectedProcess) => {
+    setApiStatus(true)
     let apiData = {
       "op": "get_process",
       "status":["RUNNING"]
@@ -46,16 +50,21 @@ import AppStyles from "../../styles/AppStyles";
         if (apiRes.response.message && apiRes.response.message.length) {
           let currentProcess = apiRes.response.message[0];
          
-
           if(currentProcess) {
-            if (processName.length > 0) {
-              let currentProObj = apiRes.response.message.find(item => item.process_name === processName)
+            console.log("processName selected " + JSON.stringify(selectedProcess))
+
+            if (selectedProcess && selectedProcess.length > 0) {
+              let currentProObj = apiRes.response.message.find(item => item.process_name === selectedProcess)
               props.processEntity(currentProObj)
               setProcessName(currentProObj.process_name)
+              setAppProcess(currentProObj.process_name)
             }
             else{
-              props.processEntity(apiRes.response.message[0])
-              setProcessName(apiRes.response.message[0].process_name)
+              let processEntity = apiRes.response.message[0];
+              props.processEntity(processEntity)
+              console.log("on load .. " + processEntity.process_name)
+              setProcessName(processEntity.process_name)
+              setAppProcess(processEntity.process_name)
             }
           }
          
@@ -80,13 +89,18 @@ import AppStyles from "../../styles/AppStyles";
   const handleChange = (name) => (value) => {
     let index = process.findIndex(item => item.process_name === value)
     setProcessName(value)  
-    if(index != -1){
+    setAppProcess(value);
+   // console.log(JSON.stringify(process[index]));
+   console.log("index "+index);
+    if(index > -1){
       props.processEntity(process[index])
     }
+    console.log("process name on handleChange "+value)
   };
 
-  const reload = () => {
-    loadProcess();
+  const reload = (processName) => {
+    console.log("called reload process "+processName);
+    loadProcess(processName);
   }
 
   return (

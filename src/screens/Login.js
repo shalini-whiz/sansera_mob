@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, ImageBackgr
 import { util } from "../commons";
 import { ApiService } from "../httpservice";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ForgeHome from "./ForgeHome";
 import UserContext from "./UserContext";
 import { subscribeToTopic } from './notification/NotifyHandler';
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -12,6 +11,7 @@ import { EmailIcon, PasswordIcon, TickIcon } from "../svgs/GenericIcon"
 import { appTheme } from "../lib/Themes";
 import TopBar from "./TopBar";
 import Home from "./Home";
+import AppContext from "../context/AppContext";
 
 let loginSchema = [
   {
@@ -33,6 +33,7 @@ export default function Login() {
   const [binTopics,setBinTopics] = useState([])
 
   const { saveUser } = React.useContext(UserContext)
+  const { setUserEntity} = React.useContext(AppContext)
   useEffect(() => {
     getUser().then(uExists => {
       if (uExists) setIsLoggedIn(true)
@@ -92,9 +93,9 @@ export default function Login() {
         AsyncStorage.setItem("userInfo", JSON.stringify(apiRes.response.message))
         AsyncStorage.setItem('token', apiRes.response.message.accessToken)
         subscribeToTopic(apiRes.response.message.id);
-        subscribeToTopic("fifo-push");
         setUser(apiRes.response.message)
         saveUser(apiRes.response.message);
+        setUserEntity(apiRes.response.message)
         setIsLoggedIn(true)
 
         let topicPaylaod = { op: "list_topics" }

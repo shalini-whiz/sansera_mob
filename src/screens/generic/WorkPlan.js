@@ -111,7 +111,6 @@ export default function WorkPlan(props) {
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
         setApiStatus(false);
-        console.log("create process res: " + JSON.stringify(apiRes))
         if (apiRes && apiRes.status) {
           if (apiRes.response.message) {
             Alert.alert("Process updated");
@@ -176,8 +175,11 @@ export default function WorkPlan(props) {
           <View style={{ flex: 3, flexDirection: 'row', }}>
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <ProcessDetails
-                title="Process Details"
-                processEntity={props && props.processEntity ? props.processEntity : {}} />
+                title="PROCESS DETAILS"
+                processEntity={props && props.processEntity ? props.processEntity : {}}
+                fields={["total_rejections"]}
+
+                />
             </View>
             {/* <View style={{ flex: 1,backgroundColor:'white',margin:5,padding:5 }}>
               <WeightDetails title="Weight Details"

@@ -24,7 +24,9 @@ export const appTheme = {
     backAction:"#CFD8DC",
     screenBackground:"#E3F2FD",
     message:"black",
-    textInputCont: "#ECF0FA"
+    textInputCont: "#ECF0FA",
+    gradientColor1:"#003399",
+    gradientColor2:"#66ccff"
   },
   fonts:{
     regular:'Poppins-Regular',

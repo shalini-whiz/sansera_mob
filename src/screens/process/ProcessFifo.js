@@ -80,9 +80,11 @@ export default function ProcessFifo(props) {
     }
   }
   const updateBin = () => {
+    console.log("nextStage "+JSON.stringify(nextStage.fifo))
+    console.log(delBin[0])
     let elementIndex = nextStage.fifo.findIndex(item => item.element_num === delBin[0]);
     console.log(elementIndex+" .. "+delBin.length)
-    if(elementIndex > 0 && delBin.length){
+    if(elementIndex > -1 && delBin.length){
       let apiData = {};
       apiData.op = "remove_element"
       apiData.process_name = props.processDet.process_name

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import UserContext from "./UserContext";
 import TopBar from "./TopBar";
 import BatchHome from "./batch/BatchHome";
@@ -12,6 +12,7 @@ import ProcessStages from "./ProcessStages"
 import { roles } from "../constants/appConstants";
 import { View } from "react-native";
 import { useIsFocused } from '@react-navigation/native';
+import AppContext from "../context/AppContext";
 
 
 
@@ -23,10 +24,17 @@ const Home = () => {
   const [dialogTitle, setDialogTitle] = React.useState('')
   const [dialogMessage, setDialogMessage] = React.useState('');
   const isFocused = useIsFocused();
+  const { processStage, setProcessStage } = React.useContext(AppContext)
 
   useEffect(() => {
     if(isFocused){
       if (userState && userState.user) setUser(userState.user);
+      console.log("cache "+userState.user)
+      AsyncStorage.getItem("stage").then(stage => {
+        setProcessStage(stage)
+        console.log("home process stage" + processStage)
+
+      })
     }
     return () => { }
   }, [isFocused])
@@ -47,16 +55,17 @@ const Home = () => {
     await AsyncStorage.clear();
     setUser(null);
     clearTopics(userState && userState.user && userState.user.id);
-    clearTopics("fifo-push");
   }
 
   return (
 
     <View style={{flexDirection:'column',flex:1}}>
+      {console.log("home process stage "+processStage)}
+      {console.log(user)}
       {user ? <TopBar openLogOut={openDialog}/> : <Login/>}   
       {user &&  user.role === roles.QA ? <BatchHome/> : false}
       {user && user.role === roles.PL ? <ProcessHome/> : false}
-      {user && user.role === roles.MO ? <ProcessStages  /> : false}
+      {user && user.role === roles.MO ? <ProcessStages/> : false}
       {dialog ? <CustomModal
         modalVisible={dialog}
         dialogTitle={dialogTitle}

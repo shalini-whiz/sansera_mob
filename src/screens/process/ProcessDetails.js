@@ -74,6 +74,15 @@ let created_process_schema = [
   },
 ]
 
+let rejection_schema = {
+  "key": "total_rejections", displayName: "Rejected Component", placeholder: "", value: "",
+    error: "", required: true, label: "rejected component", type: "number", nonZero: true
+}
+
+let forge_schema = {
+  "key": "forge_machine_id", displayName: "Forge Machine", placeholder: "", value: "",
+  error: "", required: true, label: "Forge Machine", type: "number", nonZero: true
+}
 
 export default function ProcessDetails(props) {
   const [batchFormData, setBatchFormData] = useState([])
@@ -116,6 +125,18 @@ export default function ProcessDetails(props) {
 
   const loadForm =  () => {
     if (props && props.processEntity){
+      if(props.fields && props.fields.length){
+        let rejIndex = created_process_schema.findIndex(item => item.key === "total_rejections")
+        let forgeIndex = created_process_schema.findIndex(item => item.key === "forge_machine_id")
+
+        if (props.fields.indexOf('total_rejections') > -1 && rejIndex === -1){
+          created_process_schema.push(rejection_schema);
+        }
+        if (props.fields.indexOf('forge_machine_id') > -1 && forgeIndex === -1) {
+          created_process_schema.push(forge_schema);
+        }
+      }
+     // console.log("process det "+JSON.stringify(props.processEntity))
       created_process_schema.map(item => {
         item["value"] = props.processEntity[item.key] ? props.processEntity[item.key] + "" : "";
         
@@ -128,14 +149,19 @@ export default function ProcessDetails(props) {
         }
         if(props.processEntity && props.processEntity.process && props.processEntity.process.length){
           AsyncStorage.getItem("stage").then(value => {
+            let rej_comp_index = created_process_schema.findIndex(item => item.key === "total_rejections")
+
             let ok_comp_index = created_process_schema.findIndex(item => item.key === "ok_component")
             let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === value)
-             if(value && value.toLowerCase() != "shearing"){
+
+            if(value && value.toLowerCase() != "shearing"){
               created_process_schema[ok_comp_index].value = props.processEntity.process[stage_ok_comp_index].ok_component + ""
              }
              else{
                created_process_schema[ok_comp_index].value = "0"
              }
+            created_process_schema[rej_comp_index].value = props.processEntity.process[stage_ok_comp_index].total_rejections + ""
+
               setBatchFormData(created_process_schema); 
           })
         }
@@ -353,13 +379,12 @@ export default function ProcessDetails(props) {
     >
       <View style={styles.container}>
         {props.noTitle ? false
-          : <CustomHeader title={props.title ? props.title : ""} align={"center"} />}
+          : <CustomHeader title={props.title ? props.title : ""} align={"center"}  style={{marginBottom:20}}/>}
             {props && props.processEntity ? false : 
             
-            <View style={{ flexDirection: 'row' }}>
-              <View style={{ flex: 2, margin: 10, padding: 5 }}>
-                <View style={{ flexDirection: 'row' }}></View>
-                <Text style={{ alignSelf: 'center', fontSize: 16, fontFamily: appTheme.fonts.regular, flex: 1 }}>Forge Machine</Text>
+            <View style={{ flexDirection: 'row', }}>
+            <View style={{ flex: 2, margin: 5, padding: 5, backgroundColor: 'white' }}>
+                <Text style={{ alignSelf: 'center', fontSize: 16, fontFamily: appTheme.fonts.regular, }}>Forge Machine</Text>
                 <RadioButton.Group onValueChange={handleRadioChange("forge")}
                   value={forgeId} style={{ flexDirection: 'row', flexWrap: 'wrap', backgroundColor: 'red', color: "blue" }}>
                   <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -394,8 +419,8 @@ export default function ProcessDetails(props) {
 
               </View>
 
-              <View style={{ flex: 2,marginTop:20 }}>
-                
+              <View style={{ flex: 2,margin:5,padding:5,backgroundColor:'white',flexDirection:'column' }}>
+                <View style={{marginTop:40}}></View>
                {batchDet && batchDet._id ? <BatchDetails
                  content={batchDet}
                  editMode={false}
@@ -406,10 +431,11 @@ export default function ProcessDetails(props) {
               </View>
             </View>
             }
-        {props && props.processEntity ? <FormGen
+        {props && props.processEntity ? <FormGrid
           handleChange={handleChange}
           editMode={false}
           formData={batchFormData} labelDataInRow={true}
+          style={{marginTop:20}}
         /> : false}
             
 
@@ -421,14 +447,14 @@ export default function ProcessDetails(props) {
           dialogTitle={dialogTitle}
           dialogMessage={dialogMessage}
           okDialog={closeDialog}
-        /> : <View></View>}
+        /> :false}
 
-        <ActivityIndicator size="large" animating={apiStatus} />
+        {apiStatus ? <ActivityIndicator size="large" animating={apiStatus}  /> : false}
 
         {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
 
         {props.processEntity ? <></> : 
-        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center',margin:20 }}>
           <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row' }]} onPress={(e) => handleSubmit(e)} >
             <Text style={AppStyles.successText}>SAVE</Text>
           </TouchableOpacity>
@@ -444,7 +470,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+   // backgroundColor: "#fff",
     justifyContent: "center",
     margin: 1
   },

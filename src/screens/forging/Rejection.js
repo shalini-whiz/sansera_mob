@@ -94,10 +94,26 @@ export default function Rejection(props) {
     if (name === "reason") {
       setRejReason(value)
       let curKey = Object.keys(curRejection)[0]
-      let nestedObj = curRejection[curKey].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === value) })
-     console.log("reason nestedObj .. "+JSON.stringify(nestedObj))
-      if(nestedObj)
-        setCurRejCount(nestedObj[value])
+      console.log(curRejection[curKey])
+      console.log(rejSubType)
+      if(level2){
+        let level2Obj = curRejection[curKey].find(item =>  
+          {return (Object.keys(item).length && Object.keys(item)[0] === rejSubType) })
+        console.log("level2Obj : " + JSON.stringify(level2Obj))
+        let nestedObj = level2Obj[rejSubType].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === value) })
+        console.log("level2 reason nestedObj .. " + JSON.stringify(nestedObj))
+        if (nestedObj) {
+          setCurRejCount(nestedObj[value])
+        }
+      }
+      else{
+        let nestedObj = curRejection[curKey].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === value) })
+        console.log("reason nestedObj .. " + JSON.stringify(nestedObj))
+        if (nestedObj) {
+          setCurRejCount(nestedObj[value])
+        }
+      }
+     
     }
     if(name === "subType"){
       setRejSubType(value)
@@ -156,6 +172,7 @@ export default function Rejection(props) {
       //setLevel2(item[key])
       setLevel2(true)
 
+      console.log("preset sub type "+presetSubType)
       let nestedObj = item[key].find(item =>{ 
         console.log(Object.keys(item))
         console.log(Object.keys(item)[0])
