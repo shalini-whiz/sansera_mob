@@ -9,7 +9,7 @@ export default class AppContextState extends React.Component {
     processStage:'',
     appProcess:'',
     taskCount: 0,
-    emptyBinCount: 0,
+    //emptyBinCount: 0,
     filledBinCount: 0
   }
 
@@ -28,9 +28,9 @@ export default class AppContextState extends React.Component {
     this.setState({taskCount:count})
   }
 
-  setEmptyBinCount = (count) => {
-    this.setState({ emptyBinCount: count })
-  }
+  // setEmptyBinCount = (count) => {
+  //   this.setState({ emptyBinCount: count })
+  // }
   setFilledBinCount = (count) => {
     this.setState({ filledBinCount: count })
 
@@ -58,8 +58,8 @@ export default class AppContextState extends React.Component {
           setAppProcess:this.setAppProcess,
           taskCount:this.state.taskCount,
           setTaskCount:this.setTaskCount,
-          emptyBinCount:this.state.emptyBinCount,
-          setEmptyBinCount:this.setEmptyBinCount,
+        //  emptyBinCount:this.state.emptyBinCount,
+         // setEmptyBinCount:this.setEmptyBinCount,
           filledBinCount:this.state.filledBinCount,
           setFilledBinCount:this.setFilledBinCount
         }}

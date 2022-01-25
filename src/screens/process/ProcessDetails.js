@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import FormGrid from "../../lib/FormGrid";
 import ErrorModal from "../../components/ErrorModal";
 import AppStyles from "../../styles/AppStyles";
+import { ok } from "assert";
 
 
 let batchSchema = [
@@ -136,6 +137,15 @@ export default function ProcessDetails(props) {
           created_process_schema.push(forge_schema);
         }
       }
+      if (props.unsetFields && props.unsetFields.length){
+        console.log("hit 123")
+        let okIndex = created_process_schema.findIndex(item => item.key === "ok_component")
+        console.log(okIndex)
+        if (props.unsetFields.indexOf('ok_component') > -1 && okIndex > -1) {
+          console.log("remove here")
+          created_process_schema.splice(okIndex,1);
+        }
+      }
       created_process_schema.map(item => {
         item["value"] = props.processEntity[item.key] ? props.processEntity[item.key] + "" : "";
         
@@ -153,14 +163,17 @@ export default function ProcessDetails(props) {
             let ok_comp_index = created_process_schema.findIndex(item => item.key === "ok_component")
             let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === value)
 
-            if(value && value.toLowerCase() != "shearing"){
+            if(value && value.toLowerCase() != "shearing" && stage_ok_comp_index > -1 && ok_comp_index > -1){
               created_process_schema[ok_comp_index].value = props.processEntity.process[stage_ok_comp_index].ok_component + ""
              }
-             else{
+             else if(ok_comp_index > -1){
                created_process_schema[ok_comp_index].value = "0"
              }
-            if (props.processEntity.process[stage_ok_comp_index] && props.processEntity.process[stage_ok_comp_index].total_rejections)
-            created_process_schema[rej_comp_index].value = props.processEntity.process[stage_ok_comp_index].total_rejections + ""
+             if(stage_ok_comp_index > -1){
+               if (props.processEntity.process[stage_ok_comp_index] && props.processEntity.process[stage_ok_comp_index].total_rejections)
+                 created_process_schema[rej_comp_index].value = props.processEntity.process[stage_ok_comp_index].total_rejections + ""
+             }
+           
 
               setBatchFormData(created_process_schema); 
           })

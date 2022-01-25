@@ -41,7 +41,6 @@ export default function EmptyBin(props) {
 
     AsyncStorage.getItem("emptyBinReq").then(request => {
       setNotifications(JSON.parse(request))   
-      //setEmptyBinCount(0); 
     })
     AsyncStorage.setItem("unReadEmptyBin", "0");
 
@@ -95,10 +94,21 @@ export default function EmptyBin(props) {
       apiData.process_name = props.processEntity.process_name
       apiData.element_num = bin.element_num
       apiData.element_id = bin.element_id
-      let currentStage = props.processEntity.process.find(item => item.stage_name === stage)
-      let nextStage = props.processEntity.process.find(item => item.order === currentStage.order + 1);
-      apiData.stage_name = nextStage.stage_name
+      console.log(JSON.stringify(props.processEntity))
+      console.log(stage);
 
+      let currentStage = props.processEntity.process.find(item => item.stage_name === stage)
+      console.log("currentStage "+JSON.stringify(currentStage))
+      
+      if (currentStage && currentStage.parent_stage && currentStage.parent_stage.length){
+        apiData.stage_name = currentStage.parent_stage
+      }
+      else{
+        let nextStage = props.processEntity.process.find(item => item.order === currentStage.order + 1);
+        apiData.stage_name = nextStage.stage_name
+      }
+     
+      console.log(apiData);
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
         setApiStatus(false);

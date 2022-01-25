@@ -27,6 +27,7 @@ export const stageType = {
   "shotblasting":"shot blasting",
   "visual":"visual/mpi",
   "shotpeening":"shot peening",
-  "oiling":"oiling"
+  "oiling":"oiling",
+  "billetpunching":"billet punching"
 }
 

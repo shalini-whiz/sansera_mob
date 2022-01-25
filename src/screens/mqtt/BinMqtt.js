@@ -10,6 +10,7 @@ import { ApiService } from "../../httpservice";
 import { roles } from "../../constants/appConstants";
 import { useIsFocused } from '@react-navigation/native';
 import { binMqttOptions } from "../../constants/urlConstants";
+import EmptyBinContext from "../../context/EmptyBinContext";
 
 
 
@@ -19,6 +20,7 @@ const BinMqtt = (props) => {
   let [user, setUser] = React.useState({})
   const [binClient, setBinClient] = useState(undefined);
   const [binListeningEvent, setBinListeningEvent] = useState(false);
+  const { saveUnReadEmptyBin, unReadEmptyBin  } = React.useContext(EmptyBinContext)
 
   useEffect(() => {
     if (isFocused) {
@@ -140,12 +142,16 @@ const BinMqtt = (props) => {
 
   const setUnReadEmptyBin = (count) =>{
     console.log("on set "+count);
-    props.setEmptyBinCount(count.toString())
+   // props.setEmptyBinCount(count.toString())
+    AsyncStorage.setItem("unReadEmptyBin", count.toString());
+    saveUnReadEmptyBin(count.toString())
+
   } 
 
   return (
-
     <View style={{ flexDirection: 'column',padding:5 }}>
+      {console.log("binmqtt value " + unReadEmptyBin)}
+
       {user && user.role === roles.MO ? (binListeningEvent ?
         <View style={{ flexDirection: 'row',backgroundColor:'white' }}>
           <Text style={{ color: appTheme.colors.successAction, marginRight: 10, fontFamily: appTheme.fonts.bold }}> CONNECTED
@@ -163,4 +169,4 @@ const BinMqtt = (props) => {
   )
 }
 
-export default BinMqtt;
+export default React.memo(BinMqtt);

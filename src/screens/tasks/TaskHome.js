@@ -99,14 +99,11 @@ export default  TaskHome = React.memo((props) => {
       </View>
       <View style={styles.mainContainer}>
         {tab === "emptyBin" ? <EmptyBin processEntity={props.processEntity} reloadPage={reloadPage} 
-          setEmptyBinCount={props.setEmptyBinCount} setFilledBinCount={props.setFilledBinCount}
-
           emptyBinCount={props.emptyBinCount}
           filledBinCount={props.filledBinCount}
 
 /> : false}
         {tab === "filledBin" ? <BinTask processEntity={props.processEntity} reloadPage={reloadPage} 
-          setEmptyBinCount={props.setEmptyBinCount} setFilledBinCount={props.setFilledBinCount}
           emptyBinCount={props.emptyBinCount}
           filledBinCount={props.filledBinCount}
 

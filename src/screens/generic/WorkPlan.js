@@ -21,6 +21,7 @@ let stageSchema = [
     "key": "ok_component", displayName: "OK Component (Count)", placeholder: "", value: 0,
     error: "", required: true, label: "components", type: "number", defaultValue: 0, nonZero: true
   },
+  
 ]
 
 

@@ -90,7 +90,7 @@ import AppContext from "../../context/AppContext";
     if(index > -1){
       props.processEntity(process[index])
     }
-   // console.log(process[index])
+    console.log(JSON.stringify(process[index]))
   };
 
   const reload = (processName) => {

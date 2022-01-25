@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,6 +10,7 @@ import SplashScreen from 'react-native-splash-screen';
 import Home from './src/screens/Home';
 import AppContextState from './src/context/AppContextState';
 import AppContext from './src/context/AppContext';
+import EmptyBinContext from './src/context/EmptyBinContext';
 global.Buffer = global.Buffer || require('buffer').Buffer;
 global.process.version = '';
 const Stack = createStackNavigator()
@@ -17,13 +18,18 @@ const Stack = createStackNavigator()
 function App() {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [user, setUser] = React.useState({})
+  const [unReadEmptyBin,setUnReadEmptyBin] = useState('0');
   const [token, setToken] = React.useState(null)
   const [isLoaded, setLoaded] = React.useState(false)
-  const { processStage, setProcessStage, userEntity,setEmptyBinCount,setFilledBinCount,setTaskCount } = React.useContext(AppContext)
+  const { processStage, setProcessStage, userEntity,setFilledBinCount,setTaskCount } = React.useContext(AppContext)
 
   const saveUser = (userState) => {
     setUser(userState)
   };
+
+  const saveUnReadEmptyBin = (count) => {
+    setUnReadEmptyBin(count)
+  }
   const getUserInfo = async () => {
     let user = await AsyncStorage.getItem("userInfo");
     let stage = await AsyncStorage.getItem("stage");
@@ -34,7 +40,9 @@ function App() {
       setUser(JSON.parse(user))
       setIsLoggedIn(true)
       setFilledBinCount(unreadFilledBin)
-      setEmptyBinCount(unreadEmptyBin)
+      console.log("app js unread empty bin "+unreadEmptyBin)
+      if (unreadEmptyBin) setUnReadEmptyBin(unreadEmptyBin)
+      else setUnReadEmptyBin("0")
       setTaskCount(parseInt(unreadEmptyBin)+parseInt(unreadFilledBin))
     }
     setLoaded(false);
@@ -75,6 +83,7 @@ function App() {
 
   return (
     <UserContext.Provider value={{ user, saveUser }}>
+      <EmptyBinContext.Provider value={{ unReadEmptyBin, saveUnReadEmptyBin}}>
       <AppContextState>
       <NavigationContainer independent={true} ref={navigationRef}>
         <Stack.Navigator
@@ -85,6 +94,7 @@ function App() {
         </Stack.Navigator>
       </NavigationContainer>
       </AppContextState>
+      </EmptyBinContext.Provider>
     </UserContext.Provider>
   )
 }

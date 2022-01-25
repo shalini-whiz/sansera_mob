@@ -122,11 +122,7 @@ export const StageHome =React.memo((props) => {
           children={() => <TaskHome
            
             updateProcess={updateProcess}
-            setEmptyBinCount={setEmptyBinCount}
-            setFilledBinCount={setFilledBinCount}
-            
-            emptyBinCount={unReadEmptyBin}
-            filledBinCount={unReadFilledBin}
+         
             
           />}
         />
@@ -138,7 +134,7 @@ export const StageHome =React.memo((props) => {
 
   return (
     <View style={{ flex: 1, flexDirection: 'column' }}>
-      <BinMqtt setEmptyBinCount={setEmptyBinCount} />
+      <BinMqtt />
       <ProcessFilter processEntity={setProcess} ref={processRef} style={{ margin: 5 }} />
       <TabNavigation style={{ flex: 2 }} />
     </View>

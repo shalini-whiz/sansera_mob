@@ -13,6 +13,7 @@ import ForgingHome from './forging/ForgingHome';
 import { stageColors, stageType } from '../constants/appConstants';
 import AppContext from '../context/AppContext';
 import { StageHome } from './generic/StageHome';
+import BilletHome from './billet/BilletHome';
 
 const styles = StyleSheet.create({
 
@@ -104,7 +105,7 @@ const  ProcessStages = (props) => {
   }
 
   const stageNavigation = (stage) => {
-    let validStages = ["shearing", "forging", "shot blasting", "visual/mpi", "shot peening","oiling"];
+    let validStages = ["shearing", "forging", "shot blasting", "visual/mpi", "shot peening","oiling","billet punching"];
     if (validStages.includes(stage.toLowerCase())) {
       setStage(stage.toLowerCase())
       AsyncStorage.setItem("stage", stage)
@@ -124,6 +125,8 @@ const  ProcessStages = (props) => {
       {processStage && (processStage.toLowerCase() === stageType.shotblasting || 
       processStage.toLowerCase() === stageType.visual || processStage.toLowerCase() === stageType.shotpeening || 
         processStage.toLowerCase() === stageType.oiling) ? <StageHome stage={stage} /> : false}
+      {processStage && processStage.toLowerCase() === stageType.billetpunching ? <BilletHome stage={stage} /> : false}
+
       {processStage == null ? 
           <View style={styles.container}>
             {apiStatus ? <ActivityIndicator size="large" animating={apiStatus} /> : false}

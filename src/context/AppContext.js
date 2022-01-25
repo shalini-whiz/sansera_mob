@@ -5,13 +5,13 @@ export default React.createContext({
   processStage: '',
   appProcess:'',
   taskCount:0,
-  emptyBinCount: 0,
+ // emptyBinCount: 0,
   filledBinCount:0,
   setUserEntity:(user) => {},
   setProcessStage : (stage) => {},
   setAppProcess: (process) => { },
   setTaskCount:(count) => {},
-  setEmptyBinCount:(count) => {},
+  //setEmptyBinCount:(count) => {},
   setFilledBinCount:(count) => {},
  
 });
