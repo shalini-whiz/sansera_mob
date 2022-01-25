@@ -68,8 +68,7 @@ export default function LoadRM() {
           let bOptions = {...batchOptions}
           bOptions.options = apiRes.response.message;
           setBatchOptions(bOptions)
-          console.log(batchNum)
-          console.log(batchDet._id)
+
           if (bOptions.options[0] && batchNum === '') {
             setBatchNum(bOptions.options[0]._id)
             setBatchDet(bOptions.options[0])
@@ -85,7 +84,6 @@ export default function LoadRM() {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-     console.log("on refresh "+batchNum)
     loadBatches();
   });
 
@@ -109,8 +107,6 @@ export default function LoadRM() {
         setBatchNum(value)
         let bOptions = [...batchOptions.options]
         let bDet = bOptions[index];
-        console.log("value here " + value)
-        console.log("value id  here " + bDet._id)
         setBatchDet(bDet);
 
       }
@@ -139,7 +135,6 @@ export default function LoadRM() {
   const addToDelRacks = (e,fifoItem) => {
     let racks_to_del = [...delRacks]
     let racks_to_add = [...addRacks]
-    console.log("racks_t0_ddd"+racks_to_add)
     let element_num = fifoItem.element_num;
     const selectedIndex = racks_to_del.indexOf(element_num);
     if (selectedIndex === -1) {
@@ -157,7 +152,6 @@ export default function LoadRM() {
     }
     let mergeArr = [...racks_to_del,...racks_to_add]
     setDelRacks(racks_to_del);
-    console.log("racks to add "+racks_to_add)
 
     setAddRacks(racks_to_add)
 
@@ -200,35 +194,23 @@ export default function LoadRM() {
 
          let batchDetails = { ...batchDet };
         let rackDevices = Object.keys(batchDetails.device_map);
-        console.log("rack devices "+rackDevices)
         let deviceId = msg.topic.split("/")[1];
-        console.log(deviceId)
         let deviceExists = rackDevices.indexOf(deviceId);
         let fifoExists = batchDetails.fifo.findIndex(item => item.element_id === deviceId);
-        console.log(fifoExists+" .... "+deviceExists)
         if(deviceExists > -1 && fifoExists === -1){
           const selectedIndex = addRacks.indexOf(batchDetails.device_map[deviceId]);
           if(selectedIndex === -1){
-            console.log("addRacks before "+JSON.stringify(addRacks))
             addRacks.push(batchDetails.device_map[deviceId]);
-            console.log("addRacks after " + JSON.stringify(addRacks))
             let newRacks = []
             addRacks.map(itemV => {
-              console.log(itemV)
               let key = Object.keys(batchDetails.device_map).find(k => batchDetails.device_map[k] === itemV);
-              console.log(key+" .. "+itemV)
               let obj = { element_num: itemV, element_id: key }
-              console.log(obj)
               newRacks.push({ element_num: itemV,element_id:key})
             })
 
-            console.log("newRacks before.. " + JSON.stringify(newRacks))
 
            // let newRack = { "element_num": batchDetails.device_map[deviceId],"element_id":deviceId}
             //newRacks.push(newRack)
-            console.log("newRacks after .. " + JSON.stringify(newRacks))
-
-
             setNewFifo(newRacks)
           }
         }
@@ -274,11 +256,10 @@ export default function LoadRM() {
     else if(racks_to_add.length){
       stopLoading();
       if(batchDet.fifo && batchDet.fifo.length)
-        {
-          let mergeFifo = [...batchDet.fifo,...newFifo]
-          console.log("merge .. "+JSON.stringify(mergeFifo))
+      {
+        let mergeFifo = [...batchDet.fifo,...newFifo]
         apiData.fifo = mergeFifo 
-        }
+      }
       else apiData.fifo = newFifo
       invokeApi = true;
     
@@ -289,14 +270,12 @@ export default function LoadRM() {
       apiData.fifo = updatedFifo
       invokeApi = true;
     }
-    console.log("apiData here "+JSON.stringify(apiData))
     if(invokeApi){
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
-        console.log("apiRes : " + JSON.stringify(apiRes))
         setApiStatus(false);
         if (apiRes && !apiRes.status) {
-          
+          Alert.alert(apiRes.response.message)
           setApiError(apiRes.response.message)
           setDelRacks([]);
           setAddRacks([]);
@@ -330,10 +309,6 @@ export default function LoadRM() {
 
   const computeRacks = () => {
     let racks_to_del = [...delRacks];
-   console.log(racks_to_del.length)
-   console.log(addRacks.length)
-   console.log(addRacks)
-   console.log(racks_to_del)
     if(racks_to_del.length && addRacks.length){
       showDialog(true);
       setDialogTitle('Save Racks');

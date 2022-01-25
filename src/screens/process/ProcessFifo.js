@@ -80,10 +80,7 @@ export default function ProcessFifo(props) {
     }
   }
   const updateBin = () => {
-    console.log("nextStage "+JSON.stringify(nextStage.fifo))
-    console.log(delBin[0])
     let elementIndex = nextStage.fifo.findIndex(item => item.element_num === delBin[0]);
-    console.log(elementIndex+" .. "+delBin.length)
     if(elementIndex > -1 && delBin.length){
       let apiData = {};
       apiData.op = "remove_element"
@@ -92,12 +89,10 @@ export default function ProcessFifo(props) {
       apiData.element_id = nextStage.fifo[elementIndex].element_id 
      
       ApiService.getAPIRes(apiData,"POST","fifo").then(apiRes => {
-        console.log("remove element "+JSON.stringify(apiRes));
         if(apiRes){
           if(apiRes.status){
             Alert.alert("Bin removed");
             props.okDialog();
-
           }
           else{
             setApiError("Could not update. try again!")

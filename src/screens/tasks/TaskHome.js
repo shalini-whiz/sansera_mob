@@ -5,14 +5,14 @@ import {Badge} from"react-native-paper"
 import UserContext from "../UserContext";
 import { useIsFocused } from '@react-navigation/native';
 import { appTheme } from "../../lib/Themes";
-import { default as AppStyles } from "../../styles/AppStyles";
 import EmptyBin from "./EmptyBin";
 import BinTask from "./BinTask";
 import AppContext from "../../context/AppContext";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
-export default function TaskHome(props) {
+export default  TaskHome = React.memo((props) => {
   const [apiError, setApiError] = useState('')
   const [apiStatus, setApiStatus] = useState(false);
   const userState = React.useContext(UserContext);
@@ -23,15 +23,26 @@ export default function TaskHome(props) {
   const [refreshing, setRefreshing] = useState(false)
   const isFocused = useIsFocused();
   const [tab, setTab] = useState('')
-  let {emptyBinCount, filledBinCount,setEmptyBinCount,setFilledBinCount} = React.useContext(AppContext);
-
+  let {appProcess,processStage} = React.useContext(AppContext);
+  let [unReadEmptyBin,setUnReadEmptyBin] = useState('')
+  let [unReadFilledBin,setUnReadFilledBin] = useState('')
   useEffect(() => {
     if (isFocused) {
       if(tab === "") setTab('emptyBin')
+      loadData()
+      
     }
     return () => { }
   }, [isFocused])
 
+  const loadData = async() => {
+    let count = await AsyncStorage.getItem("unReadEmptyBin");
+    setUnReadEmptyBin(count)
+    console.log(appProcess + "_" + processStage)
+    let unReadFilledBinCount = await AsyncStorage.getItem(appProcess+"_"+processStage);
+    if(unReadFilledBinCount)
+      setUnReadFilledBin(unReadFilledBinCount)
+  }
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
   }, []);
@@ -51,44 +62,60 @@ export default function TaskHome(props) {
       <View style={{ flexDirection: 'row', backgroundColor: 'white', padding: 10 }}>
         <TouchableOpacity style={{
           flexDirection: 'row', padding: 8,
-          borderRadius: tab === "emptyBin" ? 15 : 0,
-          backgroundColor: tab === "emptyBin" ? appTheme.colors.cardTitle : 'white'
+          borderRadius:  15 ,
+          backgroundColor: tab === "emptyBin" ? appTheme.colors.cardTitle : appTheme.colors.inactiveTab
         }}
           onPress={(e) => tabChange("emptyBin")} >
             <Text style={[styles.filterText, {
-              fontFamily: tab === "emptyBin" ? appTheme.fonts.bold : appTheme.fonts.regular,
+              fontFamily:appTheme.fonts.bold ,
               color: tab === "emptyBin" ? 'white' : appTheme.colors.cardTitle,
             }]}>Empty Bin Request
              
             </Text>
-            {/* {emptyBinCount ?               
+          {props.emptyBinCount && props.emptyBinCount != "0" ?               
             <Badge style={{ color: 'white',position:'absolute',top:-10,left:150 }}
-              containerStyle={{ top:-25,left: 40 }}>{emptyBinCount}</Badge>  : false} */}
+              containerStyle={{ top: -25, left: 40 }}>{props.emptyBinCount}</Badge>  : false}
 
           
         </TouchableOpacity>
-        <Text style={{ padding: 5 }}> / </Text>
+        <Text style={{ padding: 8 }}> / </Text>
         <TouchableOpacity
           style={{
             flexDirection: 'row', padding: 8,
-            borderRadius: tab === "filledBin" ? 15 : 0,
-            backgroundColor: tab === "filledBin" ? appTheme.colors.cardTitle : 'white'
+            borderRadius:  15,
+            backgroundColor: tab === "filledBin" ? appTheme.colors.cardTitle : appTheme.colors.inactiveTab
           }}
           onPress={(e) => tabChange("filledBin")} >
           <Text style={[styles.filterText, {
-            fontFamily: tab === "filledBin" ? appTheme.fonts.bold : appTheme.fonts.regular,
+            fontFamily:  appTheme.fonts.bold ,
             color: tab === "filledBin" ? 'white' : appTheme.colors.cardTitle,
-          }]}>Filled Bin Request  {filledBinCount > 0 ? <Badge>filledBinCount</Badge> : ''}</Text>
+          }]}>Filled Bin Request  
+                     </Text>
+          {props.filledBinCount && props.filledBinCount != "0" ?
+            <Badge style={{ color: 'white', position: 'absolute', top: -8, left: 140 }}
+              containerStyle={{ top: -25, left: 40 }}>{props.filledBinCount}</Badge> : false}
         </TouchableOpacity>
 
       </View>
       <View style={styles.mainContainer}>
-        {tab === "emptyBin" ? <EmptyBin processEntity={props.processEntity} reloadPage={reloadPage}/> : false}
-        {tab === "filledBin" ? <BinTask processEntity={props.processEntity} reloadPage={reloadPage} /> : false}
+        {tab === "emptyBin" ? <EmptyBin processEntity={props.processEntity} reloadPage={reloadPage} 
+          setEmptyBinCount={props.setEmptyBinCount} setFilledBinCount={props.setFilledBinCount}
+
+          emptyBinCount={props.emptyBinCount}
+          filledBinCount={props.filledBinCount}
+
+/> : false}
+        {tab === "filledBin" ? <BinTask processEntity={props.processEntity} reloadPage={reloadPage} 
+          setEmptyBinCount={props.setEmptyBinCount} setFilledBinCount={props.setFilledBinCount}
+          emptyBinCount={props.emptyBinCount}
+          filledBinCount={props.filledBinCount}
+
+/> : false}
       </View>
     </ScrollView>
   )
-}
+})
+
 const styles = StyleSheet.create({
   mainContainer: {
     justifyContent: "center",

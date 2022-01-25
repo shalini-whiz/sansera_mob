@@ -17,12 +17,10 @@ export default class AppContextState extends React.Component {
     this.setState({userEntity:user})
   }
   setProcessStage = (stage) => {
-    console.log("changed stage "+stage);
     this.setState({ processStage:stage})
   }
 
   setAppProcess = (process) => {
-    console.log("changed process " + process);
     this.setState({ appProcess: process })
   }
 

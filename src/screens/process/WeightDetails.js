@@ -65,10 +65,10 @@ export default function WeightDetails(props) {
         if (item.type === "date") {
           item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
         }
-        if (item.key === "hold_materials_weight"){
+        if (item.key === "hold_materials_weight" && props.processEntity.process[stage_ok_comp_index]){
           item.value = props.processEntity.process[stage_ok_comp_index][item.key]+ ""
         }
-        if (value.toLowerCase() === "shearing" && item.key === "ok_component") {
+        if (value.toLowerCase() === "shearing" && item.key === "ok_component" && props.processEntity.process[stage_ok_comp_index]) {
           item.value = props.processEntity.process[stage_ok_comp_index][item.key] + ""
         }
       });

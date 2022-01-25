@@ -13,6 +13,7 @@ import { roles } from "../constants/appConstants";
 import { View } from "react-native";
 import { useIsFocused } from '@react-navigation/native';
 import AppContext from "../context/AppContext";
+import BinTask from "./tasks/BinTask";
 
 
 
@@ -24,16 +25,13 @@ const Home = () => {
   const [dialogTitle, setDialogTitle] = React.useState('')
   const [dialogMessage, setDialogMessage] = React.useState('');
   const isFocused = useIsFocused();
-  const { processStage, setProcessStage } = React.useContext(AppContext)
+  const { setProcessStage,setAppProcess } = React.useContext(AppContext)
 
   useEffect(() => {
     if(isFocused){
       if (userState && userState.user) setUser(userState.user);
-      console.log("cache "+userState.user)
       AsyncStorage.getItem("stage").then(stage => {
         setProcessStage(stage)
-        console.log("home process stage" + processStage)
-
       })
     }
     return () => { }
@@ -53,6 +51,8 @@ const Home = () => {
   const logout = async () => {
     closeDialog()
     await AsyncStorage.clear();
+    setAppProcess('')
+    setProcessStage('')
     setUser(null);
     clearTopics(userState && userState.user && userState.user.id);
   }
@@ -60,9 +60,8 @@ const Home = () => {
   return (
 
     <View style={{flexDirection:'column',flex:1}}>
-      {console.log("home process stage "+processStage)}
-      {console.log(user)}
       {user ? <TopBar openLogOut={openDialog}/> : <Login/>}   
+      {user && user.role === roles.FO ? <BinTask/> : false}
       {user &&  user.role === roles.QA ? <BatchHome/> : false}
       {user && user.role === roles.PL ? <ProcessHome/> : false}
       {user && user.role === roles.MO ? <ProcessStages/> : false}

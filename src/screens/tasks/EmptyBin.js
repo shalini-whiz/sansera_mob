@@ -8,7 +8,6 @@ import { appTheme } from "../../lib/Themes";
 import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from "../../components/ErrorModal";
-import AppContext from "../../context/AppContext";
 
 
 
@@ -25,7 +24,6 @@ export default function EmptyBin(props) {
   const [notifications,setNotifications] = useState([])
   const [stage,setStage] = useState('')
   const [bin,setBin] = useState({})
-  const {setEmptyBinCount} = React.useContext(AppContext);
   useEffect(() => {
     if (isFocused) {
       loadData();
@@ -39,11 +37,14 @@ export default function EmptyBin(props) {
   }, []);
 
   const loadData = () => {
-   
+   // props.setEmptyBinCount("0");
+
     AsyncStorage.getItem("emptyBinReq").then(request => {
       setNotifications(JSON.parse(request))   
       //setEmptyBinCount(0); 
     })
+    AsyncStorage.setItem("unReadEmptyBin", "0");
+
     AsyncStorage.getItem("stage").then(stage => {
       setStage(stage)
     })
@@ -101,7 +102,6 @@ export default function EmptyBin(props) {
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
         setApiStatus(false);
-        console.log("create process res: " + JSON.stringify(apiRes))
         if (apiRes && apiRes.status) {
           Alert.alert("Bin confirmed");
           closeDialog()

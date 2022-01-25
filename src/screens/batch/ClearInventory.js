@@ -166,7 +166,6 @@ export default function ClearInventory() {
     setApiStatus(true);
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
       setApiStatus(false);
-      console.log("clear racks : "+apiRes)
       if (apiRes && apiRes.status) {
         Alert.alert("Racks updated !")
         setDelRacks([]);

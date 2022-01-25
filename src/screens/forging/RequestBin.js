@@ -35,7 +35,6 @@ export default function RequestBin(props) {
   }
 
   const handleSubmit = async() => {
-    console.log("entered submit ")
     if(requestType.length == 0)
       setBinErr("Please select SELF/FORKLIFT")
     else if(requestType === "forklift" && !forkOp.length)
@@ -47,12 +46,10 @@ export default function RequestBin(props) {
       apiData.op = "create"
       apiData.resolver_id = requestType === "self" ? userState.user.id : forkOp
       apiData.stage = await AsyncStorage.getItem("stage");
-      console.log("apiData here "+JSON.stringify(apiData))
 
 
       ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {
         setApiStatus(false);
-        console.log("create task .. "+JSON.stringify(apiRes))
         if (apiRes && apiRes.status) {
           Alert.alert("Filled Bin Requested")
           props.closeDialog()
@@ -63,23 +60,16 @@ export default function RequestBin(props) {
   }
 
   const handleChange = (name) => async (value, index) => {
-    console.log(name + " .. " + value + " .. " + index)
     if (name === "forkOp") {
       setForkOp(value)
-      
     }
-    
   };
   const handleRequestType = (name) => (value) => {
     setRequestType(value)
     if(value === "forklift"){
       let apiData = { op : "fetch_member_by_role",role:roles.FO}
-      console.log(userState.user.parent_suborg_id)
       apiData.parent_suborg_id = userState.user.parent_suborg_id
-
-      console.log("apiData here "+JSON.stringify(apiData))
       ApiService.getAPIRes(apiData,"POST","org").then(apiRes => {
-         console.log("apiRes here "+JSON.stringify(apiRes))
         if(apiRes && apiRes.status){
           if(apiRes.response.message && apiRes.response.message.length){
             setForkUsers(apiRes.response.message)

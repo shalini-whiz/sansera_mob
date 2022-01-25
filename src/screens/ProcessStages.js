@@ -10,9 +10,9 @@ import { appTheme } from '../lib/Themes';
 import ShearingHome from './shearing/ShearingHome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ForgingHome from './forging/ForgingHome';
-import StageHome from './generic/StageHome';
 import { stageColors, stageType } from '../constants/appConstants';
 import AppContext from '../context/AppContext';
+import { StageHome } from './generic/StageHome';
 
 const styles = StyleSheet.create({
 
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
 });
 
 
-const ProcessStages = (props) => {
+const  ProcessStages = (props) => {
   const isFocusedHistory = useIsFocused();
   let [user, setUser] = React.useState({})
   const [stagingData, setStagingData] = React.useState([])
@@ -70,7 +70,6 @@ const ProcessStages = (props) => {
       }
       else {
         getStagingProcess();
-
       }
     }
    
@@ -88,6 +87,7 @@ const ProcessStages = (props) => {
     setApiStatus(true);
     ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
       setApiStatus(false)
+      console.log("apiRes here "+JSON.stringify(apiRes))
       if (apiRes) {
         if (apiRes.status) {
           let stages = [...apiRes.response.message.stages]
@@ -108,7 +108,6 @@ const ProcessStages = (props) => {
     if (validStages.includes(stage.toLowerCase())) {
       setStage(stage.toLowerCase())
       AsyncStorage.setItem("stage", stage)
-      console.log("set process stage here "+stage);
       setProcessStage(stage);
       
 
@@ -120,14 +119,12 @@ const ProcessStages = (props) => {
 
   return (
     <>
- 
       {processStage && processStage.toLowerCase() === stageType.shearing ? <ShearingHome stage={stage}/> : false}
       {processStage && processStage.toLowerCase() === stageType.forging ? <ForgingHome stage={stage} /> : false}
       {processStage && (processStage.toLowerCase() === stageType.shotblasting || 
       processStage.toLowerCase() === stageType.visual || processStage.toLowerCase() === stageType.shotpeening || 
         processStage.toLowerCase() === stageType.oiling) ? <StageHome stage={stage} /> : false}
-
-      {processStage ? false :
+      {processStage == null ? 
           <View style={styles.container}>
             {apiStatus ? <ActivityIndicator size="large" animating={apiStatus} /> : false}
             <View style={{
@@ -151,12 +148,12 @@ const ProcessStages = (props) => {
                   </TouchableOpacity>
                 )
               })}
-            </View></View>
+            </View></View> : false}
 
-      }
+      
     </>
 
   );
 }
-
 export default ProcessStages;
+

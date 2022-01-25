@@ -68,7 +68,6 @@ export default function ApproveBatch({navigation}) {
      // "status": "NEW"
     }
     apiData.status = status.length ? status : "NEW";
-    console.log("apiData here "+JSON.stringify(apiData))
 
     ApiService.getAPIRes(apiData, "POST", "list_raw_material_by_status").then(apiRes => {
       setApiStatus(false);
@@ -83,10 +82,8 @@ export default function ApproveBatch({navigation}) {
           let index = -1;
           if(batchNum.length)
             index = apiRes.response.message.findIndex(item => item._id === batchNum);
-          console.log("on load : " + batchNum + " ... " + batchDet._id + " ... " 
-           + " .. " + status+" ... "+index)
-          //  if(batchDet)
-          //   console.log("on load "+JSON.stringify(batchDet))
+         
+          
 
           if (bOptions.options[0] && (batchNum === '' || index === -1)) {
             setBatchNum(bOptions.options[0]._id)
@@ -98,7 +95,6 @@ export default function ApproveBatch({navigation}) {
           let bOptions = { ...batchOptions }
           bOptions.options = []
           setBatchOptions(bOptions)
-          console.log("first else")
           setBatchNum('')
           setBatchDet({})
         }
@@ -111,26 +107,21 @@ export default function ApproveBatch({navigation}) {
   }
 
   const onRefresh = React.useCallback(() => {
-    console.log("on refresh : " + batchNum+" ... "+status)
     setRefreshing(true);
     loadBatches();
   });
 
   const handleStatusChange = (value) => {
-    console.log("on status change"+value)
-    console.log("second else")
     setBatchNum('')
     setBatchDet({})
     setStatus(value)
   }
 
   const handleChange = (name) => (value, index) => {
-    console.log(name+" .. "+value+" .. "+index)
     if (name === "batchNum") {
       let bOptions = [...batchOptions.options]
       if(bOptions.length){
         let bIndex = bOptions.findIndex(item => item._id === value);
-        console.log("bIndex : "+bIndex)
         if(bIndex > -1){
           let bDet = bOptions[bIndex];
           setBatchDet(bDet)
@@ -139,7 +130,6 @@ export default function ApproveBatch({navigation}) {
         
       }
       else{
-        console.log("third else")
         setBatchDet({})
         setBatchNum('')
       }

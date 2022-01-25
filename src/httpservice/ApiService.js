@@ -48,11 +48,7 @@ ApiService.getAPIRes = async(params, type, api, props) => {
             status: "failure",
             message: ""
         };
-        // HttpService.makeRequest(type,params,api)
-        // .then(res =>{
-        //     console.log(JSON.stringify(res.json()))
-        //     return res;
-        // })
+      
         let networkState = await NetInfo.fetch();
         if(networkState.isConnected){
             let token = await Auth.getToken();

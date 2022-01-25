@@ -116,7 +116,6 @@ export default function BatchDetails(props) {
 
   const loadForm = () => {
     let batchSchemaData = [];
-    console.log(props._id)
 
     if (props._id) {
       batchSchemaData = [...createdBatch];
@@ -244,7 +243,6 @@ export default function BatchDetails(props) {
       setApiStatus(true);
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "batch");
       setApiStatus(false);
-      console.log(apiRes)
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
           setBatchDet(apiRes.response.message);

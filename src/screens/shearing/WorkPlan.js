@@ -112,7 +112,6 @@ export default function WorkPlan(props) {
     apiData.batch_num = props.processEntity.batch_num
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
       if (apiRes && apiRes.status && apiRes.response && apiRes.response.message) {
-        console.log("show rack "+JSON.stringify(apiRes.response.message));
         PublishMqtt({ "topic": apiRes.response.message.element_id})
         setRackData(apiRes.response.message);
         setDialogTitle("SHOW RACK")

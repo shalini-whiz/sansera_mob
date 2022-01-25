@@ -136,7 +136,6 @@ export default function ProcessDetails(props) {
           created_process_schema.push(forge_schema);
         }
       }
-     // console.log("process det "+JSON.stringify(props.processEntity))
       created_process_schema.map(item => {
         item["value"] = props.processEntity[item.key] ? props.processEntity[item.key] + "" : "";
         
@@ -160,6 +159,7 @@ export default function ProcessDetails(props) {
              else{
                created_process_schema[ok_comp_index].value = "0"
              }
+            if (props.processEntity.process[stage_ok_comp_index] && props.processEntity.process[stage_ok_comp_index].total_rejections)
             created_process_schema[rej_comp_index].value = props.processEntity.process[stage_ok_comp_index].total_rejections + ""
 
               setBatchFormData(created_process_schema); 
@@ -321,7 +321,6 @@ export default function ProcessDetails(props) {
       apiData.forge_machine_id  = forgeId;
       setForgeErr('')
       setApiStatus(true);
-      console.log("apiData "+JSON.stringify(apiData))
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "process");
       setApiStatus(false);
       if (apiRes && apiRes.status) {

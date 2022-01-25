@@ -4,6 +4,7 @@ import PushNotification from 'react-native-push-notification';
 import messaging from '@react-native-firebase/messaging';
 //custom
 import { handleNotificationNavig } from './NavigationHandler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //request permission for notifications
 const requestPermission = async () => {
@@ -55,6 +56,20 @@ export const initNotification = async (openNotificationHandler) => {
             console.log("userInteraction " + notification.userInteraction)
             let notifyData = JSON.parse(notification.data.data);
             console.log("notify data on load " + JSON.stringify(notifyData))
+            //{ "sender": "61c4171c4bae1e001dcb9e88", "process_name": "P-1-C-122", 
+            //"forge_machine_id": "61c44f52e9bdcd001d8cb2cc", "stage": "Shot blasting", "status": "REQUESTED",
+             //"receiver": "61c4171c4bae1e001dcb9e88", "task_id": "61eaf18f183ac5002b65e1c1" }
+            if (notifyData.process_name && notifyData.stage && notifyData.task_id){
+                let storageName = notifyData.process_name + "_" + notifyData.stage
+                console.log("storageName : "+storageName)
+                AsyncStorage.getItem(storageName).then(count => {
+                    console.log("task count" + count);
+                    let newFilledBinCount = 1;
+                    if (count && count.length)
+                        newFilledBinCount = parseInt(count) + 1;
+                    AsyncStorage.setItem(storageName, newFilledBinCount.toString());
+                })   
+            }
             if (notification.userInteraction) {
                 console.log('notification on user interaction ', notification);
                 handleNotificationNavig(notification, openNotificationHandler);

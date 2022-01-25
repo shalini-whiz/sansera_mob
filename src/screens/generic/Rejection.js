@@ -13,14 +13,13 @@ import ProcessDetails from "../process/ProcessDetails";
 import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
-import App from "../../../App";
 
 
 
 
 
 
-export default function Rejection(props) {
+export const  Rejection = React.memo((props) => {
   const [formData, setFormData] = useState([])
   const [apiError, setApiError] = useState('')
   const [apiStatus, setApiStatus] = useState(false);
@@ -59,15 +58,13 @@ export default function Rejection(props) {
     setRefreshing(false);
     setRejCount(0);
 
-    console.log("apiData .. "+JSON.stringify(apiData));
-    console.log("apiData "+JSON.stringify(apiData))
+
     ApiService.getAPIRes(apiData, "POST", "rejection").then(async apiRes => {
       setApiStatus(false);
       if (apiRes) {
         if (apiRes.status && apiRes.response.message && apiRes.response.message.rejections) {
           let rejections = apiRes.response.message.rejections
           setRejections(rejections)
-          console.log("rejections here "+JSON.stringify(rejections));
          // setRejections(rejections)
           let stage_name = await AsyncStorage.getItem("stage");
           let curKey = Object.keys(rejections[0])[0]
@@ -79,28 +76,23 @@ export default function Rejection(props) {
               
           if(rejReason === ''){
             let initalReason = menuKeys[0];
-            console.log("reasons here "+JSON.stringify(menuKeys))
-            console.log("initial reason"+menuKeys[0]);
+          
             setRejReasons(menuKeys)
             setRejReason(initalReason)
             let curKey = Object.keys(rejections[0])[0]
 
             let nestedObj = rejections[0][curKey].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === initalReason) })
-            console.log(JSON.stringify(nestedObj))
             if (nestedObj) {
               setCurRejCount(nestedObj[initalReason])
             }
           }
           else{
             let initalReason =rejReason;
-            console.log("reasons here " + JSON.stringify(menuKeys))
-            console.log("initial reason" + initalReason);
             setRejReasons(menuKeys)
             setRejReason(initalReason)
             let curKey = Object.keys(rejections[0])[0]
 
             let nestedObj = rejections[0][curKey].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === initalReason) })
-            console.log(JSON.stringify(nestedObj))
             if (nestedObj) {
               setCurRejCount(nestedObj[initalReason])
             }
@@ -115,14 +107,11 @@ export default function Rejection(props) {
   }
 
   const handleChange = (name) =>  (value, index) => {
-    console.log(name + " .. " + value + " .. " + index)
     if (name === "reason") {
       setRejReason(value)
-      console.log("rejReasons : "+JSON.stringify(rejections))
       let curKey = Object.keys(rejections[0])[0]
 
       let nestedObj = rejections[0][curKey].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === value) })
-      console.log("handle change reason "+JSON.stringify(nestedObj))
       if (nestedObj)
         setCurRejCount(nestedObj[value])
     }
@@ -139,13 +128,10 @@ export default function Rejection(props) {
   const validateRejection = () => {
     setRejError('')
     let valid = true;
-    console.log(rejReason.length)
-    console.log(rejCount)
     if (rejReason.length === 0 || rejCount < 1) {
       setRejError('Please enter mandatory fields')
       valid = false;
     }
-    console.log("isValid .. "+valid)
     
     if (valid) {
       showDialog(true);
@@ -163,15 +149,12 @@ export default function Rejection(props) {
     rejReasonObj[rejReason] = parseInt(rejCount)
     let rejObj = {}
     let curKey = Object.keys(rejections[0])[0]
-    console.log(curKey)
     rejObj[curKey] = rejReasonObj;
     apiData.rejections = rejObj;
 
-    console.log("apiData here "+JSON.stringify(apiData))
     setRefreshing(false);
     ApiService.getAPIRes(apiData, "POST", "rejection").then(apiRes => {
       setApiStatus(false);
-      console.log("update rejection " + apiRes)
       if (apiRes && apiRes.status) {
         Alert.alert("Rejections updated");
         setRejCount(0)
@@ -258,7 +241,7 @@ export default function Rejection(props) {
       </View>
     </ScrollView>
   )
-}
+})
 const styles = StyleSheet.create({
   mainContainer: {
     justifyContent: "center",

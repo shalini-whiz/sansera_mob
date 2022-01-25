@@ -26,7 +26,8 @@ export const appTheme = {
     message:"black",
     textInputCont: "#ECF0FA",
     gradientColor1:"#003399",
-    gradientColor2:"#66ccff"
+    gradientColor2:"#66ccff",
+    inactiveTab:'#ECF0FA'
   },
   fonts:{
     regular:'Poppins-Regular',

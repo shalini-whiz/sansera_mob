@@ -10,7 +10,6 @@ import { ApiService } from "../../httpservice";
 import { roles } from "../../constants/appConstants";
 import { useIsFocused } from '@react-navigation/native';
 import { binMqttOptions } from "../../constants/urlConstants";
-import AppContext from "../../context/AppContext";
 
 
 
@@ -21,10 +20,9 @@ const BinMqtt = (props) => {
   const [binClient, setBinClient] = useState(undefined);
   const [binListeningEvent, setBinListeningEvent] = useState(false);
 
-  let {emptyBinCount, setEmptyBinCount,taskCount,setTaskCount} = React.useContext(AppContext);
   useEffect(() => {
     if (isFocused) {
-
+      console.log("user effect binmqtt ")
       if (userState && userState.user) setUser(userState.user);
       if (userState && userState.user && userState.user.role === roles.MO) {
         let binTopics;
@@ -42,14 +40,10 @@ const BinMqtt = (props) => {
   }, [isFocused])
 
   const reconnectToBinMQTT = () => {
-    console.log("call reconnect to mqtt");
-    console.log(userState.user)
     if (userState && userState.user && userState.user.role === roles.MO) {
-      console.log(1);
       let binTopics;
       if (props && props.binTopics && props.binTopics.length)
         binTopics = JSON.parse(props.binTopics)
-      console.log("bin topics : " + binTopics)
       AsyncStorage.getItem("bins").then(topics => {
         if (topics) binTopics = JSON.parse(topics)
         if (binTopics && binTopics.length)
@@ -90,33 +84,34 @@ const BinMqtt = (props) => {
             }
             AsyncStorage.getItem("emptyBinReq").then(binRequest => {
               let request = [];
-              console.log("binRequest here : " + binRequest)
+              let updateBinCount = false;
               if (!binRequest) {
                 request.push(curTop)
-                console.log("request at first : " + JSON.stringify(request))
+                updateBinCount = true;
               }
               else {
                 request = JSON.parse(binRequest);
                 let index = request.findIndex(item => item.element_id === curTop.element_id)
-                console.log(index);
                 if (index > -1) {
                   request.splice(index, 1);
                   request.splice(0, 0, curTop)
+                  updateBinCount = true;
                 }
                 else {
                   request.push(curTop)
+                  updateBinCount = true
                 }
-
-                console.log("request at later : " + JSON.stringify(request))
-
               }
               AsyncStorage.setItem("emptyBinReq", JSON.stringify(request));
-              let newEmptyBinCount = emptyBinCount + 1;
-              let newTaskCount = taskCount + 1;
-              setEmptyBinCount(newEmptyBinCount);
-              setTaskCount(newTaskCount);
-
-              
+              if(updateBinCount){
+                AsyncStorage.getItem("unReadEmptyBin").then(count => {
+                  let newEmptyBinCount = 1;
+                  if (count && count.length)
+                    newEmptyBinCount = parseInt(count) + 1;
+                  setUnReadEmptyBin(newEmptyBinCount);
+                  AsyncStorage.setItem("unReadEmptyBin",newEmptyBinCount.toString())
+                })
+              }              
             });
 
           }
@@ -143,6 +138,10 @@ const BinMqtt = (props) => {
     });
   }
 
+  const setUnReadEmptyBin = (count) =>{
+    console.log("on set "+count);
+    props.setEmptyBinCount(count.toString())
+  } 
 
   return (
 

@@ -64,13 +64,11 @@ export default function Rejection(props) {
           let rejections = apiRes.response.message.rejections
           setRejections(rejections)
           
-            console.log("curRejMenu .. "+curRejMenu)
             let menuKeys = await rejections.reduce((keys, obj) => (
               keys.concat(Object.keys(obj).filter(key => (
                 keys.indexOf(key) === -1))
               )
             ), [])
-            console.log("keys here " + menuKeys)
             if(Object.keys(curRejection).length){
               let index = menuKeys.indexOf(curRejMenu)
               if(index > -1) {
@@ -90,25 +88,19 @@ export default function Rejection(props) {
   }
  
   const handleChange = (name) => async(value, index) => {
-    console.log(name + " .. " + value + " .. " + index)
     if (name === "reason") {
       setRejReason(value)
       let curKey = Object.keys(curRejection)[0]
-      console.log(curRejection[curKey])
-      console.log(rejSubType)
       if(level2){
         let level2Obj = curRejection[curKey].find(item =>  
           {return (Object.keys(item).length && Object.keys(item)[0] === rejSubType) })
-        console.log("level2Obj : " + JSON.stringify(level2Obj))
         let nestedObj = level2Obj[rejSubType].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === value) })
-        console.log("level2 reason nestedObj .. " + JSON.stringify(nestedObj))
         if (nestedObj) {
           setCurRejCount(nestedObj[value])
         }
       }
       else{
         let nestedObj = curRejection[curKey].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === value) })
-        console.log("reason nestedObj .. " + JSON.stringify(nestedObj))
         if (nestedObj) {
           setCurRejCount(nestedObj[value])
         }
@@ -118,9 +110,7 @@ export default function Rejection(props) {
     if(name === "subType"){
       setRejSubType(value)
       let curKey = Object.keys(curRejection)[0];
-      console.log(curKey);
       let curObj = curRejection[curKey];
-      console.log("curObj here "+JSON.stringify(curObj))
       let nestedObj = curObj.find(item => 
         (Object.keys(item).length && Object.keys(item)[0] === value))
 
@@ -130,33 +120,26 @@ export default function Rejection(props) {
         )
       ), [])
 
-      console.log(JSON.stringify(nestedObj[value]))
-      console.log("on change 123 " + subTypeReasonList)
+    
       setSubTypeReasons(subTypeReasonList)
       setRejReason(subTypeReasonList[0])
       let curReason = nestedObj[value].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === subTypeReasonList[0]) })
-      console.log("Default curReason "+JSON.stringify(curReason))
-      console.log(curReason[value])
-      console.log("value here "+value)
+ 
       if(curReason)
         setCurRejCount(curReason[subTypeReasonList[0]])
 
     }
   };
   const handleRejection = async (item) => {
-    console.log("entered here ")
     setRejError('')
     setCurRejection(item);
     let key = Object.keys(item)[0]
-    console.log("key ... "+key);
     setCurRejMenu(key)
-    //console.log(item[key])
     let level1Keys = await item[key].reduce((keys, obj) => (
       keys.concat(Object.keys(obj).filter(key => (
         keys.indexOf(key) === -1))
       )
     ), [])
-    console.log("m herer " + level1Keys)
     setLevel1(level1Keys)
  
     if (Array.isArray(item[key][0][level1Keys[0]]))
@@ -164,43 +147,29 @@ export default function Rejection(props) {
       //set level 2 here
       let presetSubType = level1Keys[0]
       setRejSubType(presetSubType)
-
-      console.log("presetSubType : "+presetSubType)
-      console.log("key here " + key);
-      console.log("item key  here " + JSON.stringify(item[key]));
-
       //setLevel2(item[key])
       setLevel2(true)
 
-      console.log("preset sub type "+presetSubType)
       let nestedObj = item[key].find(item =>{ 
-        console.log(Object.keys(item))
-        console.log(Object.keys(item)[0])
-        
         return  (Object.keys(item).length && Object.keys(item)[0] === presetSubType) })
-      console.log("nestedOBj heer "+JSON.stringify(nestedObj))
       if(nestedObj){
         let subTypeReasonList = await nestedObj[presetSubType].reduce((keys, obj) => (
           keys.concat(Object.keys(obj).filter(key => (
             keys.indexOf(key) === -1))
           )
         ), [])    
-        console.log("on load " + subTypeReasonList)
         setSubTypeReasons(subTypeReasonList)
         setRejReason(subTypeReasonList[0])
 
         let curReason = nestedObj[presetSubType].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === subTypeReasonList[0]) })
-       console.log("on laod curReason "+JSON.stringify(curReason))
-        console.log(curReason[subTypeReasonList[0]])
+ 
         if (curReason)
          setCurRejCount(curReason[subTypeReasonList[0]])
       }
     }  
     else {
       setLevel2(false) 
-      console.log("default reason : "+level1Keys[0])
       let nestedObj = item[key].find(item => { return (Object.keys(item).length && Object.keys(item)[0] === level1Keys[0]) })
-      console.log("default nestedObj : " + JSON.stringify(nestedObj))
       if(nestedObj){
         setRejReason(level1Keys[0])
         setCurRejCount(nestedObj[level1Keys[0]])
@@ -218,7 +187,6 @@ export default function Rejection(props) {
       }
     }
     else{
-      console.log(rejReason+" .. "+rejCount+" .. "+rejSubType)
       if (rejReason.length === 0 || rejCount == 0 || rejSubType.length === 0){
         setRejError('Please enter mandatory fields')
         valid = false;
@@ -265,13 +233,11 @@ export default function Rejection(props) {
       apiData.rejections = rejObj;
     }
 
-    console.log("apiData here "+JSON.stringify(apiData))
 
 
     setRefreshing(false);
     ApiService.getAPIRes(apiData, "POST", "rejection").then(apiRes => {
       setApiStatus(false);
-      console.log("update rejection "+apiRes)
       if (apiRes && apiRes.status) {
          setRejCount(0)
          closeDialog();

@@ -198,9 +198,6 @@ export default function RawMaterial(props) {
 
   }
   const startListening = () => {
-    console.log("partial start listening")
-    console.log(batchDet._id)
-
     if(!batchDet._id){
       let apiData = {
         "op": "get_batch_details",

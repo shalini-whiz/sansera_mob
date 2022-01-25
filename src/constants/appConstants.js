@@ -8,7 +8,8 @@ export const roles = {
 }
 export const taskState = {
   "FULFILL":"FULFILLED",
-  "CANCEL":"CANCELLED"
+  "CANCEL":"CANCELLED",
+  "DELIVER": "DELIVERED"
 
 }
 export const stageColors = {

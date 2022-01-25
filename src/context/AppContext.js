@@ -8,9 +8,7 @@ export default React.createContext({
   emptyBinCount: 0,
   filledBinCount:0,
   setUserEntity:(user) => {},
-  setProcessStage : (stage) => {console.log("stage 123 "+stage)
-  
-  },
+  setProcessStage : (stage) => {},
   setAppProcess: (process) => { },
   setTaskCount:(count) => {},
   setEmptyBinCount:(count) => {},

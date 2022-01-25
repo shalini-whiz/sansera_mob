@@ -84,11 +84,12 @@ export default function Login() {
       let apiData = await util.filterFormData([...loginData]);
       apiData.op = "login"
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "login")
-      console.log("login response " + JSON.stringify(apiRes))
       setApiStatus(false)
       if (!apiRes)
         setApiError("Please load again!")
       if (apiRes && apiRes.status) {
+        console.log(JSON.stringify(apiRes.response))
+        console.log(apiRes.response.role)
         if (apiRes.response.role === "QA") apiRes.response.roleName = "Quality Operator";
         AsyncStorage.setItem("userInfo", JSON.stringify(apiRes.response.message))
         AsyncStorage.setItem('token', apiRes.response.message.accessToken)
@@ -116,7 +117,6 @@ export default function Login() {
               return acc
             }, []);
             AsyncStorage.setItem("racks", JSON.stringify(switchPressedRacks));
-            console.log("switch pressed racks "+switchPressedRacks)
             AsyncStorage.setItem("bins", JSON.stringify(binSwitch));
             setBinTopics(JSON.stringify(binSwitch))
 

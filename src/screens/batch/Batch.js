@@ -52,7 +52,6 @@ export default function Batch(props) {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    console.log("id here " + props._id)
     if (isFocused) {
       loadForm();
     }

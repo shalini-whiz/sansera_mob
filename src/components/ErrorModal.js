@@ -19,13 +19,9 @@ const ErrorModal = (props) => {
   }
 
   const loadData = () => {
-    console.log(JSON.stringify(props))
-    console.log("props here  "+props.msg)
-    console.log(props.msg.split(":")[1])
     if(props.msg && props.msg.split(":")[1]){
       let k = props.msg.split(":")[1].toString();
       const msg = util.capitalize(k.replace(/-/g, " "))
-      console.log(msg)
       Alert.alert("Error : " +msg,"",[{text:"OK",onPress:(e) => okAction(e)}]);
     }
     else

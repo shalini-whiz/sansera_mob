@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert } from "react-native";
-import { util } from "../../commons";
 import { ApiService } from "../../httpservice";
 import UserContext from "../UserContext";
 import CustomModal from "../../components/CustomModal";
@@ -9,8 +8,10 @@ import { appTheme } from "../../lib/Themes";
 import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from "../../components/ErrorModal";
-import { taskState } from "../../constants/appConstants";
+import { roles, taskState,stageType } from "../../constants/appConstants";
 import PublishMqtt from "../mqtt/PublishMqtt";
+import AppContext from "../../context/AppContext";
+
 
 
 
@@ -27,7 +28,9 @@ export default function BinTask(props) {
   const [binTask, setBinTask] = useState([])
   const [stage, setStage] = useState('')
   const [task, setTask] = useState({})
-  const [binNo,setBinNo] = useState('')
+  const [binNo, setBinNo] = useState('')
+  let { appProcess, processStage } = React.useContext(AppContext);
+
   useEffect(() => {
     if (isFocused) {
       loadData();
@@ -40,27 +43,39 @@ export default function BinTask(props) {
     loadData()
   }, []);
 
-  const loadData =  async () => {
+  const loadData = async () => {
+   
+  //  props.setFilledBinCount("0");
     let stage = await AsyncStorage.getItem("stage")
     setStage(stage);
+
     let apiData = {};
     apiData.op = "get_request"
-    apiData.process_name = props.processEntity.process_name
+    
+    if(props.processEntity)
+    apiData.process_name =  props.processEntity.process_name 
     apiData.stage = stage
-    apiData.task_state = ["REQUESTED", "DELIVERED"]
+    if(userState.user.role === roles.MO)
+      apiData.task_state = ["REQUESTED", "DELIVERED"]
+    else if(userState.user.role === roles.FO)
+      apiData.task_state = ["REQUESTED"]
+    if(userState.user.role === roles.FO)
+      apiData.resolver_id = userState.user.id
+
     setBinTask([])
-    ApiService.getAPIRes(apiData,"POST","task").then(apiRes => {
-      console.log("apiRes here "+JSON.stringify(apiRes))
-      if(apiRes && apiRes.status){
-        if(apiRes.response.message && apiRes.response.message.length)
+    ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {
+      AsyncStorage.setItem(appProcess + "_" + processStage, "0");
+
+      if (apiRes && apiRes.status) {
+        if (apiRes.response.message && apiRes.response.message.length)
           setBinTask(apiRes.response.message);
       }
-      else if(apiRes.response.message){
+      else if (apiRes.response.message) {
         setBinTask([])
         setApiError(apiRes.response.message)
       }
     })
-    
+
 
   }
 
@@ -74,19 +89,18 @@ export default function BinTask(props) {
   }
 
   const showBin = async (e, type, item) => {
-    console.log("Show bin clicked ")
     let dialogTitle = "";
     let dialogMessage = "";
     setDialogType(type)
     let apiData = {}
     apiData.op = "get_next_element"
-    apiData.process_name = props.processEntity.process_name
-    apiData.stage_name = stage;
+    apiData.process_name = item.process_name
+    apiData.stage_name = item.stage;
+
     setApiStatus(true);
-    let apiRes = await ApiService.getAPIRes(apiData,"POST","process");
-    console.log("get next element "+JSON.stringify(apiRes));
-    if(apiRes && apiRes.status && apiRes.response.message){
-      PublishMqtt({topic: apiRes.response.message.element_id});
+    let apiRes = await ApiService.getAPIRes(apiData, "POST", "process");
+    if (apiRes && apiRes.status && apiRes.response.message) {
+      PublishMqtt({ topic: apiRes.response.message.element_id });
       setBinNo(apiRes.response.message.element_num)
       if (type === "fulfilled") {
         showDialog(true);
@@ -95,14 +109,21 @@ export default function BinTask(props) {
         setDialogTitle(dialogTitle);
         setDialogMessage(dialogMessage);
         setTask(item)
-
+      }
+      else if (type === "delivered"){
+        showDialog(true);
+        dialogTitle = "Deliver Filled Bin Request";
+        dialogMessage = "Are you sure you wish to confirm filled bin request "
+        setDialogTitle(dialogTitle);
+        setDialogMessage(dialogMessage);
+        setTask(item)
       }
     }
     else {
       Alert.alert("Bin not found")
     }
-    
-    
+
+
   }
 
   const openDialog = (e, type, item) => {
@@ -110,12 +131,11 @@ export default function BinTask(props) {
     let dialogTitle = "";
     let dialogMessage = "";
     setDialogType(type)
-    console.log("type : "+type)
     if (type === "cancel") {
       dialogTitle = "Cancel Filled Bin Request";
       dialogMessage = "Are you sure you wish to cancel filled bin request "
     }
-   
+
     setDialogTitle(dialogTitle);
     setDialogMessage(dialogMessage);
     setTask(item)
@@ -130,24 +150,25 @@ export default function BinTask(props) {
       apiData.task_state = taskState.FULFILL
       invokeApi = true;
     }
-    else if(dialogType === "cancel"){
+    else if (dialogType === "cancel") 
       apiData.task_state = taskState.CANCEL
-    }
-    console.log("api Data here " + JSON.stringify(apiData))
-
+    
+    else if (dialogType === "delivered") 
+      apiData.task_state = taskState.DELIVER
+    
     ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {
-      console.log("task update " + JSON.stringify(apiRes))
-      console.log(apiRes.status);
       if (apiRes && apiRes.status) {
         let msg = "";
         if (dialogType === "fulfilled") msg = "Task fulfilled"
         if (dialogType === "cancel") msg = "Task Cancelled";
+        if (dialogType === "delivered") msg = "Task Delivered";
+
         loadData();
         Alert.alert(msg);
         closeDialog();
       }
-      else if(apiRes.response.message)
-      setApiError(apiRes.response.message)
+      else if (apiRes.response.message)
+        setApiError(apiRes.response.message)
     })
   }
 
@@ -162,43 +183,72 @@ export default function BinTask(props) {
       <View style={styles.mainContainer}>
         {binTask && binTask.length ? binTask.map((item, index) => {
           return (<View style={{ flexDirection: 'row', padding: 5, backgroundColor: 'white', margin: 5 }} key={index}>
-            <View style={{flexDirection:'column',flex:3,padding:5}}>
-
-            <Text 
-            style={[AppStyles.subtitle, {justifyContent: 'flex-start',  color: 'black', padding: 1 }]}>
-              {item.requester_id === item.resolver_id ?  item.stage+" - Requested Filled Bin" : "Requested forklift "+item.resolver_emp_name+" to pick Filled Bin" }</Text>
+            <View style={{ flexDirection: 'column', flex: 3, padding: 5 }}>
+              {item.task_state.toLowerCase() === "requested" ? (userState.user.role === roles.MO ? <Text
+                style={[AppStyles.subtitle, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
+                {item.requester_id === item.resolver_id ? item.stage + " - Requested Filled Bin" : "Requested forklift " + item.resolver_emp_name + " to pick Filled Bin"}</Text> :
+                <Text
+                  style={[AppStyles.subtitle, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
+                  {"Supply to " + item.stage + " " + (item.stage.toLowerCase() === stageType.forging ?  " ( "+item.forge_machine_id+" ) " : '')}</Text>)  : 
+                <Text
+                  style={[AppStyles.subtitle, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
+                  {"Forklift " + item.resolver_emp_name+" delivered filled bin"}</Text>
+                  }
+              
+              {userState.user.role === roles.MO ?
               <Text
                 style={[AppStyles.info, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
-                {item.created_on}</Text>
-              </View>
-            {item.task_state.toLowerCase() === "requested" && item.requester_id === item.resolver_id ? 
+                {item.created_on}</Text> : 
+                <Text
+                  style={[AppStyles.info, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
+                  {"Requested By " + item.requester_emp_name+" "+item.created_on}</Text>
+                }
+            </View>
+            {item.task_state.toLowerCase() === "requested" && item.requester_id === item.resolver_id && userState.user.role === roles.MO  ?
               <TouchableOpacity style={[AppStyles.warnButtonContainer, { flex: 1, margin: 10 }]}
                 onPress={(e) => showBin(e, "fulfilled", item)}
               >
                 <Text style={AppStyles.warnButtonTxt}>SHOW BIN</Text>
-              </TouchableOpacity> 
-            
-            : false}
+              </TouchableOpacity>
 
-            {item.task_state.toLowerCase() === "requested" && item.requester_id != item.resolver_id ?
-              <TouchableOpacity style={[ { flex: 1, margin: 10 }]}
+              : false}
+            {item.task_state.toLowerCase() === "delivered" && userState.user.role === roles.MO ?
+              <TouchableOpacity style={[AppStyles.warnButtonContainer, { flex: 1, margin: 10 }]}
+                onPress={(e) => showBin(e, "fulfilled", item)}
+              >
+                <Text style={AppStyles.warnButtonTxt}>SHOW BIN</Text>
+              </TouchableOpacity>
+
+              : false}
+
+            {item.task_state.toLowerCase() === "requested" && item.requester_id != item.resolver_id && userState.user.role === roles.FO ?
+              <TouchableOpacity style={[AppStyles.warnButtonContainer, { flex: 1, margin: 10 }]}
+                onPress={(e) => showBin(e, "delivered", item)}
+              >
+                <Text style={AppStyles.warnButtonTxt}>SHOW BIN</Text>
+              </TouchableOpacity>
+
+              : false}
+
+            {(item.task_state.toLowerCase() === "requested" || item.task_state.toLowerCase() === "delivered") && item.requester_id != item.resolver_id ?
+              <TouchableOpacity style={[{ flex: 1, margin: 10 }]}
               >
               </TouchableOpacity>
 
               : false}
-            {item.task_state.toLowerCase() === "requested" ? 
-           
-            <TouchableOpacity style={[AppStyles.canButtonContainer, { flex: 1, margin: 10 }]}
-              onPress={(e) => openDialog(e, "cancel", item)}
-            >
-              <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
-            </TouchableOpacity> : false}
+            {item.task_state.toLowerCase() === "requested"  && userState.user.role === roles.MO ?
+
+              <TouchableOpacity style={[AppStyles.canButtonContainer, { flex: 1, margin: 10 }]}
+                onPress={(e) => openDialog(e, "cancel", item)}
+              >
+                <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
+              </TouchableOpacity> : false}
           </View>)
         }) : false}
-        {dialog && dialogType === "fulfilled" ? <CustomModal modalVisible={dialog} dialogTitle={dialogTitle}
-          dialogMessage={dialogMessage} 
+        {dialog && (dialogType === "fulfilled" || dialogType === "delivered") ? <CustomModal modalVisible={dialog} dialogTitle={dialogTitle}
+          dialogMessage={dialogMessage}
           okDialog={updateRequest} closeDialog={closeDialog}
-          okTitle={"PICK UP"}
+          okTitle={dialogType === "fulfilled" ? "PICK UP" : "DELIVERED"}
           container={
             <View style={{ flexDirection: 'column', alignItems: 'center', width: '70%' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
@@ -208,12 +258,12 @@ export default function BinTask(props) {
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Stage : </Text>
-                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle,fontFamily:appTheme.fonts.bold }]}>{stage} </Text>
+                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{stage} </Text>
 
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Process : </Text>
-                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{props.processEntity.process_name} </Text>
+                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{props.processEntity ? props.processEntity.process_name: ''} </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Requested On : </Text>
@@ -248,7 +298,7 @@ export default function BinTask(props) {
 
         {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
 
-        
+
 
       </View>
 

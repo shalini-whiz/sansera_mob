@@ -31,7 +31,6 @@ import AppContext from "../../context/AppContext";
 
   useImperativeHandle(ref, () => ({
     setFromOutside(selectedProcess) {
-      console.log("calling reload from child " + selectedProcess)
       reload(selectedProcess)
     }
   }), [])
@@ -51,8 +50,6 @@ import AppContext from "../../context/AppContext";
           let currentProcess = apiRes.response.message[0];
          
           if(currentProcess) {
-            console.log("processName selected " + JSON.stringify(selectedProcess))
-
             if (selectedProcess && selectedProcess.length > 0) {
               let currentProObj = apiRes.response.message.find(item => item.process_name === selectedProcess)
               props.processEntity(currentProObj)
@@ -62,7 +59,6 @@ import AppContext from "../../context/AppContext";
             else{
               let processEntity = apiRes.response.message[0];
               props.processEntity(processEntity)
-              console.log("on load .. " + processEntity.process_name)
               setProcessName(processEntity.process_name)
               setAppProcess(processEntity.process_name)
             }
@@ -90,16 +86,14 @@ import AppContext from "../../context/AppContext";
     let index = process.findIndex(item => item.process_name === value)
     setProcessName(value)  
     setAppProcess(value);
-   // console.log(JSON.stringify(process[index]));
-   console.log("index "+index);
+ 
     if(index > -1){
       props.processEntity(process[index])
     }
-    console.log("process name on handleChange "+value)
+   // console.log(process[index])
   };
 
   const reload = (processName) => {
-    console.log("called reload process "+processName);
     loadProcess(processName);
   }
 

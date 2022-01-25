@@ -30,7 +30,6 @@ function App() {
     let unreadEmptyBin = await AsyncStorage.getItem("emptyBinCount")
     let unreadFilledBin = await AsyncStorage.getItem("filledBinCount")
     if (user) {
-      console.log("app stage " + stage);
       setProcessStage(stage);
       setUser(JSON.parse(user))
       setIsLoggedIn(true)

@@ -22,10 +22,8 @@ export default function RejectionData(props) {
     let apiData = { }
     apiData.op = "get_rejection_summary"
     apiData.process_name = props.processEntity.process_name
-    console.log("apiData here "+JSON.stringify(apiData))
     setRejectionData([])
     ApiService.getAPIRes(apiData, "POST","rejection").then(apiRes => {
-      console.log("ApiRes "+JSON.stringify(apiRes))
       if(apiRes && apiRes.status){
         if(apiRes.response.message && apiRes.response.message.rejections)
           setRejectionData(apiRes.response.message.rejections)
