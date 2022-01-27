@@ -1,48 +1,63 @@
-import { CommonActions } from '@react-navigation/routers';
-import * as React from 'react';
 import { stageType } from '../../constants/appConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { EmptyBinContext } from '../../context/EmptyBinContext';
+import React from "react";
 
 //reference for navigation
 export const navigationRef = React.createRef();
+const { setUnReadFilledBinData } = React.useContext(EmptyBinContext)
 
-export const handleNotificationNavig = (notification, openNotificationHandler) => {
+export const handleNotificationNavig = async (notification, openNotificationHandler) => {
     try {
         let currentPage = navigationRef && navigationRef.current &&
             navigationRef.current.getCurrentRoute().name;
         console.log("current Page " + currentPage)
         let notifyData = JSON.parse(notification.data.data);
-        console.log("notifyData here "+JSON.stringify(notifyData))
-        // { "sender": "61c4171c4bae1e001dcb9e88", "process_name": "P-1-C-124", 
-        // "forge_machine_id": "61c44f3ae9bdcd001d8cb2c8", "stage": "Shot blasting",
-        //  "status": "REQUESTED", "receiver": "61c4171c4bae1e001dcb9e88", "task_id": "61ef9a00a2de49002cddd5a0" }
+        console.log("notifyData here " + JSON.stringify(notifyData))
+
         let navigationPage = '';
-        AsyncStorage.getItem('stage').then(currentStage => {
-            if(currentStage.toLowerCase() === notifyData.stage.toLowerCase()){
-                let processStage = notifyData.stage.toLowerCase();
-                if(processStage.toLowerCase() === stageType.shotblasting ||
-                    processStage.toLowerCase() === stageType.visual || 
-                    processStage.toLowerCase() === stageType.shotpeening ||
-                    processStage.toLowerCase() === stageType.oiling)
-                    navigationPage = 'StageHome';
-                    
+        let currentStage = await AsyncStorage.getItem("stage");
+
+        console.log("currentStage : " + currentStage + " .... " + notifyData.stage);
+
+        console.log("notify data on load " + JSON.stringify(notifyData))
+        if (notifyData.process_name && notifyData.stage && notifyData.task_id) {
+            let storageName = notifyData.process_name + "_" + notifyData.stage
+            console.log("storageName : " + storageName)
+            AsyncStorage.getItem(storageName).then(count => {
+                console.log("task count" + count);
+                let newFilledBinCount = 1;
+                if (count && count.length)
+                    newFilledBinCount = parseInt(count) + 1;
+                console.log("final task count " + newFilledBinCount);
+                AsyncStorage.setItem(storageName, newFilledBinCount.toString());
+                console.log("notification set " + newFilledBinCount)
+                setUnReadFilledBinData(newFilledBinCount.toString())
+            })
+        }
+
+        if (currentStage && currentStage.toLowerCase() === notifyData.stage.toLowerCase()) {
+            let processStage = notifyData.stage.toLowerCase();
+            if (processStage.toLowerCase() === stageType.shotblasting ||
+                processStage.toLowerCase() === stageType.visual ||
+                processStage.toLowerCase() === stageType.shotpeening ||
+                processStage.toLowerCase() === stageType.oiling)
+                navigationPage = 'StageHome';
+            if (processStage.toLowerCase() === stageType.forging)
+                navigationPage = 'ForgingHome'
+            if (processStage.toLowerCase() === stageType.shearing)
+                navigationPage = 'ShearingHome'
+        }
+        else {
+
+        }
+
+        openNotificationHandler(navigationPage, () => {
+            if (navigationRef && navigationRef.current) {
+                console.log("navigate page ");
+                navigationRef.current.navigate({ name: navigationPage, params: notifyData });
             }
-            else
-            {
-
-            }
-
-            openNotificationHandler(navigationPage, () => {
-                if (navigationRef && navigationRef.current) {
-                    console.log("navigate page ");
-                    navigationRef.current.navigate({ name: navigationPage, params: notifyData });
-                }
-            });
-        })
-
-            
-       
-
+        });
     } catch (e) {
         console.log(e);
     }

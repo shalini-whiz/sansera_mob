@@ -10,7 +10,8 @@ import { Picker } from '@react-native-picker/picker';
 import CustomModal from "../../components/CustomModal";
 
 
-export default function Rejection(props) {
+  export const Rejection = React.memo((props) => {
+
   const [apiError, setApiError] = useState('')
   const [apiStatus, setApiStatus] = useState(false);
   const userState = React.useContext(UserContext);
@@ -369,7 +370,7 @@ export default function Rejection(props) {
 
     </ScrollView>
   )
-}
+})
 const styles = StyleSheet.create({
   mainContainer: {
     justifyContent: "center",

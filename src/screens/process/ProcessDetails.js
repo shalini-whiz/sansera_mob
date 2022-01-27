@@ -138,11 +138,8 @@ export default function ProcessDetails(props) {
         }
       }
       if (props.unsetFields && props.unsetFields.length){
-        console.log("hit 123")
         let okIndex = created_process_schema.findIndex(item => item.key === "ok_component")
-        console.log(okIndex)
         if (props.unsetFields.indexOf('ok_component') > -1 && okIndex > -1) {
-          console.log("remove here")
           created_process_schema.splice(okIndex,1);
         }
       }

@@ -11,11 +11,11 @@ import ErrorModal from "../../components/ErrorModal";
 import { roles, taskState,stageType } from "../../constants/appConstants";
 import PublishMqtt from "../mqtt/PublishMqtt";
 import AppContext from "../../context/AppContext";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 
 
-
-export default function BinTask(props) {
+export const BinTask = React.memo((props) => {
   const [apiError, setApiError] = useState('')
   const [apiStatus, setApiStatus] = useState(false);
   const userState = React.useContext(UserContext);
@@ -30,6 +30,7 @@ export default function BinTask(props) {
   const [task, setTask] = useState({})
   const [binNo, setBinNo] = useState('')
   let { appProcess, processStage } = React.useContext(AppContext);
+  const { setUnReadFilledBinData } = React.useContext(EmptyBinContext)
 
   useEffect(() => {
     if (isFocused) {
@@ -44,16 +45,16 @@ export default function BinTask(props) {
   }, []);
 
   const loadData = async () => {
-   
-  //  props.setFilledBinCount("0");
     let stage = await AsyncStorage.getItem("stage")
     setStage(stage);
-
+    setTimeout(() => {
+      setUnReadFilledBinData("0");
+    }, 3000)
     let apiData = {};
     apiData.op = "get_request"
     
     if(props.processEntity)
-    apiData.process_name =  props.processEntity.process_name 
+      apiData.process_name =  props.processEntity.process_name 
     apiData.stage = stage
     if(userState.user.role === roles.MO)
       apiData.task_state = ["REQUESTED", "DELIVERED"]
@@ -61,9 +62,13 @@ export default function BinTask(props) {
       apiData.task_state = ["REQUESTED"]
     if(userState.user.role === roles.FO)
       apiData.resolver_id = userState.user.id
+    apiData.sort_by = 'updated_on'
+    apiData.sort_order = 'DSC'
 
+    console.log("apiData here "+JSON.stringify(apiData))
     setBinTask([])
     ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {
+     // console.log(JSON.stringify(apiRes))
       AsyncStorage.setItem(appProcess + "_" + processStage, "0");
 
       if (apiRes && apiRes.status) {
@@ -198,10 +203,10 @@ export default function BinTask(props) {
               {userState.user.role === roles.MO ?
               <Text
                 style={[AppStyles.info, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
-                {item.created_on}</Text> : 
+                  {item.updated_on}</Text> : 
                 <Text
                   style={[AppStyles.info, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
-                  {"Requested By " + item.requester_emp_name+" "+item.created_on}</Text>
+                  {"Requested By " + item.requester_emp_name + " " + item.updated_on}</Text>
                 }
             </View>
             {item.task_state.toLowerCase() === "requested" && item.requester_id === item.resolver_id && userState.user.role === roles.MO  ?
@@ -258,12 +263,12 @@ export default function BinTask(props) {
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Stage : </Text>
-                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{stage} </Text>
+                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{task.stage} </Text>
 
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Process : </Text>
-                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{props.processEntity ? props.processEntity.process_name: ''} </Text>
+                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{task.process_name} </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Requested On : </Text>
@@ -286,7 +291,7 @@ export default function BinTask(props) {
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Process : </Text>
-                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{props.processEntity.process_name} </Text>
+                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{task.process_name} </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Requested On : </Text>
@@ -305,7 +310,8 @@ export default function BinTask(props) {
 
     </ScrollView>
   )
-}
+})
+
 const styles = StyleSheet.create({
   mainContainer: {
     justifyContent: "center",

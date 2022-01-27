@@ -7,13 +7,13 @@ import { useIsFocused } from "@react-navigation/native";
 import { SvgCss } from 'react-native-svg';
 import { HexaStageSingle } from "../svgs/HexaStage"
 import { appTheme } from '../lib/Themes';
-import ShearingHome from './shearing/ShearingHome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ForgingHome from './forging/ForgingHome';
 import { stageColors, stageType } from '../constants/appConstants';
 import AppContext from '../context/AppContext';
-import { StageHome } from './generic/StageHome';
 import BilletHome from './billet/BilletHome';
+import { ForgingHome } from './forging/ForgingHome';
+import { ShearingHome } from './shearing/ShearingHome';
+import { StageHome } from './generic/StageHome';
 
 const styles = StyleSheet.create({
 
@@ -88,7 +88,6 @@ const  ProcessStages = (props) => {
     setApiStatus(true);
     ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
       setApiStatus(false)
-      console.log("apiRes here "+JSON.stringify(apiRes))
       if (apiRes) {
         if (apiRes.status) {
           let stages = [...apiRes.response.message.stages]

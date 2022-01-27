@@ -25,7 +25,8 @@ let stageSchema = [
 
 
 
-export default function WorkPlan(props) {
+  export const WorkPlan = React.memo((props) => {
+
   const [formData, setFormData] = useState([])
   const [apiError, setApiError] = useState('')
   const [apiStatus, setApiStatus] = useState(false);
@@ -198,7 +199,7 @@ export default function WorkPlan(props) {
       </View>
     </ScrollView>
   )
-}
+})
 const styles = StyleSheet.create({
   mainContainer:{
     justifyContent: "center",

@@ -10,7 +10,7 @@ import { ApiService } from "../../httpservice";
 import { roles } from "../../constants/appConstants";
 import { useIsFocused } from '@react-navigation/native';
 import { binMqttOptions } from "../../constants/urlConstants";
-import EmptyBinContext from "../../context/EmptyBinContext";
+import {EmptyBinContext} from "../../context/EmptyBinContext";
 
 
 
@@ -20,7 +20,7 @@ const BinMqtt = (props) => {
   let [user, setUser] = React.useState({})
   const [binClient, setBinClient] = useState(undefined);
   const [binListeningEvent, setBinListeningEvent] = useState(false);
-  const { saveUnReadEmptyBin, unReadEmptyBin  } = React.useContext(EmptyBinContext)
+  const { unReadEmptyBin, setUnReadEmptyBinData,unReadTask  } = React.useContext(EmptyBinContext)
 
   useEffect(() => {
     if (isFocused) {
@@ -106,12 +106,12 @@ const BinMqtt = (props) => {
               }
               AsyncStorage.setItem("emptyBinReq", JSON.stringify(request));
               if(updateBinCount){
-                AsyncStorage.getItem("unReadEmptyBin").then(count => {
+                AsyncStorage.getItem("emptyBinCount").then(count => {
                   let newEmptyBinCount = 1;
                   if (count && count.length)
                     newEmptyBinCount = parseInt(count) + 1;
                   setUnReadEmptyBin(newEmptyBinCount);
-                  AsyncStorage.setItem("unReadEmptyBin",newEmptyBinCount.toString())
+                  //AsyncStorage.setItem("unReadEmptyBin",newEmptyBinCount.toString())
                 })
               }              
             });
@@ -144,19 +144,26 @@ const BinMqtt = (props) => {
     console.log("on set "+count);
    // props.setEmptyBinCount(count.toString())
     AsyncStorage.setItem("unReadEmptyBin", count.toString());
-    saveUnReadEmptyBin(count.toString())
+    setUnReadEmptyBinData(count.toString())
 
   } 
 
   return (
     <View style={{ flexDirection: 'column',padding:5 }}>
-      {console.log("binmqtt value " + unReadEmptyBin)}
-
+      {console.log("unReadTask : "+unReadTask)}
       {user && user.role === roles.MO ? (binListeningEvent ?
         <View style={{ flexDirection: 'row',backgroundColor:'white' }}>
+          <View style={{flex:1,flexDirection:'row'}}>
           <Text style={{ color: appTheme.colors.successAction, marginRight: 10, fontFamily: appTheme.fonts.bold }}> CONNECTED
           </Text>
           <MaterialCommunityIcons name="wifi" size={30} color={appTheme.colors.successAction} style={{}} />
+          </View>
+          <View style={{flex:1}}>
+            <Text style={{ color: appTheme.colors.cancelAction, marginRight: 10, 
+              fontFamily: appTheme.fonts.bold
+            }}> {(unReadTask && unReadTask.length && unReadTask !="0" ? (" "+unReadTask+" unread notifications") : '')}
+          </Text>
+          </View>
         </View> : 
         <View style={{ flexDirection: 'row', backgroundColor: 'white' }}>
 

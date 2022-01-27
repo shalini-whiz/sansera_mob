@@ -5,10 +5,10 @@ import {Badge} from"react-native-paper"
 import UserContext from "../UserContext";
 import { useIsFocused } from '@react-navigation/native';
 import { appTheme } from "../../lib/Themes";
-import EmptyBin from "./EmptyBin";
-import BinTask from "./BinTask";
 import AppContext from "../../context/AppContext";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { EmptyBinContext } from "../../context/EmptyBinContext";
+import { EmptyBin } from "./EmptyBin";
+import { BinTask } from "./BinTask";
 
 
 
@@ -16,16 +16,11 @@ export default  TaskHome = React.memo((props) => {
   const [apiError, setApiError] = useState('')
   const [apiStatus, setApiStatus] = useState(false);
   const userState = React.useContext(UserContext);
-  const [dialog, showDialog] = useState(false);
-  const [dialogTitle, setDialogTitle] = useState('')
-  const [dialogMessage, setDialogMessage] = useState('');
-  const [dialogType, setDialogType] = useState('')
   const [refreshing, setRefreshing] = useState(false)
   const isFocused = useIsFocused();
-  const [tab, setTab] = useState('')
-  let {appProcess,processStage} = React.useContext(AppContext);
-  let [unReadEmptyBin,setUnReadEmptyBin] = useState('')
-  let [unReadFilledBin,setUnReadFilledBin] = useState('')
+  const [tab, setTab] = useState('') 
+  const { unReadEmptyBin,unReadFilledBin } = React.useContext(EmptyBinContext)
+
   useEffect(() => {
     if (isFocused) {
       if(tab === "") setTab('emptyBin')
@@ -36,12 +31,12 @@ export default  TaskHome = React.memo((props) => {
   }, [isFocused])
 
   const loadData = async() => {
-    let count = await AsyncStorage.getItem("unReadEmptyBin");
-    setUnReadEmptyBin(count)
-    console.log(appProcess + "_" + processStage)
-    let unReadFilledBinCount = await AsyncStorage.getItem(appProcess+"_"+processStage);
-    if(unReadFilledBinCount)
-      setUnReadFilledBin(unReadFilledBinCount)
+    // let count = await AsyncStorage.getItem("unReadEmptyBin");
+    // setUnReadEmptyBin(count)
+    // console.log(appProcess + "_" + processStage)
+    // let unReadFilledBinCount = await AsyncStorage.getItem(appProcess+"_"+processStage);
+    // if(unReadFilledBinCount)
+    //   setUnReadFilledBin(unReadFilledBinCount)
   }
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -72,9 +67,9 @@ export default  TaskHome = React.memo((props) => {
             }]}>Empty Bin Request
              
             </Text>
-          {props.emptyBinCount && props.emptyBinCount != "0" ?               
+          {unReadEmptyBin && unReadEmptyBin != "0" ?               
             <Badge style={{ color: 'white',position:'absolute',top:-10,left:150 }}
-              containerStyle={{ top: -25, left: 40 }}>{props.emptyBinCount}</Badge>  : false}
+              containerStyle={{ top: -25, left: 40 }}>{unReadEmptyBin}</Badge>  : false}
 
           
         </TouchableOpacity>
@@ -91,9 +86,10 @@ export default  TaskHome = React.memo((props) => {
             color: tab === "filledBin" ? 'white' : appTheme.colors.cardTitle,
           }]}>Filled Bin Request  
                      </Text>
-          {props.filledBinCount && props.filledBinCount != "0" ?
+                     {console.log("unReadFilledBin .. "+unReadFilledBin)}
+          {unReadFilledBin && unReadFilledBin != "0" ?
             <Badge style={{ color: 'white', position: 'absolute', top: -8, left: 140 }}
-              containerStyle={{ top: -25, left: 40 }}>{props.filledBinCount}</Badge> : false}
+              containerStyle={{ top: -25, left: 40 }}>{unReadFilledBin}</Badge> : false}
         </TouchableOpacity>
 
       </View>

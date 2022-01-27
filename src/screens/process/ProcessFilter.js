@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { forwardRef, useImperativeHandle } from 'react'
 import AppStyles from "../../styles/AppStyles";
 import AppContext from "../../context/AppContext";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
  function ProcessFilter(props,ref) {
   const userState = React.useContext(UserContext);
@@ -22,6 +23,7 @@ import AppContext from "../../context/AppContext";
 
   const {setAppProcess,appProcess} = useContext(AppContext)
 
+  
   useEffect(() => {
     if (isFocused) {
       loadProcess();
@@ -90,7 +92,6 @@ import AppContext from "../../context/AppContext";
     if(index > -1){
       props.processEntity(process[index])
     }
-    console.log(JSON.stringify(process[index]))
   };
 
   const reload = (processName) => {

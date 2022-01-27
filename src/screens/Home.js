@@ -13,7 +13,8 @@ import { roles } from "../constants/appConstants";
 import { View } from "react-native";
 import { useIsFocused } from '@react-navigation/native';
 import AppContext from "../context/AppContext";
-import BinTask from "./tasks/BinTask";
+import { EmptyBinContext } from "../context/EmptyBinContext";
+import { BinTask } from "./tasks/BinTask";
 
 
 
@@ -26,7 +27,7 @@ const Home = () => {
   const [dialogMessage, setDialogMessage] = React.useState('');
   const isFocused = useIsFocused();
   const { setProcessStage,setAppProcess } = React.useContext(AppContext)
-
+  let { setUnReadEmptyBinData, setUnReadFilledBinData, resetTaskData } = React.useContext(EmptyBinContext)
   useEffect(() => {
     if(isFocused){
       if (userState && userState.user) setUser(userState.user);
@@ -53,6 +54,9 @@ const Home = () => {
     await AsyncStorage.clear();
     setAppProcess('')
     setProcessStage('')
+    resetTaskData('')
+    setUnReadEmptyBinData('')
+    setUnReadFilledBinData('')
     setUser(null);
     clearTopics(userState && userState.user && userState.user.id);
   }

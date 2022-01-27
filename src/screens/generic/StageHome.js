@@ -14,71 +14,27 @@ import { useIsFocused } from '@react-navigation/native';
 import {Rejection } from "./Rejection"
 import { WorkPlan } from "./WorkPlan"
 import TaskHome from "../tasks/TaskHome";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 const Tab = createMaterialTopTabNavigator();
 
 
 
-export const StageHome =React.memo((props) => {
+export const StageHome =React.memo((props) =>
+ {
   const isFocused = useIsFocused();
   const processRef = useRef()
   const [processDet, setProcessDet] = React.useState({});
   let {  appProcess, processStage } = React.useContext(AppContext);
-  const [unReadEmptyBin,setUnReadEmptyBin] = React.useState('0');
-  const [unReadFilledBin, setUnReadFilledBin] = React.useState('0');
-  const [taskCount,setTaskCount] = React.useState('')
+
   useEffect(() => {
     if (isFocused) {
-      loadData();
     }
     return () => { }
   }, [isFocused])
 
-  const loadData = async() => {
-    let unReadEmptyBinCount = await AsyncStorage.getItem("unReadEmptyBin");
-    if (unReadEmptyBinCount) setUnReadEmptyBin(unReadEmptyBinCount)
-    let unReadFilledBinCount = null;
-    if(appProcess){
-      let unReadFilledBinCount = await AsyncStorage.setItem(appProcess + "_" + processStage);
-      if (unReadFilledBinCount) setUnReadFilledBin(unReadFilledBinCount);
-    }
-   
-    if (unReadFilledBinCount && unReadEmptyBinCount)
-      setTaskCount(parseInt(unReadFilledBinCount)+parseInt(unReadEmptyBinCount))
-    else if(unReadFilledBinCount)
-      setTaskCount(parseInt(unReadFilledBinCount))
-    else if(unReadEmptyBinCount)
-      setTaskCount(parseInt(unReadEmptyBinCount))
-
-  }
-
-  const setEmptyBinCount = (count) => {
-    console.log("received count "+count);
-    console.log(typeof count)
-    console.log("received count " + count);
-
-    AsyncStorage.setItem("unReadEmptyBin", count);
-    setUnReadEmptyBin(count);
-    if(unReadFilledBin)
-      setTaskCount(parseInt(unReadFilledBin) + parseInt(count))
-    if (unReadFilledBin && count)
-      setTaskCount(parseInt(unReadFilledBin) + parseInt(count))
-    else if (unReadFilledBin)
-      setTaskCount(parseInt(unReadFilledBin))
-    else if (count)
-      setTaskCount(parseInt(count))
-  }
-
-  const setFilledBinCount = (count) => {
-    AsyncStorage.setItem(appProcess + "_" + processStage, count);
-    setUnReadFilledBin(count);
-    if (unReadEmptyBin && count)
-      setTaskCount(parseInt(unReadEmptyBin) + parseInt(count))
-    else if (unReadEmptyBin)
-      setTaskCount(parseInt(unReadEmptyBin))
-    else if (count)
-      setTaskCount(parseInt(count))
-  }
+ 
+  
 
   const setProcess = (data) => {
     setProcessDet(data)
@@ -89,6 +45,8 @@ export const StageHome =React.memo((props) => {
   }
 
   const TabNavigation = memo(() => {
+    const { unReadTask } = React.useContext(EmptyBinContext)
+    console.log("stage home unReadTask here "+unReadTask)
 
     return (<NavigationContainer independent={true}>
       <Tab.Navigator
@@ -118,7 +76,8 @@ export const StageHome =React.memo((props) => {
 
         /> : false}
         <Tab.Screen 
-        name={"Tasks"}
+          // name={"Tasks" + (unReadTask && unReadTask.length && unReadTask !="0" ? (" ("+unReadTask+")") : '')}
+          name="Tasks"
           children={() => <TaskHome
            
             updateProcess={updateProcess}

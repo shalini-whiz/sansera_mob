@@ -1,20 +1,23 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef,memo } from "react";
 
 import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { appTheme } from '../../lib/Themes';
 import ProcessFilter from '../process/ProcessFilter';
-import WorkPlan from './WorkPlan';
-import Rejection from "./Rejection";
 import BinMqtt from "../mqtt/BinMqtt";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 import TaskHome from "../tasks/TaskHome";
+import { WorkPlan } from "./WorkPlan";
+import { Rejection } from "./Rejection";
+
 
 const Tab = createMaterialTopTabNavigator();
 
 
 
-export default function ForgingHome() {
+export const ForgingHome = React.memo((props) => {
+
   const processRef = useRef()
 
   const [processDet, setProcessDet] = React.useState({});
@@ -29,7 +32,8 @@ export default function ForgingHome() {
    // processRef.current.setFromOutside('HELLO from Parent')
   }
 
-  const TabNavigation = () => {
+  const TabNavigation = memo(() => {
+    const { unReadTask } = React.useContext(EmptyBinContext)
 
     return (<NavigationContainer independent={true}>
       <Tab.Navigator
@@ -70,7 +74,9 @@ export default function ForgingHome() {
             },
           })}
         />
-        <Tab.Screen name="Tasks"
+        <Tab.Screen 
+         // name={"Tasks" + (unReadTask && unReadTask.length && unReadTask != "0" ? (" (" + unReadTask + ")") : '')}
+          name="Tasks"
           children={() => <TaskHome
             processEntity={processDet}
             setProcessEntity={setProcess}
@@ -89,7 +95,8 @@ export default function ForgingHome() {
 
       </Tab.Navigator>
     </NavigationContainer>)
-  }
+  })
+
   return (
     <View style={{ flex: 1, flexDirection: 'column' }}>
       <BinMqtt />
@@ -98,4 +105,4 @@ export default function ForgingHome() {
 
     </View>
   );
-}
+})

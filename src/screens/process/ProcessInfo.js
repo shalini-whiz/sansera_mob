@@ -88,22 +88,26 @@ export default function ProcessInfo(props) {
   }, []);
 
   const loadForm = async() => {
-    if (props && props.processEntity) {
+    if (props && props.processEntity && props.processEntity.process) {
      
       
       let currentStage = await AsyncStorage.getItem("stage");
       let processSchema = []
-      console.log(currentStage)
       
-      if(currentStage.toLowerCase() === stageType.billetpunching){
+      if(currentStage && currentStage.toLowerCase() === stageType.billetpunching){
         processSchema = [...created_process_schema]
         processSchema.push(rejection_schema)
         processSchema.push(one_punch_billet_schema)
         processSchema.push(two_punch_billet_schema)
         processSchema.push(three_punch_billet_schema)
-        console.log("processChema here "+JSON.stringify(processSchema))
       }
-
+      if ( currentStage && (currentStage.toLowerCase() === stageType.shotblasting || currentStage.toLowerCase() === stageType.visual || 
+      currentStage.toLowerCase() === stageType.shotpeening || currentStage.toLowerCase() === stageType.oiling)) {
+        processSchema = [...created_process_schema]
+        processSchema.push(ok_component_schema);
+        processSchema.push(rejection_schema)
+       
+      }
       processSchema.map(item => {
         item["value"] = props.processEntity[item.key] ? props.processEntity[item.key] + "" : "";
 
@@ -119,7 +123,6 @@ export default function ProcessInfo(props) {
       });
 
       if (props.fields && props.fields.length) {
-        console.log(JSON.stringify(props.processEntity))
         let rej_comp_index = processSchema.findIndex(item => item.key === "total_rejections")
         let ok_comp_index = processSchema.findIndex(item => item.key === "ok_component")
         let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === currentStage)
@@ -127,8 +130,14 @@ export default function ProcessInfo(props) {
           if (props.processEntity.process[stage_ok_comp_index] && props.processEntity.process[stage_ok_comp_index].total_rejections)
             processSchema[rej_comp_index].value = props.processEntity.process[stage_ok_comp_index].total_rejections + ""
         }
+        if (currentStage && currentStage.toLowerCase() != "shearing" && stage_ok_comp_index > -1 && ok_comp_index > -1) {
+          processSchema[ok_comp_index].value = props.processEntity.process[stage_ok_comp_index].ok_component + ""
+        }
+        else if (ok_comp_index > -1) {
+          processSchema[ok_comp_index].value = "0"
+        }
       }
-      if (currentStage.toLowerCase() === stageType.billetpunching) {
+      if (currentStage && currentStage.toLowerCase() === stageType.billetpunching) {
         let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === currentStage)
         
         if(stage_ok_comp_index > -1){

@@ -7,7 +7,6 @@ import { SvgCss } from 'react-native-svg';
 import { AppIcon } from '../svgs/AppIcon';
 import { appTheme } from "../lib/Themes";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { clearTopics } from './notification/NotifyHandler';
 import Login from "./Login";
 import AppContext from "../context/AppContext";
 

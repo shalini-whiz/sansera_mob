@@ -10,7 +10,8 @@ import SplashScreen from 'react-native-splash-screen';
 import Home from './src/screens/Home';
 import AppContextState from './src/context/AppContextState';
 import AppContext from './src/context/AppContext';
-import EmptyBinContext from './src/context/EmptyBinContext';
+import {EmptyBinContext, EmptyBinContextProvider} from "./src/context/EmptyBinContext"
+
 global.Buffer = global.Buffer || require('buffer').Buffer;
 global.process.version = '';
 const Stack = createStackNavigator()
@@ -18,39 +19,36 @@ const Stack = createStackNavigator()
 function App() {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [user, setUser] = React.useState({})
-  const [unReadEmptyBin,setUnReadEmptyBin] = useState('0');
   const [token, setToken] = React.useState(null)
   const [isLoaded, setLoaded] = React.useState(false)
-  const { processStage, setProcessStage, userEntity,setFilledBinCount,setTaskCount } = React.useContext(AppContext)
+  const { processStage, setProcessStage } = React.useContext(AppContext)
+  const { setUnReadFilledBinData } = React.useContext(EmptyBinContext)
 
   const saveUser = (userState) => {
     setUser(userState)
   };
 
-  const saveUnReadEmptyBin = (count) => {
-    setUnReadEmptyBin(count)
-  }
+  
   const getUserInfo = async () => {
     let user = await AsyncStorage.getItem("userInfo");
     let stage = await AsyncStorage.getItem("stage");
-    let unreadEmptyBin = await AsyncStorage.getItem("emptyBinCount")
-    let unreadFilledBin = await AsyncStorage.getItem("filledBinCount")
+   
     if (user) {
       setProcessStage(stage);
       setUser(JSON.parse(user))
       setIsLoggedIn(true)
-      setFilledBinCount(unreadFilledBin)
-      console.log("app js unread empty bin "+unreadEmptyBin)
-      if (unreadEmptyBin) setUnReadEmptyBin(unreadEmptyBin)
-      else setUnReadEmptyBin("0")
-      setTaskCount(parseInt(unreadEmptyBin)+parseInt(unreadFilledBin))
     }
     setLoaded(false);
   }
   //open page notification onclick of notification
   const openNotificationHandler = (pMoveTo, navigateTo) => {
     setTimeout(() => {
+      console.log("pMoveTo ... " + JSON.stringify(pMoveTo))
+
+      console.log("navigateTo ... "+JSON.stringify(navigateTo))
       navigateTo();
+
+
     }, 50);
   };
 
@@ -83,8 +81,8 @@ function App() {
 
   return (
     <UserContext.Provider value={{ user, saveUser }}>
-      <EmptyBinContext.Provider value={{ unReadEmptyBin, saveUnReadEmptyBin}}>
       <AppContextState>
+        <EmptyBinContextProvider>
       <NavigationContainer independent={true} ref={navigationRef}>
         <Stack.Navigator
           initialRouteName={isLoggedIn ? 'Home' : 'Login'}
@@ -93,8 +91,9 @@ function App() {
           <Stack.Screen name="Login" component={Login} />
         </Stack.Navigator>
       </NavigationContainer>
+        </EmptyBinContextProvider>
+
       </AppContextState>
-      </EmptyBinContext.Provider>
     </UserContext.Provider>
   )
 }

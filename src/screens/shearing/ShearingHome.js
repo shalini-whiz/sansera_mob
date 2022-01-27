@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect,useRef,memo } from "react";
 
 import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -10,12 +10,12 @@ import RawMaterial from './RawMaterial';
 import BinMqtt from "../mqtt/BinMqtt";
 import { useIsFocused } from '@react-navigation/native';
 import TaskHome from "../tasks/TaskHome";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 const Tab = createMaterialTopTabNavigator();
 
 
-
-export default function ShearingHome(props) {
+export const ShearingHome = React.memo((props) =>  {
   const processRef = useRef()
   const isFocused = useIsFocused();
   const [processDet, setProcessDet] = React.useState({});
@@ -36,7 +36,8 @@ export default function ShearingHome(props) {
     //processRef.current.setFromOutside('HELLO from Parent')
   }
   
-  const TabNavigation = () => {
+  const TabNavigation = memo(() => {
+    const { unReadTask } = React.useContext(EmptyBinContext)
 
     return (<NavigationContainer independent={true}>
       <Tab.Navigator
@@ -77,7 +78,9 @@ export default function ShearingHome(props) {
             },
           })}
         />
-        <Tab.Screen name="Tasks"
+        <Tab.Screen 
+          // name={"Tasks" + (unReadTask && unReadTask.length && unReadTask != "0" ? (" (" + unReadTask + ")") : '')}
+          name="Tasks"
           children={() => <TaskHome 
             processEntity={processDet}
             setProcessEntity={setProcess}
@@ -96,7 +99,7 @@ export default function ShearingHome(props) {
 
       </Tab.Navigator>
     </NavigationContainer>)
-  }
+  })
   return (
     <View style={{flex:1,flexDirection:'column'}}>
       <BinMqtt />
@@ -105,4 +108,4 @@ export default function ShearingHome(props) {
       
     </View>
   );
-}
+})

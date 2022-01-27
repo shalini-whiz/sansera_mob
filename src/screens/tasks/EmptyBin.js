@@ -8,10 +8,12 @@ import { appTheme } from "../../lib/Themes";
 import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from "../../components/ErrorModal";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 
 
-export default function EmptyBin(props) {
+  export const EmptyBin = React.memo((props) =>{
+
   const [apiError, setApiError] = useState('')
   const [apiStatus, setApiStatus] = useState(false);
   const userState = React.useContext(UserContext);
@@ -24,9 +26,12 @@ export default function EmptyBin(props) {
   const [notifications,setNotifications] = useState([])
   const [stage,setStage] = useState('')
   const [bin,setBin] = useState({})
+  const {  setUnReadEmptyBinData } = React.useContext(EmptyBinContext)
   useEffect(() => {
     if (isFocused) {
+     
       loadData();
+     
     }
     return () => { }
   }, [isFocused])
@@ -36,17 +41,17 @@ export default function EmptyBin(props) {
     loadData()
   }, []);
 
-  const loadData = () => {
-   // props.setEmptyBinCount("0");
-
-    AsyncStorage.getItem("emptyBinReq").then(request => {
-      setNotifications(JSON.parse(request))   
-    })
-    AsyncStorage.setItem("unReadEmptyBin", "0");
-
-    AsyncStorage.getItem("stage").then(stage => {
-      setStage(stage)
-    })
+  const loadData = async () => {
+   
+    let request = await AsyncStorage.getItem("emptyBinReq");
+    setNotifications(JSON.parse(request))   
+    let stage = await AsyncStorage.getItem("stage");
+    setStage(stage)
+    setTimeout(() => {
+      console.log("reset here ")
+      setUnReadEmptyBinData("0");
+    }, 3000)
+    
     
   }
   
@@ -94,11 +99,8 @@ export default function EmptyBin(props) {
       apiData.process_name = props.processEntity.process_name
       apiData.element_num = bin.element_num
       apiData.element_id = bin.element_id
-      console.log(JSON.stringify(props.processEntity))
-      console.log(stage);
 
       let currentStage = props.processEntity.process.find(item => item.stage_name === stage)
-      console.log("currentStage "+JSON.stringify(currentStage))
       
       if (currentStage && currentStage.parent_stage && currentStage.parent_stage.length){
         apiData.stage_name = currentStage.parent_stage
@@ -184,7 +186,7 @@ export default function EmptyBin(props) {
 
     </ScrollView>
   )
-}
+})
 const styles = StyleSheet.create({
   mainContainer: {
     justifyContent: "center",

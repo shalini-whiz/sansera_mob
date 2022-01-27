@@ -14,6 +14,7 @@ import { default as AppStyles } from "../../styles/AppStyles";
 import WeightDetails from "../process/WeightDetails";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RequestBin from "./RequestBin";
+import ProcessInfo from "../process/ProcessInfo";
 
 
 let stageSchema = [
@@ -175,10 +176,10 @@ export const  WorkPlan = React.memo((props) => {
           </View>
           <View style={{ flex: 3, flexDirection: 'row', }}>
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
-              <ProcessDetails
+              <ProcessInfo
                 title="PROCESS DETAILS"
                 processEntity={props && props.processEntity ? props.processEntity : {}}
-                fields={["total_rejections"]}
+                fields={["ok_component","total_rejections"]}
 
                 />
             </View>
