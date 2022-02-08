@@ -114,11 +114,7 @@ export default function WorkPlan(props) {
 
     setFormData(validFormData);
     if (!isError) {
-
       setApiStatus(true);
-
-      console.log("apiData here "+JSON.stringify(apiData));
-      return;
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
         setApiStatus(false);
         if (apiRes && apiRes.status) {
@@ -126,9 +122,6 @@ export default function WorkPlan(props) {
             Alert.alert("Process updated");
             props.setProcessEntity(apiRes.response.message)
             props.updateProcess()
-
-            // setBatchDet(apiRes.response.message);
-            //openDialog(apiRes.response.message);
             util.resetForm(formData);
           }
         }
@@ -185,7 +178,10 @@ export default function WorkPlan(props) {
               <ProcessInfo 
                 title="PROCESS DETAILS"
                 processEntity={props && props.processEntity ? props.processEntity : {}}
+                fields={["total_rejections"]}
+
                 />
+             
             </View>
            
           </View>

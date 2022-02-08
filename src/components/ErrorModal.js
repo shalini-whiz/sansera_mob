@@ -22,10 +22,13 @@ const ErrorModal = (props) => {
     if(props.msg && props.msg.split(":")[1]){
       let k = props.msg.split(":")[1].toString();
       const msg = util.capitalize(k.replace(/-/g, " "))
-      Alert.alert("Error : " +msg,"",[{text:"OK",onPress:(e) => okAction(e)}]);
+      let alertMsg = props.type && props.type === "info" ? msg : "Error : " + msg
+      Alert.alert(alertMsg,"",[{text:"OK",onPress:(e) => okAction(e)}]);
     }
-    else
-      Alert.alert("Error : " + props.msg, "", [{ text: "OK", onPress: (e) => okAction(e) }]);
+    else{
+      let alertMsg = props.type && props.type === "info" ? props.msg : "Error : " + props.msg
+      Alert.alert(alertMsg, "", [{ text: "OK", onPress: (e) => okAction(e) }]);
+    }
 
   }
   return (

@@ -86,7 +86,6 @@ export default  TaskHome = React.memo((props) => {
             color: tab === "filledBin" ? 'white' : appTheme.colors.cardTitle,
           }]}>Filled Bin Request  
                      </Text>
-                     {console.log("unReadFilledBin .. "+unReadFilledBin)}
           {unReadFilledBin && unReadFilledBin != "0" ?
             <Badge style={{ color: 'white', position: 'absolute', top: -8, left: 140 }}
               containerStyle={{ top: -25, left: 40 }}>{unReadFilledBin}</Badge> : false}

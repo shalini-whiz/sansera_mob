@@ -45,9 +45,12 @@ export default function Login() {
     return () => { }
   }, [])
 
-  const loadForm = () => {
+  const loadForm = async() => {
     let loginSchemaData = [...loginSchema];
-    setLoginData(util.formatForm(loginSchemaData))
+    let loginForm = await util.formatForm(loginSchemaData);
+    loginForm[0].value = "emp"
+    loginForm[1].value = "password"
+    setLoginData(loginForm)
   }
 
   const handleChange = (name) => value => {
@@ -88,8 +91,6 @@ export default function Login() {
       if (!apiRes)
         setApiError("Please load again!")
       if (apiRes && apiRes.status) {
-        console.log(JSON.stringify(apiRes.response))
-        console.log(apiRes.response.role)
         if (apiRes.response.role === "QA") apiRes.response.roleName = "Quality Operator";
         AsyncStorage.setItem("userInfo", JSON.stringify(apiRes.response.message))
         AsyncStorage.setItem('token', apiRes.response.message.accessToken)
@@ -176,6 +177,7 @@ export default function Login() {
                       placeholder={item.placeholder}
                       placeholderTextColor="grey"
                       onChangeText={handleChange(item.key)}
+                      value={item.value}
                       secureTextEntry={item.secureTextEntry ? true : false} />
                     {item.secureTextEntry != undefined && item.value && item.value.length ?
                       <Icon

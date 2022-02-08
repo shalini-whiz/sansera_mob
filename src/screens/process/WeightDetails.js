@@ -20,8 +20,13 @@ let created_process_schema = [
     required: true, "label": "batch created on", type: "string"
   },
   {
-    "key": "ok_component", displayName: "End Billet Weight", placeholder: "", value: "", error: "",
-    required: true, type:"string"
+    "key": "ok_end_billets_weight", displayName: "OK Billets Weight (kg)", placeholder: "", value: "", error: "",
+    required: true, type: "string"
+  },
+ 
+  {
+    "key": "ok_component", displayName: "OK Billets (count)", placeholder: "", value: "", error: "",
+    required: true, type: "string"
   },
   {
     "key": "updated_on", displayName: "Last Updated", placeholder: "", value: "",
@@ -67,6 +72,9 @@ export default function WeightDetails(props) {
         }
         if (item.key === "hold_materials_weight" && props.processEntity.process[stage_ok_comp_index]){
           item.value = props.processEntity.process[stage_ok_comp_index][item.key]+ ""
+        }
+        if (value.toLowerCase() === "shearing" && item.key === "ok_end_billets_weight" && props.processEntity.process[stage_ok_comp_index]) {
+          item.value = props.processEntity.process[stage_ok_comp_index][item.key] + ""
         }
         if (value.toLowerCase() === "shearing" && item.key === "ok_component" && props.processEntity.process[stage_ok_comp_index]) {
           item.value = props.processEntity.process[stage_ok_comp_index][item.key] + ""

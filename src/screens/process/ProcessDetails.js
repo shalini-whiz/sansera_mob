@@ -34,9 +34,13 @@ let batchSchema = [
     required: true, lowerCase: true, "label": "Component", select: true, options: [],
     keyName: "_id", valueName: "value",lowerCase:false
   },
+  // {
+  //   "key": "component_count", displayName: "Components Required (Count)", placeholder: "", value: "",
+  //   error: "", required: true, label: "components", type: "number",nonZero:true
+  // },
   {
-    "key": "component_count", displayName: "Components Required (Count)", placeholder: "", value: "",
-    error: "", required: true, label: "components", type: "number",nonZero:true
+    "key": "component_weight", displayName: "Total Weight (kg)", placeholder: "", value: "",
+    error: "", required: true, label: "component_weight", type: "number", nonZero: true
   },
 ]
 
@@ -57,9 +61,13 @@ let created_process_schema = [
     "key": "heat_num", displayName: "Heat Number", placeholder: "", value: "",
     error: "", required: true, label: "components", type: "string"
   },
+  // {
+  //   "key": "component_count", displayName: "Required Components", placeholder: "", value: "",
+  //   error: "", required: true, label: "components", type: "number"
+  // },
   {
-    "key": "component_count", displayName: "Required Components", placeholder: "", value: "",
-    error: "", required: true, label: "components", type: "number"
+    "key": "component_weight", displayName: "Total Quantity (kg)", placeholder: "", value: "",
+    error: "", required: true, label: "component_weight", type: "number", nonZero: true
   },
   {
     "key": "component_id", displayName: "Component Id", placeholder: "", value: "",

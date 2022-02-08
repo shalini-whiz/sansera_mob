@@ -73,6 +73,11 @@ export default StyleSheet.create({
     fontFamily: appTheme.fonts.regular,
     padding: 5,
   },
+  titleWithBold:{
+    textAlign: 'center',
+    fontSize: 20,
+    fontFamily: appTheme.fonts.bold,
+  },
   title: {
     textAlign: 'center',
     fontSize: 20,
@@ -81,6 +86,10 @@ export default StyleSheet.create({
   subtitle:{
     fontSize: 16,
     fontFamily: appTheme.fonts.regular,
+  },
+  subtitleWithBold: {
+    fontSize: 16,
+    fontFamily: appTheme.fonts.bold,
   },
   info:{
     fontSize:12,

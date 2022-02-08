@@ -17,5 +17,9 @@ dateUtil.toDateFormat = (input, dateFormat) => {
   if (!dateFormat) dateFormat = "DD-MM-YYYY";
   return moment(new Date(input)).format(dateFormat);
 };
-
+dateUtil.toTimeFormat = (input, dateFormat) => {
+  if (!input) return "";
+  if (!dateFormat) dateFormat = "HH:MM";
+  return moment(new Date(input)).format(dateFormat);
+};
 export default dateUtil;

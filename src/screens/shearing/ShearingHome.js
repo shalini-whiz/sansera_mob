@@ -11,6 +11,8 @@ import BinMqtt from "../mqtt/BinMqtt";
 import { useIsFocused } from '@react-navigation/native';
 import TaskHome from "../tasks/TaskHome";
 import { EmptyBinContext } from "../../context/EmptyBinContext";
+import { FifoBoard } from "../process/FifoBoard";
+import { ConsumptionData } from "../generic/ConsumptionData";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -64,19 +66,11 @@ export const ShearingHome = React.memo((props) =>  {
           })} />
         <Tab.Screen name="Raw Material" 
           children={() => <RawMaterial 
-            processEntity={processDet}
-            setProcessEntity={setProcess}
-            updateProcess={updateProcess}
-
-          />}
-
-          listeners={({ navigation, route }) => ({
-            tabPress: e => {
-              if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Raw Material')
-              }
-            },
-          })}
+            processEntity={processDet} setProcessEntity={setProcess} updateProcess={updateProcess} />}
+        />
+        <Tab.Screen name="Consumption Data"
+          children={() => <ConsumptionData
+            processEntity={processDet} setProcessEntity={setProcess} updateProcess={updateProcess} />}
         />
         <Tab.Screen 
           // name={"Tasks" + (unReadTask && unReadTask.length && unReadTask != "0" ? (" (" + unReadTask + ")") : '')}
@@ -96,7 +90,23 @@ export const ShearingHome = React.memo((props) =>  {
           })}
         />
 
+        <Tab.Screen
+          // name={"Tasks" + (unReadTask && unReadTask.length && unReadTask != "0" ? (" (" + unReadTask + ")") : '')}
+          name="FIFO Board"
+          children={() => <FifoBoard
+            processEntity={processDet}
+            setProcessEntity={setProcess}
+            updateProcess={updateProcess}
+          />}
 
+          listeners={({ navigation, route }) => ({
+            tabPress: e => {
+              if (route.state && route.state.routeNames.length > 0) {
+                navigation.navigate('Tasks')
+              }
+            },
+          })}
+        />
       </Tab.Navigator>
     </NavigationContainer>)
   })

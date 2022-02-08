@@ -25,9 +25,13 @@ let created_process_schema = [
     "key": "heat_num", displayName: "Heat Number", placeholder: "", value: "",
     error: "", required: true, label: "components", type: "string"
   },
+  // {
+  //   "key": "component_count", displayName: "Required Components", placeholder: "", value: "",
+  //   error: "", required: true, label: "components", type: "number"
+  // },
   {
-    "key": "component_count", displayName: "Required Components", placeholder: "", value: "",
-    error: "", required: true, label: "components", type: "number"
+    "key": "component_weight", displayName: "Total Quantity (kg)", placeholder: "", value: "",
+    error: "", required: true, label: "component_weight", type: "number", nonZero: true
   },
   {
     "key": "component_id", displayName: "Component Id", placeholder: "", value: "",
@@ -94,6 +98,12 @@ export default function ProcessInfo(props) {
       let currentStage = await AsyncStorage.getItem("stage");
       let processSchema = []
       
+      if(currentStage && currentStage.toLowerCase() === stageType.forging){
+        processSchema = [...created_process_schema]
+        processSchema.push(forge_schema)
+        processSchema.push(ok_component_schema)
+        processSchema.push(rejection_schema)
+      }
       if(currentStage && currentStage.toLowerCase() === stageType.billetpunching){
         processSchema = [...created_process_schema]
         processSchema.push(rejection_schema)
@@ -121,7 +131,7 @@ export default function ProcessInfo(props) {
        
 
       });
-
+      console.log("props "+JSON.stringify(props))
       if (props.fields && props.fields.length) {
         let rej_comp_index = processSchema.findIndex(item => item.key === "total_rejections")
         let ok_comp_index = processSchema.findIndex(item => item.key === "ok_component")
@@ -139,7 +149,8 @@ export default function ProcessInfo(props) {
       }
       if (currentStage && currentStage.toLowerCase() === stageType.billetpunching) {
         let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === currentStage)
-        
+     
+
         if(stage_ok_comp_index > -1){
           let properties = props.processEntity.process[stage_ok_comp_index].properties;
           let punchKeys = ["one punch billet", "two punch billet", "three punch billet"];

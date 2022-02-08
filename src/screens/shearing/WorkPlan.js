@@ -21,12 +21,16 @@ import PublishMqtt from "../mqtt/PublishMqtt";
 
 let stageWeightSchema = [
   {
-    "key": "hold_materials_weight", displayName: "Hold Material Weight (kg)", placeholder: "", value: 0, error: "",
-    required: true, "label": "Hold Material Weight", type: "number", defaultValue: 0, nonZero: true
+    "key": "ok_component", displayName: "Count of OK Billets", placeholder: "", value: 0, error: "",
+    required: true, "label": "Billet Weight", type: "number", defaultValue: 0, nonZero: true
   },
   {
-    "key": "ok_component", displayName: "End Billet Weight (kg)", placeholder: "", value: 0, error: "",
+    "key": "ok_end_billets_weight", displayName: "Weight of OK Billets (kg)", placeholder: "", value: 0, error: "",
     required: true, "label": "Billet Weight", type: "number", defaultValue: 0, nonZero: true
+  },
+  {
+    "key": "hold_materials_weight", displayName: "Hold Material Weight (kg)", placeholder: "", value: 0, error: "",
+    required: false, "label": "Hold Material Weight", type: "number", defaultValue: 0, 
   },
   // {
   //   "key": "ok_component", displayName: "OK Component (Count)", placeholder: "", value: 0,
@@ -139,7 +143,6 @@ export default function WorkPlan(props) {
     setBatchFormData(validFormData);
 
     if (!isError) {
-
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
         setApiStatus(false);
@@ -195,14 +198,14 @@ export default function WorkPlan(props) {
               </TouchableOpacity>
             </View>
           </View>
-          <View style={{ flex: 3, flexDirection: 'row', }}>
+          <View style={{ flex: 4, flexDirection: 'row', }}>
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <ProcessDetails
-                title="Process Details"
+                title="PROCESS DETAILS"
                 processEntity={props && props.processEntity ? props.processEntity : {}} />
             </View>
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
-              <WeightDetails title="Weight Details"
+              <WeightDetails title="WEIGHT DETAILS"
                 processEntity={props && props.processEntity ? props.processEntity : {}} />
             </View>
           </View>

@@ -178,15 +178,12 @@ export const  WorkPlan = React.memo((props) => {
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <ProcessInfo
                 title="PROCESS DETAILS"
+                fields={["ok_component", "total_rejections"]}
                 processEntity={props && props.processEntity ? props.processEntity : {}}
-                fields={["ok_component","total_rejections"]}
 
                 />
             </View>
-            {/* <View style={{ flex: 1,backgroundColor:'white',margin:5,padding:5 }}>
-              <WeightDetails title="Weight Details"
-                processEntity={props && props.processEntity ? props.processEntity : {}} />
-            </View> */}
+           
           </View>
         </View>
         {dialog ? <CustomModal

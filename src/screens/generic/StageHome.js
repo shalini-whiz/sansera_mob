@@ -34,8 +34,6 @@ export const StageHome =React.memo((props) =>
   }, [isFocused])
 
  
-  
-
   const setProcess = (data) => {
     setProcessDet(data)
   }
@@ -79,9 +77,9 @@ export const StageHome =React.memo((props) =>
           // name={"Tasks" + (unReadTask && unReadTask.length && unReadTask !="0" ? (" ("+unReadTask+")") : '')}
           name="Tasks"
           children={() => <TaskHome
-           
+            processEntity={processDet}
+            setProcessEntity={setProcess}
             updateProcess={updateProcess}
-         
             
           />}
         />

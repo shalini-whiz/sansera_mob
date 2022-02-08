@@ -47,7 +47,8 @@ const urls = {
     mqtt: SERVER_URL +"api/mqtt-service",
     rejection: SERVER_URL +"api/rejection",
     org: SERVER_URL +"api/org-service",
-    task: SERVER_URL +"api/operator-task"
+    task: SERVER_URL +"api/operator-task",
+    process_consumption: SERVER_URL +"api/process-consumption"
 };
 
 

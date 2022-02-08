@@ -170,6 +170,7 @@ export default function RawMaterial(props) {
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
+          Alert.alert("Reject Weight updated");
           props.setProcessEntity(apiRes.response.message)
           setBatchDet(apiRes.response.message);
           //openDialog(apiRes.response.message);

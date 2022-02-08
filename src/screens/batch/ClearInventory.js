@@ -45,6 +45,8 @@ export default function ClearInventory() {
       "op": "list_raw_material_by_status",
       "status": ["APPROVED", "REJECTED"]
     }
+    apiData.sort_by = 'updated_on'
+    apiData.sort_order = 'DSC'
     setRefreshing(false);
     ApiService.getAPIRes(apiData, "POST", "list_raw_material_by_status").then(apiRes => {
       setApiStatus(false);

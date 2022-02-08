@@ -9,9 +9,8 @@ import FontAwesome from "react-native-vector-icons/FontAwesome"
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import RejectionData from "./RejectionData";
-import ProcessFifo from "./ProcessFifo";
-import { green100 } from "react-native-paper/lib/typescript/styles/colors";
 import ErrorModal from "../../components/ErrorModal";
+import { ProcessFifo } from "./ProcessFifo";
 
 
 
@@ -42,6 +41,8 @@ export default function ProcessList() {
     let apiData = {
       "op": "get_process",
     }
+    apiData.sort_by = 'updated_on'
+    apiData.sort_order = 'DSC'
     setRefreshing(false);
     ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
       setApiStatus(false);
@@ -77,6 +78,9 @@ export default function ProcessList() {
     dialogType = type;
     if (type === "rejection") {
       dialogTitle = "Rejection Data"
+    }
+    else if (type === "consumption") {
+      dialogTitle = "Consumption Data"
     }
     else if (type === "processFifo") {
       dialogTitle = "Update Process " + item.process_name
@@ -182,8 +186,13 @@ export default function ProcessList() {
               </View>
               <View style={{ flexDirection: 'row' }}>
                 <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Batch</Text>
-                <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Total Components</Text>
+                <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Heat Number</Text>
+                <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Supplier</Text>
+                {/* <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Total Components</Text> */}
+                <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Total Quantity (kg)</Text>
+
                 <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Status</Text>
+                <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Consumption Data</Text>
                 <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Rejection Data</Text>
               </View>
               <View style={{ flexDirection: 'row' }}>
@@ -194,9 +203,19 @@ export default function ProcessList() {
                   </TouchableOpacity>
 
                 </Text>
-                <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.component_count}</Text>
-                <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.status}</Text>
+                <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.heat_num}</Text>
+                <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.supplier}</Text>
 
+                {/* <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.component_count}</Text> */}
+                
+                
+                <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.component_weight}</Text> 
+
+                <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.status}</Text>
+                <TouchableOpacity style={[{ flex: 1, alignItems: 'center' }]}
+                  onPress={(e) => openDialog('consumption', item)} >
+                  <FontAwesome name="eye" size={20} style={{ flex: 1, justifyContent: 'center' }}  ></FontAwesome>
+                </TouchableOpacity>
                 <TouchableOpacity style={[{ flex: 1, alignItems: 'center' }]}
                   onPress={(e) => openDialog('rejection', item)} >
                   <FontAwesome name="eye" size={20} style={{ flex: 1, justifyContent: 'center' }}  ></FontAwesome>
@@ -215,15 +234,21 @@ export default function ProcessList() {
         dialogMessage={dialogMessage}
         closeDialog={closeDialog}
         container={<RejectionData processEntity={processDet} />}
-      /> : <View></View>}
+      /> : false}
 
+      {dialog && dialogType === "consumption" ? <CustomModal
+        modalVisible={dialog}
+        dialogTitle={dialogTitle}
+        dialogMessage={dialogMessage}
+        closeDialog={closeDialog}
+      /> : false}
       {dialog && dialogType === "processFifo" ? <CustomModal
         modalVisible={dialog}
         dialogTitle={dialogTitle}
         dialogMessage={dialogMessage}
         // closeDialog={closeDialog}
         container={<ProcessFifo processDet={processDet} closeDialog={closeDialog} okDialog={updateFifo} />}
-      /> : <View></View>}
+      /> : false}
 
       {dialog && (dialogType === "startProcess" || dialogType === "stopProcess" || dialogType === "finishProcess") ? <CustomModal
         modalVisible={dialog}
@@ -292,7 +317,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     fontFamily: appTheme.fonts.regular,
-
+  },
+  tableHeader:{
+    flexDirection: 'row', borderTopWidth: 1, borderBottomWidth: 1
   }
 
 });

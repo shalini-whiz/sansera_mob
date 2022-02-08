@@ -5,9 +5,10 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import TopBar from '../TopBar';
 import BatchDetails from './BatchDetails';
 import LoadRM from './LoadRM';
-import ClearInventory from './ClearInventory';
 import ApproveBatch from './ApproveBatch';
 import { appTheme } from '../../lib/Themes';
+import Inventory from './Inventory';
+import { FifoBoard } from '../process/FifoBoard';
 
 
 
@@ -47,11 +48,19 @@ export default function BatchHome() {
         <Tab.Screen name="Approve Batch" component={ApproveBatch} 
         
            />
-        <Tab.Screen name="Inventory" component={ClearInventory}
+        <Tab.Screen name="Inventory" component={Inventory}
             listeners={({ navigation, route }) => ({
               tabPress: e => {
                 if (route.state && route.state.routeNames.length > 0) {
                   navigation.navigate('Inventory')
+                }
+              },
+            })} />
+          <Tab.Screen name="FIFO Board" component={FifoBoard}
+            listeners={({ navigation, route }) => ({
+              tabPress: e => {
+                if (route.state && route.state.routeNames.length > 0) {
+                  navigation.navigate('FIFO Board')
                 }
               },
             })} />

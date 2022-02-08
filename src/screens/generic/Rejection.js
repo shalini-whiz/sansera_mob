@@ -2,20 +2,14 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert } from "react-native";
 import { dateUtil, util } from "../../commons";
 import { appTheme } from "../../lib/Themes";
-import FormGen from "../../lib/FormGen"
-import CustomHeader from "../../components/CustomHeader";
 import { ApiService } from "../../httpservice";
 import UserContext from "../UserContext";
 import CustomModal from "../../components/CustomModal";
 import { useIsFocused } from '@react-navigation/native';
-import { RadioButton } from "react-native-paper";
-import ProcessDetails from "../process/ProcessDetails";
 import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
-
-
-
+import ProcessInfo from "../process/ProcessInfo";
 
 
 
@@ -73,6 +67,8 @@ export const  Rejection = React.memo((props) => {
               keys.indexOf(key) === -1))
             )
           ), [])
+
+          
               
           if(rejReason === ''){
             let initalReason = menuKeys[0];
@@ -222,11 +218,12 @@ export const  Rejection = React.memo((props) => {
           </View>
           <View style={{ flex: 3, flexDirection: 'row', }}>
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
-              <ProcessDetails
+              <ProcessInfo
                 title="PROCESS DETAILS"
                 processEntity={props && props.processEntity ? props.processEntity : {}}
                 fields={["total_rejections"]}                
                 />
+                
             </View>
            
           </View>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, 
+  ActivityIndicator, Alert, } from "react-native";
 import { ApiService } from "../../httpservice";
 import UserContext from "../UserContext";
 import CustomModal from "../../components/CustomModal";
@@ -9,6 +10,7 @@ import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from "../../components/ErrorModal";
 import { EmptyBinContext } from "../../context/EmptyBinContext";
+import { RadioButton } from "react-native-paper";
 
 
 
@@ -26,6 +28,9 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
   const [notifications,setNotifications] = useState([])
   const [stage,setStage] = useState('')
   const [bin,setBin] = useState({})
+  const [currentStage,setCurrentStage] = useState({})
+  const [nextStageName,setNextStageName] = useState('')
+  const [nextStage,setNextStage] = useState({})
   const {  setUnReadEmptyBinData } = React.useContext(EmptyBinContext)
   useEffect(() => {
     if (isFocused) {
@@ -47,6 +52,14 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
     setNotifications(JSON.parse(request))   
     let stage = await AsyncStorage.getItem("stage");
     setStage(stage)
+    let currentStage = props.processEntity.process.find(item => item.stage_name === stage)
+    setCurrentStage(currentStage)
+    console.log("current stage ; "+JSON.stringify(currentStage))
+    let nextStage = props.processEntity.process.find(item => item.order === currentStage.order + 1);
+    if(nextStage) {
+      setNextStageName(nextStage.stage_name)
+      setNextStage(nextStage)
+    }
     setTimeout(() => {
       console.log("reset here ")
       setUnReadEmptyBinData("0");
@@ -105,8 +118,10 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
       if (currentStage && currentStage.parent_stage && currentStage.parent_stage.length){
         apiData.stage_name = currentStage.parent_stage
       }
+      else if(nextStageName.length)
+        apiData.stage_name = nextStageName
       else{
-        let nextStage = props.processEntity.process.find(item => item.order === currentStage.order + 1);
+       // let nextStage = props.processEntity.process.find(item => item.order === currentStage.order + 1);
         apiData.stage_name = nextStage.stage_name
       }
      
@@ -139,6 +154,9 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
     setApiError('')
   }
 
+  const handleRequestType = (name) => (value) => {
+    setNextStageName(value)
+  };
   return (
     <ScrollView
       contentContainerStyle={styles.scrollView}
@@ -164,14 +182,36 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
           container={
             <View style={{flexDirection:'column',alignItems:'center',width:'70%'}}>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
+                <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Bin : </Text>
+                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{bin.element_num} </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Stage : </Text>
                 <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{stage} </Text>
-
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Process : </Text>
                 <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{props.processEntity.process_name} </Text>
               </View>
+              {currentStage.sub_stage && currentStage.sub_stage.length ? 
+              <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
+                  <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Move Bin to : </Text>
+                  <View style={{flex:2}}>
+                  <RadioButton.Group
+                    onValueChange={(value) => setNextStageName(value)}
+                    value={nextStageName}
+                    style={{  }}
+                    >
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }} >
+                      <RadioButton value={nextStage.stage_name} />
+                      <Text style={[AppStyles.radioText, { color: appTheme.colors.cardTitle, marginRight: 15,fontSize:20 }]}>{nextStage.stage_name}</Text>
+                      <RadioButton value={currentStage.sub_stage} />
+                      <Text style={[AppStyles.radioText, { color: appTheme.colors.cardTitle,fontSize:20 }]}>{currentStage.sub_stage}</Text>
+                    </View>
+                  </RadioButton.Group>
+                  </View>
+              </View>  : false}
+             
             </View>
             }
 

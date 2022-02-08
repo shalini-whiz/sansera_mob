@@ -10,17 +10,25 @@ import { useIsFocused } from '@react-navigation/native';
 import CustomHeader from "../../components/CustomHeader";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import ErrorModal from "../../components/ErrorModal";
+import UserContext from "../UserContext";
+import { roles } from "../../constants/appConstants";
+import AppStyles from "../../styles/AppStyles";
 
 
 
-export default function ProcessFifo(props) {
+
+export const ProcessFifo = React.memo((props) => {
   const isFocused = useIsFocused();
+  const userState = React.useContext(UserContext);
   const [refreshing, setRefreshing] = useState(false)
   const [proStageData, setProStageData] = useState([])
   const [stage,setStage] = useState({})
   const [nextStage,setNextStage] = useState({})
+  const [subStage,setSubStage] = useState({})
+  const [binStage,setBinStage] = useState({})
   const [editBin, setEditBin] = useState(false);
   const [delBin, setDelBin] = useState([]);
+  const [delSubBin,setDelSubBin] = useState([])
   const [isConfirm,setConfirm] = useState(false)
   const [apiError, setApiError] = useState('')
 
@@ -46,6 +54,12 @@ export default function ProcessFifo(props) {
     setStage(stage);
     let index = proStageData.findIndex(item => item.order === stage.order+1 )
     setNextStage(proStageData[index]);
+    if (stage.sub_stage && stage.sub_stage.length){
+      let subIndex = proStageData.findIndex(item => item.stage_name === stage.sub_stage)
+      if(subIndex > -1 )setSubStage(proStageData[subIndex]);
+    }else {
+      setSubStage({})
+    }
     setEditBin(false)
     setDelBin([])
   }
@@ -61,7 +75,8 @@ export default function ProcessFifo(props) {
     setDelBin([]);
   }
 
-  const addToDelBin = (e, fifoItem) => {
+  const addToDelBin = (e, fifoItem,type) => {
+    if (type === "stage"){
       let bin_to_del = [...delBin]
       let element_num = fifoItem.element_num;
       const selectedIndex = bin_to_del.indexOf(element_num);
@@ -71,49 +86,64 @@ export default function ProcessFifo(props) {
         bin_to_del.splice(selectedIndex, 1);
       }
       setDelBin(bin_to_del);
+    }
+    else if(type === "substage"){
+      let bin_to_del = [...delSubBin]
+      let element_num = fifoItem.element_num;
+      const selectedIndex = bin_to_del.indexOf(element_num);
+      if (selectedIndex === -1 && bin_to_del.length === 0) {
+        bin_to_del.push(element_num);
+      } else if (selectedIndex !== -1) {
+        bin_to_del.splice(selectedIndex, 1);
+      }
+      setDelSubBin(bin_to_del);
+    }
+      
   }
 
   const computeBin = () => {
-    if (delBin.length) {
-      let message = "Please confirm to delete the selected bin"
+    setConfirm(false);
+    if(delBin.length && delSubBin.length){
+
+    }
+    else if (delBin.length  === 1) {
+      setConfirm(true);
+    }
+    else if (delSubBin.length === 1) {
       setConfirm(true);
     }
   }
   const updateBin = () => {
-    let elementIndex = nextStage.fifo.findIndex(item => item.element_num === delBin[0]);
-    if(elementIndex > -1 && delBin.length){
-      let apiData = {};
+    let apiData = {};
+    let invokeApi = false;
+    if(delSubBin.length){
+      let elementIndex = subStage.fifo.findIndex(item => item.element_num === delSubBin[0]);
+      apiData.op = "remove_element"
+      apiData.process_name = props.processDet.process_name
+      apiData.stage_name = subStage.stage_name
+      apiData.element_id = subStage.fifo[elementIndex].element_id
+      invokeApi = true;
+      console.log("remove sub stage  element apiData here " + JSON.stringify(apiData))
+    }
+    if(delBin.length){
+      let elementIndex = nextStage.fifo.findIndex(item => item.element_num === delBin[0]);
       apiData.op = "remove_element"
       apiData.process_name = props.processDet.process_name
       apiData.stage_name = nextStage.stage_name
       apiData.element_id = nextStage.fifo[elementIndex].element_id 
-     
-      ApiService.getAPIRes(apiData,"POST","fifo").then(apiRes => {
-        if(apiRes){
-          if(apiRes.status){
+      invokeApi = true;
+      console.log("remove element apiData here "+JSON.stringify(apiData))     
+    }
+    if(invokeApi){
+      ApiService.getAPIRes(apiData, "POST", "fifo").then(apiRes => {
+          if (apiRes && apiRes.status) {
             Alert.alert("Bin removed");
             props.okDialog();
           }
-          else{
+          else 
             setApiError("Could not update. try again!")
-          }
-        }
       })
     }
-   
-
-  
-    // ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
-    //   setApiStatus(false);
-    //   if (apiRes && apiRes.status) {
-    //     if (apiRes.response.message && apiRes.response.message.length) {
-    //       setProcess(apiRes.response.message)
-    //     }
-    //   }
-    //   else {
-    //     setProcess([])
-    //   }
-    // }); 
   }
 
   const errOKAction = () => {
@@ -133,12 +163,12 @@ export default function ProcessFifo(props) {
 
         {/* <ActivityIndicator size="large" animating={apiStatus} /> */}
         <View style={[styles.dataContainer, {}]}>
-          
+          <CustomHeader title="BIN FIFO" align={"center"} />
+
           <View style={{
-            flexDirection: 'column', margin: 10, marginTop: 20,
+            flexDirection: 'column', margin: 5,
            padding: 10, borderRadius: 10
           }}>
-           
             <View style={{flexDirection:'row'}}>
               {proStageData.map((item,index) => {
                 return (
@@ -155,14 +185,17 @@ export default function ProcessFifo(props) {
                 </Text></TouchableOpacity>)
               })}
             </View>
-              <CustomHeader title={"Bins"} size={18} align="left" />
+            {stage && stage.fifo && stage.fifo.length ? 
+              false :
+              <Text align="left" style={[AppStyles.warnButtonTxt,{color:appTheme.colors.warnAction}]}>No Bins</Text>
+}
               
-
-              <View style={{flexDirection:'row',margin:10}}>
-                {nextStage && nextStage.fifo && nextStage.fifo.map((fifoItem, fifoIndex) => {
+              <View style={{flexDirection:'row',margin:1}}>
+                {stage && stage.fifo && stage.fifo.map((fifoItem, fifoIndex) => {
                 return (
                   <TouchableOpacity style={{}} key={fifoIndex}
-                    onPress={(e) => addToDelBin(e, fifoItem)} >  
+                    disabled={userState.user && userState.user.role === roles.PL ? false : true}
+                    onPress={(e) => addToDelBin(e, fifoItem,"stage")} >  
                 <Text style={[{
                   padding: 5, fontSize:18,
                   color: delBin.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black' 
@@ -171,10 +204,24 @@ export default function ProcessFifo(props) {
                     ]}>{fifoItem.element_num}
                 </Text></TouchableOpacity>)
               })}
+
+              {/* {subStage && subStage.fifo && subStage.fifo.map((fifoItem, fifoIndex) => {
+                return (
+                  <TouchableOpacity style={{}} key={fifoIndex}
+                    disabled={userState.user && userState.user.role === roles.PL ? false : true}
+                    onPress={(e) => addToDelBin(e, fifoItem,"substage")} >
+                    <Text style={[{
+                      padding: 5, fontSize: 18,
+                      color: delSubBin.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black'
+                    }
+
+                    ]}>{fifoItem.element_num}
+                    </Text></TouchableOpacity>)
+              })} */}
               </View>
 
             {delBin.length ? <Text style={{color:'red',fontSize:14,padding:10}}>Only one bin can be removed at a time</Text>:false}
-            {delBin.length ?
+            {(delBin.length || delSubBin.length)?
             <View style={{ display: 'flex', flexDirection: 'row', alignSelf: 'center',width:"50%" }}>
               <TouchableOpacity style={[styles.sucButtonContainer, { 
                 flex: 1,padding:5,paddingLeft:10,paddingRight:10 }]}
@@ -191,7 +238,7 @@ export default function ProcessFifo(props) {
                 </TouchableOpacity>
             </View> 
             : false}
-            {!delBin.length ? 
+            {/* {!delBin.length ? 
             <View style={{ display: 'flex', flexDirection: 'row', alignSelf: 'center', width: "20%" }}>
                 <TouchableOpacity style={[styles.canButtonContainer, {
                   flex: 1, padding: 5, paddingLeft: 10, paddingRight: 10
@@ -200,10 +247,59 @@ export default function ProcessFifo(props) {
                 >
                   <Text style={styles.canButtonTxt}>CLOSE</Text>
                 </TouchableOpacity>
-            </View>: false}
+            </View>: false} */}
             {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
 
           </View>
+          <CustomHeader title="BINS IN USE" align={"center"} />
+          <View style={{
+            flexDirection: 'column', margin: 5,
+            padding: 10, borderRadius: 10
+          }}>
+            <View style={{ flexDirection: 'row' }}>
+              {proStageData.map((item, index) => {
+                return (
+                  <TouchableOpacity style={{}} key={index}
+                    onPress={(e) => setBinStage(item)} >
+                    <Text key={index} style={[styles.tableHeader, {
+                      marginBottom: 1, flex: 1,
+                      padding: 10, width: '100%', borderColor: 'grey', borderWidth: 0.5,
+                      color: binStage.stage_name === item.stage_name ? appTheme.colors.cardTitle : 'grey'
+                    }
+
+                    ]}
+
+                    >{item.stage_name}
+                    </Text></TouchableOpacity>)
+              })}
+            </View>
+            
+
+            <View style={{ flexDirection: 'row', margin: 10 }}>
+              {binStage && binStage.last_poped_element && binStage.last_poped_element.element_num ? 
+                    <Text style={[{
+                      padding: 5, fontSize: 18,
+                      color: 'black'
+                    }
+
+                ]}>{binStage.last_poped_element.element_num}
+                    </Text> : false
+}
+            </View>
+
+        
+          
+
+          </View>
+
+            <TouchableOpacity style={[styles.canButtonContainer, {
+              width:'20%',alignSelf:'center'
+            }]}
+              onPress={(e) => closeDialog(e)}
+            >
+              <Text style={styles.canButtonTxt}>CLOSE</Text>
+            </TouchableOpacity>
+
         </View>
 
 
@@ -219,7 +315,7 @@ export default function ProcessFifo(props) {
 
     </ScrollView>
   )
-}
+});
 const styles = StyleSheet.create({
 
   container: {

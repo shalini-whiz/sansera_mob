@@ -141,11 +141,9 @@ const BinMqtt = (props) => {
   }
 
   const setUnReadEmptyBin = (count) =>{
-    console.log("on set "+count);
    // props.setEmptyBinCount(count.toString())
     AsyncStorage.setItem("unReadEmptyBin", count.toString());
     setUnReadEmptyBinData(count.toString())
-
   } 
 
   return (

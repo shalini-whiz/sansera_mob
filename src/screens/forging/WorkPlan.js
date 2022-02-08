@@ -14,6 +14,7 @@ import { default as AppStyles } from "../../styles/AppStyles";
 import WeightDetails from "../process/WeightDetails";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RequestBin from "./RequestBin";
+import ProcessInfo from "../process/ProcessInfo";
 
 
 let stageSchema = [
@@ -173,7 +174,7 @@ let stageSchema = [
           </View>
           <View style={{flex:3,flexDirection:'row',}}>
             <View style={{ flex: 1, backgroundColor: 'white',margin:5,padding:5}}>
-              <ProcessDetails 
+              <ProcessInfo 
                 title="Process Details"
                 processEntity={props && props.processEntity ? props.processEntity : {}}
                 fields={["forge_machine_id","total_rejections"]}

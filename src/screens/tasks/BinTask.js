@@ -65,10 +65,8 @@ export const BinTask = React.memo((props) => {
     apiData.sort_by = 'updated_on'
     apiData.sort_order = 'DSC'
 
-    console.log("apiData here "+JSON.stringify(apiData))
     setBinTask([])
     ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {
-     // console.log(JSON.stringify(apiRes))
       AsyncStorage.setItem(appProcess + "_" + processStage, "0");
 
       if (apiRes && apiRes.status) {
@@ -284,6 +282,7 @@ export const BinTask = React.memo((props) => {
           okDialog={updateRequest} closeDialog={closeDialog}
           container={
             <View style={{ flexDirection: 'column', alignItems: 'center', width: '70%' }}>
+              
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Stage : </Text>
                 <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{stage} </Text>
