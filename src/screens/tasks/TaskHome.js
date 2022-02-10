@@ -23,21 +23,12 @@ export default  TaskHome = React.memo((props) => {
 
   useEffect(() => {
     if (isFocused) {
-      if(tab === "") setTab('emptyBin')
-      loadData()
-      
+      if(tab === "") setTab('emptyBin')      
     }
     return () => { }
   }, [isFocused])
 
-  const loadData = async() => {
-    // let count = await AsyncStorage.getItem("unReadEmptyBin");
-    // setUnReadEmptyBin(count)
-    // console.log(appProcess + "_" + processStage)
-    // let unReadFilledBinCount = await AsyncStorage.getItem(appProcess+"_"+processStage);
-    // if(unReadFilledBinCount)
-    //   setUnReadFilledBin(unReadFilledBinCount)
-  }
+  
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
   }, []);
@@ -94,13 +85,10 @@ export default  TaskHome = React.memo((props) => {
       </View>
       <View style={styles.mainContainer}>
         {tab === "emptyBin" ? <EmptyBin processEntity={props.processEntity} reloadPage={reloadPage} 
-          emptyBinCount={props.emptyBinCount}
-          filledBinCount={props.filledBinCount}
 
 /> : false}
         {tab === "filledBin" ? <BinTask processEntity={props.processEntity} reloadPage={reloadPage} 
-          emptyBinCount={props.emptyBinCount}
-          filledBinCount={props.filledBinCount}
+         
 
 /> : false}
       </View>

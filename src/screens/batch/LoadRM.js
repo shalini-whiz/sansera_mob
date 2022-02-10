@@ -4,7 +4,6 @@ import { util } from "../../commons";
 import { appTheme } from "../../lib/Themes";
 import CustomHeader from "../../components/CustomHeader";
 import { Picker } from '@react-native-picker/picker';
-import CustomCard from "../../components/CustomCard";
 import { ApiService } from "../../httpservice";
 import BatchDetails from "./BatchDetails";
 import { useIsFocused } from '@react-navigation/native';

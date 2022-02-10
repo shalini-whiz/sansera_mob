@@ -36,39 +36,52 @@ export const ConsumptionData = React.memo((props) => {
   const [show, setShow] = useState(false);
   useEffect(() => {
     if (isFocused) {
-      setApiStatus(true);
       loadProcess();
     }
     return () => { }
-  }, [isFocused,date])
+  }, [isFocused,date,props.stageName,props.processName])
 
+ 
   const loadProcess = async () => {
-    let currentStage = await AsyncStorage.getItem("stage");
-    if(currentStage.toLowerCase() === stageType.shearing) setTableSchema(shearing_consumption_schema)
-    let apiData = {
-      "op": "get_process_consumption",
-      process_name:props.processEntity.process_name,
-      stage_name:currentStage,
-    }
-    apiData.date = await dateUtil.toDateFormat(date, "YYYY-MM-DD")
-    console.log("apiData here "+JSON.stringify(apiData))
-    setRefreshing(false);
+    console.log("props here "+JSON.stringify(props))
+    let curStage = props.stageName ? props.stageName : await AsyncStorage.getItem("stage");
+    let curProcess = props.processEntity.process_name ? props.processEntity.process_name : props.processName;
+    console.log("curStage schema : "+curStage.toLowerCase())
+    setTableSchema([])
     setConData([])
-    ApiService.getAPIRes(apiData, "POST", "process_consumption").then(apiRes => {
-      setApiStatus(false);
-      if (apiRes && apiRes.status) {
-        if (apiRes.response.message && apiRes.response.message.length) {
-          setConData(apiRes.response.message)
-        }
-        else{
-          setApiMsg("No data")
-        }
+    setApiMsg('')
+    if(curStage.toLowerCase() === stageType.shearing) 
+    {
+      setApiStatus(true);
+
+      setTableSchema(shearing_consumption_schema)
+      let apiData = {
+        "op": "get_process_consumption",
+        process_name: curProcess,
+        stage_name: curStage,
       }
-      else if (apiRes && apiRes.response.message) {
-        setApiError(apiRes.response.message)
-        setConData([])
-      }
-    });
+      apiData.date = await dateUtil.toDateFormat(date, "YYYY-MM-DD")
+      console.log("apiData here " + JSON.stringify(apiData))
+      setRefreshing(false);
+      
+      ApiService.getAPIRes(apiData, "POST", "process_consumption").then(apiRes => {
+        setApiStatus(false);
+        if (apiRes && apiRes.status) {
+          if (apiRes.response.message && apiRes.response.message.length) {
+            setConData(apiRes.response.message)
+          }
+          else {
+            setApiMsg("No data")
+          }
+        }
+        else if (apiRes && apiRes.response.message) {
+          setApiError(apiRes.response.message)
+          setConData([])
+        }
+      });
+    }
+    
+    
 
   }
 
@@ -104,12 +117,11 @@ export const ConsumptionData = React.memo((props) => {
   )};
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container,{}]}>
       {apiStatus ? <ActivityIndicator size="large" animating={apiStatus} /> : false}
-      <View style = {{flexDirection:'row',margin:5,padding:5,backgroundColor:'white'}}>
+       <View style = {{flexDirection:'row',margin:5,padding:5,backgroundColor:'white'}}>
         <TouchableOpacity onPress={(e) => setShow(!show)} style={{flexDirection:'row'}}>
           <FontAwesome name="calendar" size={25} color={appTheme.colors.cardTitle} ></FontAwesome>
-
           <Text style={[AppStyles.subtitleWithBold,{marginLeft:10}]}>{dateUtil.toDateFormat(date,"DD MMM yyyy")}</Text>
         </TouchableOpacity>
       </View>
@@ -120,7 +132,7 @@ export const ConsumptionData = React.memo((props) => {
         is24Hour={true}
         display="default"
         onChange={onDateChange}
-      /> : false}
+      /> : false} 
       {conData.length ? <View style={{ backgroundColor: 'white', margin: 2, padding: 5 }}>
         <FlatList
           data={conData}
@@ -141,10 +153,10 @@ export const ConsumptionData = React.memo((props) => {
           }}
         >
         </FlatList>
-      </View> : false}
+      </View> : false} 
    
       {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
-      {apiMsg && apiMsg.length ? (<ErrorModal msg={apiMsg} type="info" okAction={msgOKAction} />) : false}
+      {apiMsg && apiMsg.length ? <Text style={[AppStyles.subtitle,{textAlign:'center'}]} type="info" >{apiMsg}</Text>  : false}
 
     </View>
   )
@@ -153,56 +165,15 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    margin: 5
+    margin: 5,
   },
-  processContainer: {
-    flexDirection: 'column', margin: 8, backgroundColor: 'white', padding: 10
-  },
-  successBtn: {
-    width: "40%",
-    borderRadius: 25,
-    padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    //marginTop: 40,
-    backgroundColor: appTheme.colors.warnAction,
-  },
-  successText: {
-    color: appTheme.colors.warnActionTxt
-  },
-  radioText: {
-    fontSize: 16,
-  },
-  filterText: {
-    fontSize: 16,
-    fontFamily: appTheme.fonts.regular
-  },
-  filterLabel: {
-    fontSize: 14,
-    fontFamily: appTheme.fonts.regular,
-    padding: 5
-  },
-  title: {
-    textAlign: 'center',
-    fontSize: 20,
-    color: appTheme.colors.cardTitle,
-    fontFamily: appTheme.fonts.bold
-
-
-  },
-  subtitle: {
-    textAlign: 'center',
-    fontSize: 16,
-    //fontWeight: "bold",
-    fontFamily: appTheme.fonts.regular,
-    color: appTheme.colors.cardTitle
-  },
+ 
   tableContent: {
     textAlign: 'center',
     fontSize: 18,
     fontFamily: appTheme.fonts.regular,
-
   },
+
   tableHeader: {
     flexDirection: 'row', borderTopWidth: 0.5, borderBottomWidth: 0.5, borderColor: 'grey'
   },

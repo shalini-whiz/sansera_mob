@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from "../../components/ErrorModal";
 import { EmptyBinContext } from "../../context/EmptyBinContext";
 import { RadioButton } from "react-native-paper";
+import { stageType } from "../../constants/appConstants";
 
 
 
@@ -54,7 +55,6 @@ import { RadioButton } from "react-native-paper";
     setStage(stage)
     let currentStage = props.processEntity.process.find(item => item.stage_name === stage)
     setCurrentStage(currentStage)
-    console.log("current stage ; "+JSON.stringify(currentStage))
     let nextStage = props.processEntity.process.find(item => item.order === currentStage.order + 1);
     if(nextStage) {
       setNextStageName(nextStage.stage_name)
@@ -116,7 +116,8 @@ import { RadioButton } from "react-native-paper";
       let currentStage = props.processEntity.process.find(item => item.stage_name === stage)
       
       if (currentStage && currentStage.parent_stage && currentStage.parent_stage.length){
-        apiData.stage_name = currentStage.parent_stage
+        if(currentStage.stage_name.toLowerCase() === stageType.billetpunching) currentStage.output_stage = "Forging"
+        apiData.stage_name = currentStage.output_stage
       }
       else if(nextStageName.length)
         apiData.stage_name = nextStageName

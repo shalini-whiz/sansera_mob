@@ -242,6 +242,7 @@ import CustomModal from "../../components/CustomModal";
       if (apiRes && apiRes.status) {
          setRejCount(0)
          closeDialog();
+         props.updateProcess();
          loadData()
       }
       else if(apiRes && apiRes.response.message)

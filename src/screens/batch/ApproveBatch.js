@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView,
 import { util } from "../../commons";
 import { appTheme } from "../../lib/Themes";
 import { Picker } from '@react-native-picker/picker';
-import CustomCard from "../../components/CustomCard";
 import { ApiService } from "../../httpservice";
 import BatchDetails from "./BatchDetails";
 import CustomModal from "../../components/CustomModal";

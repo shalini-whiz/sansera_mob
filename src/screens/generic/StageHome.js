@@ -76,6 +76,7 @@ export const StageHome =React.memo((props) =>
         <Tab.Screen 
           // name={"Tasks" + (unReadTask && unReadTask.length && unReadTask !="0" ? (" ("+unReadTask+")") : '')}
           name="Tasks"
+          options={unReadTask && unReadTask.length && unReadTask != "0" ? {tabBarBadge:unReadTask} : {}}
           children={() => <TaskHome
             processEntity={processDet}
             setProcessEntity={setProcess}

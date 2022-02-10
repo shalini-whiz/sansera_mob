@@ -6,7 +6,6 @@ import CustomModal from "../../components/CustomModal";
 import UserContext from "../UserContext";
 import { useIsFocused } from '@react-navigation/native';
 import FontAwesome from "react-native-vector-icons/FontAwesome"
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import RejectionData from "./RejectionData";
 import ErrorModal from "../../components/ErrorModal";
@@ -192,7 +191,6 @@ export default function ProcessList() {
                 <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Total Quantity (kg)</Text>
 
                 <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Status</Text>
-                <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Consumption Data</Text>
                 <Text style={[styles.subtitle, { textAlign: 'center', flex: 1 }]}>Rejection Data</Text>
               </View>
               <View style={{ flexDirection: 'row' }}>
@@ -212,10 +210,7 @@ export default function ProcessList() {
                 <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.component_weight}</Text> 
 
                 <Text style={[styles.tableContent, { textAlign: 'center', flex: 1 }]}>{item.status}</Text>
-                <TouchableOpacity style={[{ flex: 1, alignItems: 'center' }]}
-                  onPress={(e) => openDialog('consumption', item)} >
-                  <FontAwesome name="eye" size={20} style={{ flex: 1, justifyContent: 'center' }}  ></FontAwesome>
-                </TouchableOpacity>
+                
                 <TouchableOpacity style={[{ flex: 1, alignItems: 'center' }]}
                   onPress={(e) => openDialog('rejection', item)} >
                   <FontAwesome name="eye" size={20} style={{ flex: 1, justifyContent: 'center' }}  ></FontAwesome>
@@ -236,12 +231,7 @@ export default function ProcessList() {
         container={<RejectionData processEntity={processDet} />}
       /> : false}
 
-      {dialog && dialogType === "consumption" ? <CustomModal
-        modalVisible={dialog}
-        dialogTitle={dialogTitle}
-        dialogMessage={dialogMessage}
-        closeDialog={closeDialog}
-      /> : false}
+     
       {dialog && dialogType === "processFifo" ? <CustomModal
         modalVisible={dialog}
         dialogTitle={dialogTitle}

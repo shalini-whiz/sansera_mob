@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Alert, Modal, StyleSheet, Text, Pressable, View,TouchableOpacity } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons"
 import { appTheme } from "../lib/Themes";
+import AppStyles from "../styles/AppStyles";
 
 const CustomModal = (props) => {
   const [modalVisible, setModalVisible] = useState(props.modalVisible);
@@ -17,60 +18,45 @@ const CustomModal = (props) => {
       >
         <View style={[styles.centeredView,{width:'100%'}]}>
             <View style={[styles.modalView,{}]}>
-            <Text style={[styles.modalTitle,{}]}>{props.dialogTitle}</Text>
-          {props.dialogMessage ? 
-          <Text style={[styles.modalMessage, {  }]}>{props.dialogMessage}</Text>
- : false}
+            {props.dialogTitle ? <Text style={[styles.modalTitle,{}]}>{props.dialogTitle}</Text> : false}
+            {props.dialogMessage ? <Text style={[styles.modalMessage, {  }]}>{props.dialogMessage}</Text>: false}
 
-            <View style={{}}>
+            <View style={{minHeight:100}}>
             {props.container}
             </View>
 
 
           {props.okDialog && props.closeDialog ?
             <View style={{
-              flexDirection: 'row', display: 'flex', marginRight: 20, marginLeft: 20,
+              flexDirection: 'row', display: 'flex',
               alignSelf: 'center',marginBottom:10
             }}>
               <TouchableOpacity
-                style={[styles.canButtonContainer, { flexDirection: 'row' }]}
-                onPress={(e) => props.closeDialog(e)} >
-                <Text style={styles.canButtonTxt}>CANCEL</Text>
-                {/* <SvgCss xml={CancelIcon(appTheme.colors.cancelActionTxt)} width={15} height={15} style={{ margin: 2 }} /> */}
+                style={[AppStyles.canButtonContainer, { }]} onPress={(e) => props.closeDialog(e)} >
+                <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.sucButtonContainer, { flexDirection: 'row', backgroundColor: appTheme.colors.successAction }]}
-                disabled={false} activeOpacity={.5} onPress={(e) => props.okDialog(e)} >
-                <Text style={styles.sucButtonText}>{props.okTitle ? props.okTitle : 'OK'}</Text>
-                {/* <SvgCss xml={TickIcon(appTheme.colors.successActionTxt)} width={20} height={20} style={{ margin: 2 }} /> */}
-
+                style={[AppStyles.successBtn, { }]} disabled={false} activeOpacity={.5} onPress={(e) => props.okDialog(e)} >
+                <Text style={AppStyles.successText}>{props.okTitle ? props.okTitle : 'OK'}</Text>
               </TouchableOpacity>
             </View> : false}
 
-          {props.okDialog && !props.closeDialog ? <View style={{
-            flexDirection: 'row', display: 'flex', marginRight: 20, marginLeft: 20,
-            alignSelf: 'center', marginBottom: 10,width:'50%'
-          }}>
-            
+          {props.okDialog && !props.closeDialog ? 
             <TouchableOpacity
-              style={[styles.sucButtonContainer, { flexDirection: 'row', backgroundColor: appTheme.colors.successAction }]}
+              style={[AppStyles.successBtn, { alignSelf: 'center', margin: 10 }]}
               disabled={false} activeOpacity={.5} onPress={(e) => props.okDialog(e)} >
-              <Text style={styles.sucButtonText}>OK</Text>
+              <Text style={AppStyles.successText}>OK</Text>
             </TouchableOpacity>
-          </View> : false }
+         : false }
           
-
-          {!props.okDialog && props.closeDialog ? <View style={{
-            flexDirection: 'row', display: 'flex', marginRight: 20, marginLeft: 20,
-            alignSelf: 'center', marginBottom: 10, width: '50%',
-          }}>
-
+          {!props.okDialog && props.closeDialog ?
             <TouchableOpacity
-              style={[styles.sucButtonContainer, { flexDirection: 'row', backgroundColor: appTheme.colors.successAction }]}
+              style={[AppStyles.successBtn, { alignSelf:'center',margin:10}]}
               disabled={false} activeOpacity={.5} onPress={(e) => props.closeDialog(e)} >
-              <Text style={styles.sucButtonText}>OK</Text>
+              <Text style={AppStyles.successText}>OK</Text>
             </TouchableOpacity>
-          </View> : false}
+          : false} 
+
           </View>
           </View>
       </Modal>

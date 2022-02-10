@@ -131,7 +131,6 @@ export default function ProcessInfo(props) {
        
 
       });
-      console.log("props "+JSON.stringify(props))
       if (props.fields && props.fields.length) {
         let rej_comp_index = processSchema.findIndex(item => item.key === "total_rejections")
         let ok_comp_index = processSchema.findIndex(item => item.key === "ok_component")

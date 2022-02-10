@@ -6,6 +6,7 @@ import TopBar from '../TopBar';
 import ProcessDetails from './ProcessDetails';
 import { appTheme } from '../../lib/Themes';
 import ProcessList from './ProcessList';
+import ConsumptionFilters from '../generic/ConsumptionFilters';
 
 
 
@@ -34,6 +35,9 @@ export default function ProcessHome() {
                 }
               },
             })} />
+          <Tab.Screen name="Consumption Data" component={ConsumptionFilters}
+            
+          />
           <Tab.Screen name="Create Process" component={ProcessDetails}
             listeners={({ navigation, route }) => ({
               tabPress: e => {

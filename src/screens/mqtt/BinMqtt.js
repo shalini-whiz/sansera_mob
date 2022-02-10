@@ -20,7 +20,7 @@ const BinMqtt = (props) => {
   let [user, setUser] = React.useState({})
   const [binClient, setBinClient] = useState(undefined);
   const [binListeningEvent, setBinListeningEvent] = useState(false);
-  const { unReadEmptyBin, setUnReadEmptyBinData,unReadTask  } = React.useContext(EmptyBinContext)
+  const { setUnReadEmptyBinData,unReadTask  } = React.useContext(EmptyBinContext)
 
   useEffect(() => {
     if (isFocused) {
@@ -111,7 +111,6 @@ const BinMqtt = (props) => {
                   if (count && count.length)
                     newEmptyBinCount = parseInt(count) + 1;
                   setUnReadEmptyBin(newEmptyBinCount);
-                  //AsyncStorage.setItem("unReadEmptyBin",newEmptyBinCount.toString())
                 })
               }              
             });
@@ -141,14 +140,11 @@ const BinMqtt = (props) => {
   }
 
   const setUnReadEmptyBin = (count) =>{
-   // props.setEmptyBinCount(count.toString())
-    AsyncStorage.setItem("unReadEmptyBin", count.toString());
     setUnReadEmptyBinData(count.toString())
   } 
 
   return (
     <View style={{ flexDirection: 'column',padding:5 }}>
-      {console.log("unReadTask : "+unReadTask)}
       {user && user.role === roles.MO ? (binListeningEvent ?
         <View style={{ flexDirection: 'row',backgroundColor:'white' }}>
           <View style={{flex:1,flexDirection:'row'}}>

@@ -126,14 +126,15 @@ export const ProcessFifo = React.memo((props) => {
       console.log("remove sub stage  element apiData here " + JSON.stringify(apiData))
     }
     if(delBin.length){
-      let elementIndex = nextStage.fifo.findIndex(item => item.element_num === delBin[0]);
+      let elementIndex = stage.fifo.findIndex(item => item.element_num === delBin[0]);
       apiData.op = "remove_element"
       apiData.process_name = props.processDet.process_name
-      apiData.stage_name = nextStage.stage_name
-      apiData.element_id = nextStage.fifo[elementIndex].element_id 
+      apiData.stage_name = stage.stage_name
+      apiData.element_id = stage.fifo[elementIndex].element_id 
       invokeApi = true;
       console.log("remove element apiData here "+JSON.stringify(apiData))     
     }
+    
     if(invokeApi){
       ApiService.getAPIRes(apiData, "POST", "fifo").then(apiRes => {
           if (apiRes && apiRes.status) {
