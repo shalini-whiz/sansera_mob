@@ -129,12 +129,11 @@ const  ProcessStages = (props) => {
       {processStage == null ? 
           <View style={styles.container}>
             {apiStatus ? <ActivityIndicator size="large" animating={apiStatus} /> : false}
-            <View style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-            }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', }}>
               {stagingData.map((item, index) => {
+                if(item.toLowerCase() != stageType.underheat && item.toLowerCase() != stageType.rework){
+
+                
                 let color1 = stageColors[item.toLowerCase()] ? stageColors[item.toLowerCase()].color1 : appTheme.colors.gradientColor1;
                 let color2 = stageColors[item.toLowerCase()] ? stageColors[item.toLowerCase()].color2 : appTheme.colors.gradientColor2
                 return (
@@ -142,19 +141,13 @@ const  ProcessStages = (props) => {
                     onPress={() => stageNavigation(item)} style={{ margin: 10 }}>
                     <SvgCss
                       xml={HexaStageSingle(util.capitalizeWord(item),color1,color2)}
-                      width={250}
-                      height={200}
-                      style={{justifyContent:'center'}}
-                      
+                      width={250} height={200} style={{justifyContent:'center'}}
                       />
                   </TouchableOpacity>
-                )
+                )}
               })}
-            </View></View> : false}
-
-      
+            </View></View> : false}      
     </>
-
   );
 }
 export default ProcessStages;

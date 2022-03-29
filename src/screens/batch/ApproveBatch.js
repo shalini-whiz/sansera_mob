@@ -26,6 +26,7 @@ export default function ApproveBatch({navigation}) {
   const [batchNum, setBatchNum] = useState('')
   const [status, setStatus] = useState('NEW');
   const [reason, setReason] = useState('');
+  const [reasonId, setReasonId] = useState('');
   const [batchDet, setBatchDet] = useState({})
   const [dialog, showDialog] = useState(false);
   const [dialogTitle, setDialogTitle] = useState('')
@@ -46,10 +47,9 @@ export default function ApproveBatch({navigation}) {
     ],
   })
   const [reasonOptions, setReasonOptions] = useState({
-    keyName: "_id", valueName: "reason",
+    keyName: "_id", valueName: "rejection_reason",
     options: [
-      { "_id": "1", "reason": "reason 1" },
-      { "_id": "2", "reason": "reason 2" }
+      
     ],
   })
   useEffect(() => {
@@ -57,6 +57,7 @@ export default function ApproveBatch({navigation}) {
       setApiStatus(true);
       loadBatches();
       setAction('')
+      loadReasons()
     }
     return () => { }
   }, [navigation,isFocused,status])
@@ -107,6 +108,32 @@ export default function ApproveBatch({navigation}) {
 
   }
 
+  const loadReasons = () => {
+    let apiData = { "op": "get_batch_reasons", }
+  
+    ApiService.getAPIRes(apiData, "POST","get_batch_reason").then(apiRes => {
+      if (apiRes && apiRes.status) {
+        if (apiRes.response.message && apiRes.response.message.length) {
+          let reasonObj = { ...reasonOptions }
+          reasonObj.options = apiRes.response.message;
+          setReasonOptions(reasonObj);
+          setReasonId(reasonObj.options[0]._id)
+          setReason(reasonObj.options[0].rejection_reason)
+        }
+        else {
+          let reasonObj = { ...reasonOptions }
+          reasonObj.options = [];
+          setReasonOptions(reasonObj)
+          setReasonId('')
+          setReason()
+        }
+      }
+      else if (apiRes && apiRes.response.message)
+        setApiError(apiRes.response.message)
+
+    });
+
+  }
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     loadBatches();
@@ -185,7 +212,7 @@ export default function ApproveBatch({navigation}) {
   }
   const updateBatch = () => {
     let apiData = {}
-    if (action === "rejected") apiData.material_reject_reason = reason
+    if (action === "rejected") apiData.material_reject_reason = reasonId
     let batchDetails = { ...batchDet };
 
     apiData.batch_num = batchDetails.batch_num;
@@ -194,6 +221,8 @@ export default function ApproveBatch({navigation}) {
     apiData.op = "update_raw_material";
     if (action === "rejected")
       apiData.reject_weight = 0;
+
+    console.log("apiData her "+JSON.stringify(apiData))
     setApiStatus(true);
 
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {

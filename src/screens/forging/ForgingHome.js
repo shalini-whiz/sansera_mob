@@ -14,26 +14,24 @@ import { Rejection } from "./Rejection";
 
 const Tab = createMaterialTopTabNavigator();
 
-
-
 export const ForgingHome = React.memo((props) => {
 
   const processRef = useRef()
-
   const [processDet, setProcessDet] = React.useState({});
+  const [route, setRoute] = React.useState('')
+  let { appProcess } = React.useContext(EmptyBinContext);
 
   const setProcess = (data) => {
-    setProcessDet(data)
+    //setProcessDet(data)
   }
 
   const updateProcess = e => {
-    processRef.current.setFromOutside(processDet.process_name)
-
-   // processRef.current.setFromOutside('HELLO from Parent')
+    processRef.current.setFromOutside(appProcess.process_name)
   }
 
   const TabNavigation = memo(() => {
     const { unReadTask } = React.useContext(EmptyBinContext)
+    console.log("route here "+route);
 
     return (<NavigationContainer independent={true}>
       <Tab.Navigator
@@ -42,54 +40,49 @@ export const ForgingHome = React.memo((props) => {
           tabBarInactiveTintColor: 'gray',
           lazy: true
         })}
+        initialRouteName={route.length ? route : 'Work Plan'}
       >
 
         <Tab.Screen name="Work Plan"
           children={() => <WorkPlan
-            processEntity={processDet}
-            setProcessEntity={setProcess}
+            //processEntity={processDet}
+            //setProcessEntity={setProcess}
             updateProcess={updateProcess}
           />}
-
-          listeners={({ navigation, route }) => ({
-            tabPress: e => {
-              if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Edit Process')
-              }
+          listeners={{
+            tabPress: (e) => {
+              setRoute('Work Plan')
             },
-          })} />
+          }}
+
+          />
         <Tab.Screen name="Rejection"
           children={() => <Rejection
-            processEntity={processDet}
-            setProcessEntity={setProcess}
+            //processEntity={processDet}
+            //setProcessEntity={setProcess}
             updateProcess={updateProcess}
 
           />}
-
-          listeners={({ navigation, route }) => ({
-            tabPress: e => {
-              if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Rejection')
-              }
+          listeners={{
+            tabPress: (e) => {
+              setRoute('Rejection')
             },
-          })}
+          }}
+         
         />
         <Tab.Screen 
-         // name={"Tasks" + (unReadTask && unReadTask.length && unReadTask != "0" ? (" (" + unReadTask + ")") : '')}
           name="Tasks"
           children={() => <TaskHome
-            processEntity={processDet}
-            setProcessEntity={setProcess}
+           // processEntity={processDet}
+            //setProcessEntity={setProcess}
             updateProcess={updateProcess}
           />}
-
-          listeners={({ navigation, route }) => ({
-            tabPress: e => {
-              if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Create Process')
-              }
+          listeners={{
+            tabPress: (e) => {
+              setRoute('Tasks')
             },
-          })}
+          }}
+         
         />
 
 

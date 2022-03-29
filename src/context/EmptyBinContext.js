@@ -7,6 +7,7 @@ const EmptyBinContextProvider = ({children}) => {
   const [unReadEmptyBin,setUnReadEmptyBin] = React.useState('0');
   const [unReadFilledBin, setUnReadFilledBin] = React.useState('0');
   const [unReadTask, setUnReadTask] = React.useState('0');
+  const [appProcess, setAppProcess] = React.useState({});
 
   useEffect(() => {
     AsyncStorage.getItem("emptyBinCount")
@@ -60,9 +61,13 @@ const EmptyBinContextProvider = ({children}) => {
     setUnReadFilledBin(value);
     AsyncStorage.setItem("taskCount", value);
   }
+
+  const setAppProcessData = (value) => {
+    setAppProcess(value);
+  }
   return(
     <EmptyBinContext.Provider value={{unReadEmptyBin,setUnReadEmptyBinData,
-    unReadFilledBin,setUnReadFilledBinData,unReadTask,resetTaskData}}>
+    unReadFilledBin,setUnReadFilledBinData,unReadTask,resetTaskData,appProcess,setAppProcessData}}>
       {children}
     </EmptyBinContext.Provider>
   ) 

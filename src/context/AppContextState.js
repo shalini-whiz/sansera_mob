@@ -7,7 +7,6 @@ export default class AppContextState extends React.Component {
     userEntity:{},
     tasks: [],
     processStage:'',
-    appProcess:'',
     taskCount: 0,
     //emptyBinCount: 0,
     filledBinCount: 0
@@ -20,9 +19,7 @@ export default class AppContextState extends React.Component {
     this.setState({ processStage:stage})
   }
 
-  setAppProcess = (process) => {
-    this.setState({ appProcess: process })
-  }
+
 
   setTaskCount = (count) => {
     this.setState({taskCount:count})
@@ -54,8 +51,6 @@ export default class AppContextState extends React.Component {
           deleteTask: this.deleteTask,
           processStage:this.state.processStage,
           setProcessStage:this.setProcessStage,
-          appProcess:this.state.appProcess,
-          setAppProcess:this.setAppProcess,
           taskCount:this.state.taskCount,
           setTaskCount:this.setTaskCount,
         //  emptyBinCount:this.state.emptyBinCount,

@@ -29,6 +29,14 @@ let created_process_schema = [
     required: true, type: "string"
   },
   {
+    "key": "ok_bits_count", displayName: "OK Bits (count)", placeholder: "", value: 0, error: "",
+    required: false, "label": "Count of OK Bits", type: "number", defaultValue: 0,
+  },
+  {
+    "key": "ok_bits_weight", displayName: "OK Bits Weight (kg)", placeholder: "", value: 0, error: "",
+    required: false, "label": "OK Bits Weight", type: "number", defaultValue: 0,
+  },
+  {
     "key": "updated_on", displayName: "Last Updated", placeholder: "", value: "",
     error: "", required: true, label: "components", type: "string"
   }
@@ -74,6 +82,12 @@ export default function WeightDetails(props) {
           item.value = props.processEntity.process[stage_ok_comp_index][item.key]+ ""
         }
         if (value.toLowerCase() === "shearing" && item.key === "ok_end_billets_weight" && props.processEntity.process[stage_ok_comp_index]) {
+          item.value = props.processEntity.process[stage_ok_comp_index][item.key] + ""
+        }
+        if (value.toLowerCase() === "shearing" && item.key === "ok_bits_count" && props.processEntity.process[stage_ok_comp_index]) {
+          item.value = props.processEntity.process[stage_ok_comp_index][item.key] + ""
+        }
+        if (value.toLowerCase() === "shearing" && item.key === "ok_bits_weight" && props.processEntity.process[stage_ok_comp_index]) {
           item.value = props.processEntity.process[stage_ok_comp_index][item.key] + ""
         }
         if (value.toLowerCase() === "shearing" && item.key === "ok_component" && props.processEntity.process[stage_ok_comp_index]) {

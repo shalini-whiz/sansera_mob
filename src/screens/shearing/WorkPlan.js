@@ -17,20 +17,29 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ShowRack from "./ShowRack";
 import ErrorModal from "../../components/ErrorModal";
 import PublishMqtt from "../mqtt/PublishMqtt";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 
 let stageWeightSchema = [
   {
     "key": "ok_component", displayName: "Count of OK Billets", placeholder: "", value: 0, error: "",
-    required: true, "label": "Billet Weight", type: "number", defaultValue: 0, nonZero: true
+    required: false, "label": "Billet Weight", type: "number", defaultValue: 0, 
   },
   {
     "key": "ok_end_billets_weight", displayName: "Weight of OK Billets (kg)", placeholder: "", value: 0, error: "",
-    required: true, "label": "Billet Weight", type: "number", defaultValue: 0, nonZero: true
+    required: false, "label": "Billet Weight", type: "number", defaultValue: 0, 
   },
   {
     "key": "hold_materials_weight", displayName: "Hold Material Weight (kg)", placeholder: "", value: 0, error: "",
     required: false, "label": "Hold Material Weight", type: "number", defaultValue: 0, 
+  },
+  {
+    "key": "ok_bits_count", displayName: "Count of OK Bits", placeholder: "", value: 0, error: "",
+    required: false, "label": "Count of OK Bits", type: "number", defaultValue: 0,
+  },
+  {
+    "key": "ok_bits_weight", displayName: "OK Bits Weight (kg)", placeholder: "", value: 0, error: "",
+    required: false, "label": "OK Bits Weight", type: "number", defaultValue: 0,
   },
   // {
   //   "key": "ok_component", displayName: "OK Component (Count)", placeholder: "", value: 0,
@@ -53,6 +62,7 @@ export default function WorkPlan(props) {
   const isFocused = useIsFocused();
   const [count, setCount] = useState(0);
   const [rackData, setRackData] = useState({})
+  const { appProcess } = React.useContext(EmptyBinContext)
 
 
   useEffect(() => {
@@ -113,7 +123,7 @@ export default function WorkPlan(props) {
 
   const showRack = (e) => {
     let apiData = { op: "get_next_raw_material_item" }
-    apiData.batch_num = props.processEntity.batch_num
+    apiData.batch_num = appProcess.batch_num
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
       if (apiRes && apiRes.status && apiRes.response && apiRes.response.message) {
         PublishMqtt({ "topic": apiRes.response.message.element_id})
@@ -133,24 +143,59 @@ export default function WorkPlan(props) {
     let isError = validFormData.find(item => {
       if (item.error.length) return item;
     });
+    if(!isError){
+      let ok_bits_count_index = validFormData.findIndex(item => item.key === "ok_bits_count");
+      let ok_bits_weight_index = validFormData.findIndex(item => item.key === "ok_bits_weight");
+      let ok_bits_count_obj = validFormData[ok_bits_count_index];
+      let ok_bits_weight_obj = validFormData[ok_bits_weight_index];
 
-    let apiData = await util.filterFormData([...batchFormData]);
-    apiData.op = "update_process",
-      apiData.process_name = props.processEntity.process_name
-    apiData.stage_name = await AsyncStorage.getItem("stage")
+      if (ok_bits_count_obj.value > 0 && ok_bits_weight_obj.value == 0) {
+        validFormData[ok_bits_weight_index].error = "Weight of OK Bits required";
+      }
+      else if (ok_bits_weight_obj.value > 0 && ok_bits_count_obj.value == 0)
+        validFormData[ok_bits_count_index].error = "Count of OK Bits required";
+   
 
+      let ok_component_index = validFormData.findIndex(item => item.key === "ok_component");
+      let ok_end_billets_weight_index = validFormData.findIndex(item => item.key === "ok_end_billets_weight");
+      let ok_component_obj = validFormData[ok_component_index];
+      let ok_end_billets_weight_obj = validFormData[ok_end_billets_weight_index];
+
+
+      if (ok_component_obj.value > 0 && ok_end_billets_weight_obj.value == 0) {
+        validFormData[ok_end_billets_weight_index].error = "Weight of OK Billets required";
+      }
+      else if (ok_end_billets_weight_obj.value > 0 && ok_component_obj.value == 0)
+        validFormData[ok_component_index].error = "Count of OK Billets required";
+
+    }
+
+    isError = validFormData.find(item => {
+      if (item.error.length) return item;
+    });
 
     setBatchFormData(validFormData);
 
+    let isAllZero = validFormData.find(item => item.value != 0)
+    if(!isAllZero){
+      Alert.alert("Please enter values")
+      return;
+    }
+    let apiData = await util.filterFormData([...batchFormData]);
+    apiData.op = "update_process",
+    apiData.process_name = appProcess.process_name
+    apiData.stage_name = await AsyncStorage.getItem("stage")
+
     if (!isError) {
       setApiStatus(true);
+      
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
         setApiStatus(false);
         if (apiRes && apiRes.status) {
           if (apiRes.response.message) {
             
             Alert.alert("Work plan updated");
-            props.setProcessEntity(apiRes.response.message)
+           // props.setProcessEntity(apiRes.response.message)
             props.updateProcess()
 
             // setBatchDet(apiRes.response.message);
@@ -202,11 +247,11 @@ export default function WorkPlan(props) {
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <ProcessDetails
                 title="PROCESS DETAILS"
-                processEntity={props && props.processEntity ? props.processEntity : {}} />
+                processEntity={appProcess} />
             </View>
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <WeightDetails title="WEIGHT DETAILS"
-                processEntity={props && props.processEntity ? props.processEntity : {}} />
+                processEntity={appProcess} />
             </View>
           </View>
         </View>
@@ -216,7 +261,7 @@ export default function WorkPlan(props) {
           modalVisible={dialog}
           dialogTitle={dialogTitle}
           dialogMessage={dialogMessage}
-          container={<ShowRack rackData={rackData} processEntity={props.processEntity}
+          container={<ShowRack rackData={rackData} processEntity={appProcess}
             reloadPage={reloadPage}
             closeDialog={closeDialog}
           />} /> : false

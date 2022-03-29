@@ -109,7 +109,7 @@ export default function ProcessInfo(props) {
         processSchema.push(rejection_schema)
         processSchema.push(one_punch_billet_schema)
         processSchema.push(two_punch_billet_schema)
-        processSchema.push(three_punch_billet_schema)
+        //processSchema.push(three_punch_billet_schema)
       }
       if ( currentStage && (currentStage.toLowerCase() === stageType.shotblasting || currentStage.toLowerCase() === stageType.visual || 
       currentStage.toLowerCase() === stageType.shotpeening || currentStage.toLowerCase() === stageType.oiling)) {
@@ -156,8 +156,8 @@ export default function ProcessInfo(props) {
           punchKeys.map(punchItem => {
             let punchIndex = processSchema.findIndex(item => item.key === punchItem)
             if (punchIndex > -1) {
-              let item_index = properties.findIndex(item => Object.keys(item)[0] === punchItem)
-              processSchema[punchIndex].value = properties[item_index][punchItem] + ""
+             // let item_index = properties.findIndex(item => Object.keys(item)[0] === punchItem)
+              processSchema[punchIndex].value = properties[punchItem] + ""
             }
           })
         }

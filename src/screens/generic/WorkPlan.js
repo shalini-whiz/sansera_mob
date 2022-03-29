@@ -15,6 +15,7 @@ import WeightDetails from "../process/WeightDetails";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RequestBin from "./RequestBin";
 import ProcessInfo from "../process/ProcessInfo";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 
 let stageSchema = [
@@ -40,6 +41,7 @@ export const  WorkPlan = React.memo((props) => {
   const isFocused = useIsFocused();
   const [count, setCount] = useState(0);
   const [rackData, setRackData] = useState({})
+  const { appProcess } = React.useContext(EmptyBinContext)
 
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export const  WorkPlan = React.memo((props) => {
       loadForm();
     }
     return () => { }
-  }, [isFocused])
+  }, [isFocused,appProcess.process_name])
 
 
 
@@ -103,7 +105,7 @@ export const  WorkPlan = React.memo((props) => {
 
     let apiData = await util.filterFormData([...formData]);
     apiData.op = "update_process",
-      apiData.process_name = props.processEntity.process_name
+      apiData.process_name = appProcess.process_name
     apiData.stage_name = await AsyncStorage.getItem("stage")
 
 
@@ -116,7 +118,7 @@ export const  WorkPlan = React.memo((props) => {
         if (apiRes && apiRes.status) {
           if (apiRes.response.message) {
             Alert.alert("Process updated");
-            props.setProcessEntity(apiRes.response.message)
+           // props.setProcessEntity(apiRes.response.message)
             props.updateProcess()
 
             // setBatchDet(apiRes.response.message);
@@ -153,10 +155,10 @@ export const  WorkPlan = React.memo((props) => {
             >
               <Text style={AppStyles.warnButtonTxt}>REQUEST FILLED BIN</Text>
             </TouchableOpacity>
-            <View style={{ flexDirection: 'row', margin: 10 }}>
+            {/* <View style={{ flexDirection: 'row', margin: 10 }}>
               <Text style={AppStyles.filterLabel}>Empty Bin </Text>
               <CustomHeader title=""></CustomHeader>
-            </View>
+            </View> */}
             <View style={{ flexDirection: 'column', margin: 10 }}>
 
               <FormGen
@@ -179,7 +181,7 @@ export const  WorkPlan = React.memo((props) => {
               <ProcessInfo
                 title="PROCESS DETAILS"
                 fields={["ok_component", "total_rejections"]}
-                processEntity={props && props.processEntity ? props.processEntity : {}}
+                processEntity={appProcess.process_name ? appProcess : {}}
 
                 />
             </View>
@@ -190,7 +192,7 @@ export const  WorkPlan = React.memo((props) => {
           modalVisible={dialog}
           dialogTitle={dialogTitle}
           dialogMessage={dialogMessage}
-          container={<RequestBin processEntity={props.processEntity}
+          container={<RequestBin processEntity={appProcess}
             //reloadPage={reloadPage}
             closeDialog={closeDialog}
           />}

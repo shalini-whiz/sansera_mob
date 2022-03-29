@@ -29,14 +29,14 @@ const CustomModal = (props) => {
           {props.okDialog && props.closeDialog ?
             <View style={{
               flexDirection: 'row', display: 'flex',
-              alignSelf: 'center',marginBottom:10
+              alignSelf: 'center',marginBottom:20,
             }}>
               <TouchableOpacity
                 style={[AppStyles.canButtonContainer, { }]} onPress={(e) => props.closeDialog(e)} >
                 <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[AppStyles.successBtn, { }]} disabled={false} activeOpacity={.5} onPress={(e) => props.okDialog(e)} >
+                style={[AppStyles.successBtn, { marginLeft:10}]} disabled={false} activeOpacity={.5} onPress={(e) => props.okDialog(e)} >
                 <Text style={AppStyles.successText}>{props.okTitle ? props.okTitle : 'OK'}</Text>
               </TouchableOpacity>
             </View> : false}

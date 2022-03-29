@@ -21,6 +21,8 @@ export const ShearingHome = React.memo((props) =>  {
   const processRef = useRef()
   const isFocused = useIsFocused();
   const [processDet, setProcessDet] = React.useState({});
+  let { appProcess } = React.useContext(EmptyBinContext);
+  const [route, setRoute] = React.useState('')
   useEffect(() => {
     if (isFocused) {
      
@@ -33,7 +35,7 @@ export const ShearingHome = React.memo((props) =>  {
   }
 
   const updateProcess = e => {
-    processRef.current.setFromOutside(processDet.process_name)
+    processRef.current.setFromOutside(appProcess.process_name)
 
     //processRef.current.setFromOutside('HELLO from Parent')
   }
@@ -48,64 +50,52 @@ export const ShearingHome = React.memo((props) =>  {
           tabBarInactiveTintColor: 'gray',
           lazy: true
         })}
+        initialRouteName={route.length ? route : 'Work Plan'}
       >
-
         <Tab.Screen name="Work Plan"
-          children={() => <WorkPlan 
-            processEntity={processDet}
-            setProcessEntity={setProcess}
-            updateProcess={updateProcess}
-            />}
-
-          listeners={({ navigation, route }) => ({
-            tabPress: e => {
-              if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Work Plan')
-              }
+          children={() => <WorkPlan updateProcess={updateProcess} />}
+          listeners={{
+            tabPress: (e) => {
+              setRoute('Work Plan')
             },
-          })} />
+          }}
+        />
+
         <Tab.Screen name="Raw Material" 
           children={() => <RawMaterial 
             processEntity={processDet} setProcessEntity={setProcess} updateProcess={updateProcess} />}
-        />
-        <Tab.Screen name="Consumption Data"
-          children={() => <ConsumptionData
-            processEntity={processDet} setProcessEntity={setProcess} updateProcess={updateProcess} />}
-        />
-        <Tab.Screen 
-          // name={"Tasks" + (unReadTask && unReadTask.length && unReadTask != "0" ? (" (" + unReadTask + ")") : '')}
-          name="Tasks"
-          children={() => <TaskHome 
-            processEntity={processDet}
-            setProcessEntity={setProcess}
-            updateProcess={updateProcess}
-            />}
-
-          listeners={({ navigation, route }) => ({
-            tabPress: e => {
-              if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Tasks')
-              }
+          listeners={{
+            tabPress: (e) => {
+              setRoute('Raw Material')
             },
-          })}
+          }}
+        />
+
+        <Tab.Screen name="Consumption Data"
+          children={() => <ConsumptionData />}
+          listeners={{
+            tabPress: (e) => {
+              setRoute('Consumption Data')
+            },
+          }}
+        />
+        
+        <Tab.Screen 
+          name="Tasks"
+          children={() => <TaskHome updateProcess={updateProcess} />}
+          listeners={{ 
+            tabPress: (e) => { setRoute('Tasks') }, 
+          }}
         />
 
         <Tab.Screen
-          // name={"Tasks" + (unReadTask && unReadTask.length && unReadTask != "0" ? (" (" + unReadTask + ")") : '')}
           name="FIFO Board"
-          children={() => <FifoBoard
-            processEntity={processDet}
-            setProcessEntity={setProcess}
-            updateProcess={updateProcess}
-          />}
-
-          listeners={({ navigation, route }) => ({
-            tabPress: e => {
-              if (route.state && route.state.routeNames.length > 0) {
-                navigation.navigate('Tasks')
-              }
+          children={() => <FifoBoard />}
+          listeners={{
+            tabPress: (e) => {
+              setRoute('FIFO Board')
             },
-          })}
+          }}
         />
       </Tab.Navigator>
     </NavigationContainer>)

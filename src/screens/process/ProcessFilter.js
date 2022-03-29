@@ -21,7 +21,7 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
   const [process, setProcess] = useState([])
   const [processName, setProcessName] = useState('')
 
-  const {setAppProcess,appProcess} = useContext(AppContext)
+  const {setAppProcessData} = React.useContext(EmptyBinContext)
 
   
   useEffect(() => {
@@ -54,15 +54,15 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
           if(currentProcess) {
             if (selectedProcess && selectedProcess.length > 0) {
               let currentProObj = apiRes.response.message.find(item => item.process_name === selectedProcess)
-              props.processEntity(currentProObj)
+             // props.processEntity(currentProObj)
               setProcessName(currentProObj.process_name)
-              setAppProcess(currentProObj.process_name)
+              setAppProcessData(currentProObj)
             }
             else{
               let processEntity = apiRes.response.message[0];
-              props.processEntity(processEntity)
+             // props.processEntity(processEntity)
               setProcessName(processEntity.process_name)
-              setAppProcess(processEntity.process_name)
+              setAppProcessData(processEntity)
             }
           }
          
@@ -87,10 +87,10 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
   const handleChange = (name) => (value) => {
     let index = process.findIndex(item => item.process_name === value)
     setProcessName(value)  
-    setAppProcess(value);
  
     if(index > -1){
-      props.processEntity(process[index])
+     // props.processEntity(process[index])
+      setAppProcessData(process[index]);
     }
   };
 

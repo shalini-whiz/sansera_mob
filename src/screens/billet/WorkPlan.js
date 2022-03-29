@@ -13,6 +13,7 @@ import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RequestBin from "../generic/RequestBin";
 import ProcessInfo from "../process/ProcessInfo";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 let stageSchema = [
   {
@@ -23,10 +24,10 @@ let stageSchema = [
     "key": "two punch billet", displayName: "Two Punch Billet (Count)", placeholder: "", value: 0,
     error: "", required: true, label: "Two Punch Billet", type: "number", defaultValue: 0
   },
-  {
-    "key": "three punch billet", displayName: "Three Punch Billet (Count)", placeholder: "", value: 0,
-    error: "", required: true, label: "Three Punch Billet", type: "number", defaultValue: 0
-  },
+  // {
+  //   "key": "three punch billet", displayName: "Three Punch Billet (Count)", placeholder: "", value: 0,
+  //   error: "", required: true, label: "Three Punch Billet", type: "number", defaultValue: 0
+  // },
 ]
 
 
@@ -44,7 +45,8 @@ export default function WorkPlan(props) {
   const isFocused = useIsFocused();
   const [count, setCount] = useState(0);
   const [rackData,setRackData] = useState({})
-  
+  const { appProcess } = React.useContext(EmptyBinContext)
+
 
   useEffect(() => {
     if (isFocused) {
@@ -107,11 +109,9 @@ export default function WorkPlan(props) {
 
     let apiData = {} ;
     apiData.op = "update_process",
-    apiData.process_name = props.processEntity.process_name
+    apiData.process_name = appProcess.process_name
     apiData.stage_name = await AsyncStorage.getItem("stage")
     apiData.properties = await util.filterFormData([...formData])
-
-
     setFormData(validFormData);
     if (!isError) {
       setApiStatus(true);
@@ -120,7 +120,7 @@ export default function WorkPlan(props) {
         if (apiRes && apiRes.status) {
           if (apiRes.response.message) {
             Alert.alert("Process updated");
-            props.setProcessEntity(apiRes.response.message)
+           // props.setProcessEntity(apiRes.response.message)
             props.updateProcess()
             util.resetForm(formData);
           }
@@ -154,10 +154,10 @@ export default function WorkPlan(props) {
               >
               <Text style={AppStyles.warnButtonTxt}>REQUEST FILLED BIN</Text>
             </TouchableOpacity>
-            <View style={{flexDirection:'row',margin:10}}>
+            {/* <View style={{flexDirection:'row',margin:10}}>
               <Text style={AppStyles.filterLabel}>Empty Bin </Text>
               <CustomHeader  title=""></CustomHeader>
-            </View>
+            </View> */}
             <View style={{ flexDirection: 'column', margin: 10 }}>
 
             <FormGen
@@ -177,7 +177,7 @@ export default function WorkPlan(props) {
             <View style={{ flex: 1, backgroundColor: 'white',margin:5,padding:5}}>
               <ProcessInfo 
                 title="PROCESS DETAILS"
-                processEntity={props && props.processEntity ? props.processEntity : {}}
+                processEntity={appProcess}
                 fields={["total_rejections"]}
 
                 />
@@ -190,7 +190,7 @@ export default function WorkPlan(props) {
           modalVisible={dialog}
           dialogTitle={dialogTitle}
           dialogMessage={dialogMessage}
-          container={<RequestBin  processEntity={props.processEntity}
+          container={<RequestBin  processEntity={appProcess}
             //reloadPage={reloadPage}
             closeDialog={closeDialog}
           />} 

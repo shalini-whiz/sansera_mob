@@ -8,6 +8,7 @@ import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import CustomModal from "../../components/CustomModal";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 
   export const Rejection = React.memo((props) => {
@@ -32,6 +33,7 @@ import CustomModal from "../../components/CustomModal";
   const [refreshing, setRefreshing] = useState(false)
   const [rejError,setRejError] = useState('')
   const isFocused = useIsFocused();
+  const { appProcess } = React.useContext(EmptyBinContext)
 
   let rejectionMenu = [];
  
@@ -52,7 +54,7 @@ import CustomModal from "../../components/CustomModal";
     let apiData = {
       "op": "get_rejections",
     }
-    apiData.process_name = props.processEntity.process_name
+    apiData.process_name = appProcess.process_name
     apiData.stage_name = await AsyncStorage.getItem("stage")
     setRefreshing(false);
     setRejCount(0);
@@ -217,7 +219,7 @@ import CustomModal from "../../components/CustomModal";
   
   const updateRejections = async() => {
     let apiData = { op: "update_rejection"}
-    apiData.process_name = props.processEntity.process_name
+    apiData.process_name = appProcess.process_name
     apiData.stage_name = await AsyncStorage.getItem("stage")
     let rejReasonObj = {};
     rejReasonObj[rejReason] =  parseInt(rejCount)

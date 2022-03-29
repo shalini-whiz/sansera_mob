@@ -15,6 +15,7 @@ import WeightDetails from "../process/WeightDetails";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RequestBin from "./RequestBin";
 import ProcessInfo from "../process/ProcessInfo";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 
 let stageSchema = [
@@ -40,6 +41,7 @@ let stageSchema = [
   const isFocused = useIsFocused();
   const [count, setCount] = useState(0);
   const [rackData,setRackData] = useState({})
+  const { appProcess } = React.useContext(EmptyBinContext)
   
 
   useEffect(() => {
@@ -103,7 +105,7 @@ let stageSchema = [
 
     let apiData = await util.filterFormData([...formData]);
     apiData.op = "update_process",
-    apiData.process_name = props.processEntity.process_name
+    apiData.process_name = appProcess.process_name
     apiData.stage_name = await AsyncStorage.getItem("stage")
 
 
@@ -116,7 +118,7 @@ let stageSchema = [
         if (apiRes && apiRes.status) {
           if (apiRes.response.message) {
             Alert.alert("Process updated");
-            props.setProcessEntity(apiRes.response.message)
+           // props.setProcessEntity(apiRes.response.message)
             props.updateProcess()
 
             // setBatchDet(apiRes.response.message);
@@ -153,10 +155,10 @@ let stageSchema = [
               >
               <Text style={AppStyles.warnButtonTxt}>REQUEST FILLED BIN</Text>
             </TouchableOpacity>
-            <View style={{flexDirection:'row',margin:10}}>
+            {/* <View style={{flexDirection:'row',margin:10}}>
               <Text style={AppStyles.filterLabel}>Empty Bin </Text>
               <CustomHeader  title=""></CustomHeader>
-            </View>
+            </View> */}
             <View style={{ flexDirection: 'column', margin: 10 }}>
 
             <FormGen
@@ -175,26 +177,19 @@ let stageSchema = [
           <View style={{flex:3,flexDirection:'row',}}>
             <View style={{ flex: 1, backgroundColor: 'white',margin:5,padding:5}}>
               <ProcessInfo 
-                title="Process Details"
-                processEntity={props && props.processEntity ? props.processEntity : {}}
+                title="PROCESS DETAILS"
+                processEntity={appProcess}
                 fields={["forge_machine_id","total_rejections"]}
                 />
             </View>
-            {/* <View style={{ flex: 1,backgroundColor:'white',margin:5,padding:5 }}>
-              <WeightDetails title="Weight Details"
-                processEntity={props && props.processEntity ? props.processEntity : {}} />
-            </View> */}
+           
           </View>
         </View>
        {dialog ? <CustomModal
           modalVisible={dialog}
           dialogTitle={dialogTitle}
           dialogMessage={dialogMessage}
-          container={<RequestBin  processEntity={props.processEntity}
-            //reloadPage={reloadPage}
-            closeDialog={closeDialog}
-          />} 
-       
+          container={<RequestBin  processEntity={appProcess} closeDialog={closeDialog} />} 
        /> : false}
       
       </View>

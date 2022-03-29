@@ -39,6 +39,7 @@ const urls = {
     list_raw_material_by_status: SERVER_URL +"api/raw-materials",
     update_batch: SERVER_URL +"api/raw-materials",
     batch: SERVER_URL +"api/raw-materials",
+    get_batch_reason: SERVER_URL +"api/batch-rejection",
     process:SERVER_URL+"api/process-line",
     forgeMachine:SERVER_URL+"api/forge-machine",
     customer: SERVER_URL +"api/customer",
@@ -48,7 +49,8 @@ const urls = {
     rejection: SERVER_URL +"api/rejection",
     org: SERVER_URL +"api/org-service",
     task: SERVER_URL +"api/operator-task",
-    process_consumption: SERVER_URL +"api/process-consumption"
+    process_consumption: SERVER_URL +"api/process-consumption",
+    compartment: SERVER_URL +"api/compartment"
 };
 
 

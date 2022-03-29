@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView, RefreshControl,
-   ActivityIndicator, Touchable, FlatList } from "react-native";
+import {
+  StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView, RefreshControl,
+  ActivityIndicator, Touchable, FlatList
+} from "react-native";
 import { SvgCss } from 'react-native-svg';
 import { appTheme } from "../../lib/Themes";
 import { ApiService } from "../../httpservice";
@@ -14,7 +16,7 @@ import { ProcessFifo } from "./ProcessFifo";
 
 
 
-export const FifoBoard = React.memo((props) =>{
+export const FifoBoard = React.memo((props) => {
   const isFocused = useIsFocused();
   const [apiError, setApiError] = useState('')
   const [apiStatus, setApiStatus] = useState(false);
@@ -85,7 +87,7 @@ export const FifoBoard = React.memo((props) =>{
     setProcessDet(item)
   }
 
- 
+
 
   const updateFifo = () => {
     closeDialog()
@@ -95,9 +97,9 @@ export const FifoBoard = React.memo((props) =>{
     setApiError('')
   }
 
-  const renderItem = ({ item,index }) => (
-      <View style={[styles.tableData,{flexDirection:'row'}]} key={index}>
-      <Text style={[styles.tableDataCell, { borderLeftWidth: 0.5,textAlign:'left'  }]}>{item.batch_num}
+  const renderItem = ({ item, index }) => (
+    <View style={[styles.tableData, { flexDirection: 'row' }]} key={index}>
+      <Text style={[styles.tableDataCell, { borderLeftWidth: 0.5, textAlign: 'left' }]}>{item.batch_num}
         <TouchableOpacity style={[{ marginLeft: 15 }]}
           onPress={(e) => openDialog('processFifo', item)} >
           <SvgCss
@@ -110,13 +112,13 @@ export const FifoBoard = React.memo((props) =>{
           {/* <MaterialIcons name="edit" size={22} style={{ marginLeft: 10 }} color="green" ></MaterialIcons> */}
         </TouchableOpacity>
       </Text>
-      <Text style={[styles.tableDataCell, { }]}>{item.heat_num}</Text>
-      <Text style={[styles.tableDataCell, {  }]}>{item.supplier}</Text>
-      <Text style={[styles.tableDataCell, { }]}>{item.process_name}</Text>
-      <Text style={[styles.tableDataCell, {  }]}>{item.component_weight}</Text>
-      <Text style={[styles.tableDataCell, {}]}>{dateUtil.toDateFormat(item.created_on,"DD MMM YYYY")}</Text>
+      <Text style={[styles.tableDataCell, {}]}>{item.heat_num}</Text>
+      <Text style={[styles.tableDataCell, {}]}>{item.supplier}</Text>
+      <Text style={[styles.tableDataCell, {}]}>{item.process_name}</Text>
+      <Text style={[styles.tableDataCell, {}]}>{item.component_weight}</Text>
+      <Text style={[styles.tableDataCell, {}]}>{dateUtil.toDateFormat(item.created_on, "DD MMM YYYY")}</Text>
 
-      <Text style={[styles.tableDataCell, { }]}>{item.status}</Text>               
+      <Text style={[styles.tableDataCell, {}]}>{item.status}</Text>
     </View>
   );
 
@@ -125,40 +127,40 @@ export const FifoBoard = React.memo((props) =>{
     //   contentContainerStyle={styles.scrollView}
     //   refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }
     // >
-      <View style={styles.container}>
-        {apiStatus ? <ActivityIndicator size="large" animating={apiStatus} /> : false}
-        {process.length ?  <View style={{backgroundColor:'white',margin:2,padding:5}}>
-          <FlatList
-            data={process}
-            horizontal={false}
-            renderItem={renderItem}
-            keyExtractor={item => item.id}
+    <View style={styles.container}>
+      {apiStatus ? <ActivityIndicator size="large" animating={apiStatus} /> : false}
+      {process.length ? <View style={{ backgroundColor: 'white', margin: 2, padding: 5 }}>
+        <FlatList
+          data={process}
+          horizontal={false}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
           onRefresh={() => onRefresh()}
           refreshing={refreshing}
-            ListHeaderComponent={() => {
-              return (
-                <View style={styles.tableHeader}>
-                  <Text style={[styles.tableHeaderCell, { borderLeftWidth: 0.5 }]}>Batch</Text>
-                  <Text style={[styles.tableHeaderCell, { }]}>Heat Number</Text>
-                  <Text style={[styles.tableHeaderCell, { }]}>Supplier</Text>
-                  <Text style={[styles.tableHeaderCell, { }]}>Process</Text>
-                  <Text style={[styles.tableHeaderCell, { }]}>Total Quantity</Text>
-                  <Text style={[styles.tableHeaderCell, { }]}>Received Date</Text>
-                  <Text style={[styles.tableHeaderCell, { }]}>Status</Text>
-                </View>)
-            }}
-          >
-          </FlatList>
-        </View>: false}
-        {dialog && dialogType === "processFifo" ? <CustomModal
-          modalVisible={dialog}
-          dialogTitle={dialogTitle}
-          dialogMessage={dialogMessage}
-          container={<ProcessFifo processDet={processDet} closeDialog={closeDialog} okDialog={updateFifo} />}
-        /> : false}
-        {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
+          ListHeaderComponent={() => {
+            return (
+              <View style={styles.tableHeader}>
+                <Text style={[styles.tableHeaderCell, { borderLeftWidth: 0.5 }]}>Batch</Text>
+                <Text style={[styles.tableHeaderCell, {}]}>Heat Number</Text>
+                <Text style={[styles.tableHeaderCell, {}]}>Supplier</Text>
+                <Text style={[styles.tableHeaderCell, {}]}>Process</Text>
+                <Text style={[styles.tableHeaderCell, {}]}>Total Quantity</Text>
+                <Text style={[styles.tableHeaderCell, {}]}>Received Date</Text>
+                <Text style={[styles.tableHeaderCell, {}]}>Status</Text>
+              </View>)
+          }}
+        >
+        </FlatList>
+      </View> : false}
+      {dialog && dialogType === "processFifo" ? <CustomModal
+        modalVisible={dialog}
+        dialogTitle={dialogTitle}
+        dialogMessage={dialogMessage}
+        container={<ProcessFifo processDet={processDet} closeDialog={closeDialog} okDialog={updateFifo} />}
+      /> : false}
+      {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
 
-      </View>
+    </View>
   )
 })
 const styles = StyleSheet.create({
@@ -216,28 +218,28 @@ const styles = StyleSheet.create({
 
   },
   tableHeader: {
-    flexDirection: 'row', borderTopWidth: 0.5, borderBottomWidth: 0.5,borderColor:'grey'
+    flexDirection: 'row', borderTopWidth: 0.5, borderBottomWidth: 0.5, borderColor: 'grey'
   },
-  tableHeaderCell:{
+  tableHeaderCell: {
     textAlign: 'center', flex: 1, borderRightWidth: 0.5, padding: 5,
     textAlign: 'center',
     fontSize: 14,
     fontFamily: appTheme.fonts.regular,
     color: appTheme.colors.cardTitle,
-    borderColor:'grey'
+    borderColor: 'grey'
   },
-  tableData:{
+  tableData: {
     flexDirection: 'row', borderTopWidth: 0.5, borderBottomWidth: 0.5, borderColor: 'grey'
 
   },
-  tableDataCell:{
+  tableDataCell: {
     textAlign: 'center', flex: 1, borderRightWidth: 0.5, padding: 5,
     textAlign: 'center',
     fontSize: 16,
     fontFamily: appTheme.fonts.regular,
     color: appTheme.colors.filterText,
     borderColor: 'grey',
-    color:'black'
+    color: 'black'
   }
 
 });

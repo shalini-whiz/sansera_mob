@@ -26,7 +26,7 @@ const Home = () => {
   const [dialogTitle, setDialogTitle] = React.useState('')
   const [dialogMessage, setDialogMessage] = React.useState('');
   const isFocused = useIsFocused();
-  const { setProcessStage,setAppProcess } = React.useContext(AppContext)
+  const { setProcessStage } = React.useContext(AppContext)
   let { setUnReadEmptyBinData, setUnReadFilledBinData, resetTaskData } = React.useContext(EmptyBinContext)
   useEffect(() => {
     if(isFocused){
@@ -52,7 +52,6 @@ const Home = () => {
   const logout = async () => {
     closeDialog()
     await AsyncStorage.clear();
-    setAppProcess('')
     setProcessStage('')
     resetTaskData('')
     setUnReadEmptyBinData('')

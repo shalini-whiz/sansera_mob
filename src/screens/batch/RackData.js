@@ -7,11 +7,12 @@ import ErrorModal from "../../components/ErrorModal";
 import AppStyles from "../../styles/AppStyles";
 import CustomModal from "../../components/CustomModal";
 import { RackDetails } from "./RackDetails";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import { appTheme } from "../../lib/Themes";
 
 export const RackData = React.memo((props) => {
   const isFocused = useIsFocused();
-  const [batches,setBatches] = useState([])
-  const [secBatches,setSecBatches] = useState([])
+  const [racks,setRacks] = useState([])
   const [apiError, setApiError] = useState('')
   const [apiStatus, setApiStatus] = useState(false);
   const [refreshing, setRefreshing] = useState(false)
@@ -20,6 +21,8 @@ export const RackData = React.memo((props) => {
   const [dialogMessage, setDialogMessage] = useState('');
   const [rackNo,setRackNo] = useState('')
   const [batch,setBatch] = useState({})
+  const [rows,setRows] = useState(0);
+  const [columns,setColumns] = useState(0);
 
   useEffect(() => {
     if (isFocused) {
@@ -30,25 +33,17 @@ export const RackData = React.memo((props) => {
   }, [isFocused])
 
   const loadBatches = () => {
-    let apiData = {
-      "op": "list_raw_material_by_status",
-      "status": ["NEW","APPROVED", "REJECTED"]
-    }
+    let apiData = { "op": "get_compartments"    }
     setRefreshing(false);
-    ApiService.getAPIRes(apiData, "POST", "list_raw_material_by_status").then(async apiRes => {
+    ApiService.getAPIRes(apiData, "POST", "compartment").then(async apiRes => {
       setApiStatus(false);
+     
       if (apiRes && apiRes.status) {
-        if (apiRes.response.message && apiRes.response.message.length) {
-         
-          let batchSection = await apiRes.response.message.reduce(async function (accumulator, item) {
-            const accum = await accumulator;
-            item.data = item.fifo
-            await (accum.push(item));
-            return accum;
-          }, []);
-          setSecBatches(batchSection);
-          setBatches(apiRes.response.message);
-        
+        if (apiRes.response.message && apiRes.response.message) {
+          setColumns(apiRes.response.message.matrix.column)
+          //setColumns(4)
+          setRows(apiRes.response.message.matrix.row);
+          setRacks(apiRes.response.message.compartments);
         }
         else {
         
@@ -77,40 +72,67 @@ export const RackData = React.memo((props) => {
     setRackNo('')
     setBatch({})
   }
-  const openDialog = (e, batch,rackNo) => {
+  const openDialog = async(e, batch,rackNo) => {
     showDialog(true);
     let dialogTitle = "";
     let dialogMessage = "";
     dialogTitle = "Rack Number "+rackNo
     setDialogTitle(dialogTitle);
     setDialogMessage(dialogMessage);
-    setBatch(batch)
+    await getBatch(batch.batch_num)
   }
   
-  const Item = ({ fifo, title,section }) => {
+  const getBatch = async (batch_num) => {
+    let apiData = {
+      "op": "get_batch_details",
+      "batch_num": batch_num
+    }
+    let apiRes = await ApiService.getAPIRes(apiData, "POST", "batch")
+    if (apiRes.status && apiRes.response.message) {
+      setBatch(apiRes.response.message)     
+    }
+  }
+  const renderItem = ({ item, index }) => {
+    if(item.batch_num.length)
     return (
-    <TouchableOpacity style={{
-         width:200, flexDirection: 'row', backgroundColor: 'white', margin: 15,
-      flexWrap: 'wrap',
-
-    }}  onPress={(e) => openDialog(e, section, fifo.element_num)}>
-      <Text style={[AppStyles.titleWithBold, { backgroundColor: 'white', padding: 10 }]}>{fifo.element_num}</Text>
-      <Text style={[AppStyles.subtitle, { backgroundColor: 'yellow', padding: 10 }]}>{"Batch : " + section.batch_num}</Text>
-    </TouchableOpacity>
+      <TouchableOpacity style={{
+        flexDirection: 'row', backgroundColor: 'white', margin: 5,padding:5,
+        flex:1
+      }} onPress={(e) => openDialog(e, item, item.element_name)} key={index}>
+        <Text style={[AppStyles.titleWithBold, { backgroundColor: 'white', flex: 1, padding: 2 }]}>{item.element_name}</Text>
+        <Text style={[AppStyles.subtitle, { backgroundColor: item.color, flex:3,padding:2 }]}>{"Batch : " + item.batch_num}</Text>
+      </TouchableOpacity>
     )
+    else{
+      return (
+        
+        <View style={{
+          flexDirection: 'row', backgroundColor: 'white', margin: 5, padding: 5,
+          flex:1
+        }} key={index}>
+          <Text style={[AppStyles.titleWithBold, { backgroundColor: 'white', flex: 1, padding: 2 }]}>{item.element_name}</Text>
+          <View style={[AppStyles.subtitle, { flex: 3, alignItems: 'center', padding: 2 }]}>
+
+          </View>
+
+        </View>
+      )
+    }
   };
-  return (
-    <ScrollView
-      contentContainerStyle={styles.scrollView}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <View style={styles.container}>
-        <SectionList
-          horizontal={true}
-          sections={secBatches}
-          keyExtractor={(item, index) => item + index}
-          renderItem={({ item, section }) =><Item fifo={item} title={""} section={section}/>}
+ 
+  return (  
+      <View style={[styles.container,{flexDirection:'column',flex:1}]}>
+        {racks.length ? 
+        <FlatList
+          data={racks}
+          horizontal={false}
+          renderItem={renderItem}
+          keyExtractor={item => item.element_name}
+          onRefresh={() => onRefresh()}
+          refreshing={refreshing}
+          numColumns={columns}  
         />
+        : false}
         {dialog ? <CustomModal
           modalVisible={dialog} dialogTitle={dialogTitle}
           dialogMessage={dialogMessage} closeDialog={closeDialog}
@@ -119,19 +141,11 @@ export const RackData = React.memo((props) => {
         
         {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
       </View>
-    </ScrollView>
   )
 })
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
-    margin: 5
-  },
-  sectionContainer: {
-    backgroundColor: 'white',
     margin: 5,
-    padding: 5
   }
-
 });

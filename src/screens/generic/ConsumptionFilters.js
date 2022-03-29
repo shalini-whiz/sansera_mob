@@ -105,7 +105,6 @@ export default function ConsumptionFilters() {
       </View>
       </View>
       {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}
-      {console.log(processName+" ... "+stageName)}
         <ConsumptionData 
         processEntity={{ "process_name": processName, stage_name: stageName }} 
         processName={processName}

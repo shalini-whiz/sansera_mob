@@ -29,15 +29,17 @@ export const BinTask = React.memo((props) => {
   const [stage, setStage] = useState('')
   const [task, setTask] = useState({})
   const [binNo, setBinNo] = useState('')
-  let { appProcess, processStage } = React.useContext(AppContext);
+  const [prevSubStage,setPrevSubStage] = useState('')
+  let {  processStage } = React.useContext(AppContext);
   const { setUnReadFilledBinData } = React.useContext(EmptyBinContext)
+  const {  appProcess } = React.useContext(EmptyBinContext)
 
   useEffect(() => {
     if (isFocused) {
       loadData();
     }
     return () => { }
-  }, [isFocused])
+  }, [isFocused,appProcess.process_name])
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -47,15 +49,32 @@ export const BinTask = React.memo((props) => {
   const loadData = async () => {
     let stage = await AsyncStorage.getItem("stage")
     setStage(stage);
+    let currentStage = appProcess.process.find(item => item.stage_name === stage)
+   // setCurrentStage(currentStage)
     setTimeout(() => {
       setUnReadFilledBinData("0");
     }, 3000)
     let apiData = {};
     apiData.op = "get_request"
-    
-    if(props.processEntity)
-      apiData.process_name =  props.processEntity.process_name 
-    apiData.stage = stage
+    // if (currentStage.stage_name.toLowerCase() === stageType.shotblasting) {
+    //   currentStage.sub_stage = stageType.underheat
+    // }
+
+   // if(props.processEntity)
+    //  apiData.process_name =  props.processEntity.process_name 
+    apiData.process_name = appProcess.process_name 
+    if(stage && stage.toLowerCase() === stageType.shotblasting){
+      let inputStageList = await appProcess.process.reduce(async function (accumulator, item) {
+        const accum = await accumulator;
+        if (item.output_stage === stage && item.order === null)
+          await (accum.push(item.stage_name));
+        return accum;
+      }, []);
+
+      inputStageList.push(stage)
+      apiData.stage = inputStageList;
+    }
+    else apiData.stage = stage
     if(userState.user.role === roles.MO)
       apiData.task_state = ["REQUESTED", "DELIVERED"]
     else if(userState.user.role === roles.FO)
@@ -64,6 +83,7 @@ export const BinTask = React.memo((props) => {
       apiData.resolver_id = userState.user.id
     apiData.sort_by = 'updated_on'
     apiData.sort_order = 'DSC'
+
 
     setBinTask([])
     ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {

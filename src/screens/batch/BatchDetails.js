@@ -116,7 +116,6 @@ export default function BatchDetails(props) {
 
   const loadForm = () => {
     let batchSchemaData = [];
-
     if (props._id) {
       batchSchemaData = [...createdBatch];
       batchSchemaData.map(item => {

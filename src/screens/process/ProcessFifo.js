@@ -22,14 +22,14 @@ export const ProcessFifo = React.memo((props) => {
   const userState = React.useContext(UserContext);
   const [refreshing, setRefreshing] = useState(false)
   const [proStageData, setProStageData] = useState([])
-  const [stage,setStage] = useState({})
-  const [nextStage,setNextStage] = useState({})
-  const [subStage,setSubStage] = useState({})
-  const [binStage,setBinStage] = useState({})
+  const [stage, setStage] = useState({})
+  const [nextStage, setNextStage] = useState({})
+  const [subStage, setSubStage] = useState({})
+  const [binStage, setBinStage] = useState({})
   const [editBin, setEditBin] = useState(false);
   const [delBin, setDelBin] = useState([]);
-  const [delSubBin,setDelSubBin] = useState([])
-  const [isConfirm,setConfirm] = useState(false)
+  const [delSubBin, setDelSubBin] = useState([])
+  const [isConfirm, setConfirm] = useState(false)
   const [apiError, setApiError] = useState('')
 
   useEffect(() => {
@@ -50,14 +50,14 @@ export const ProcessFifo = React.memo((props) => {
     loadRejectionData();
   }, []);
 
-  const switchStage = (e,stage) => {
+  const switchStage = (e, stage) => {
     setStage(stage);
-    let index = proStageData.findIndex(item => item.order === stage.order+1 )
+    let index = proStageData.findIndex(item => item.order === stage.order + 1)
     setNextStage(proStageData[index]);
-    if (stage.sub_stage && stage.sub_stage.length){
+    if (stage.sub_stage && stage.sub_stage.length) {
       let subIndex = proStageData.findIndex(item => item.stage_name === stage.sub_stage)
-      if(subIndex > -1 )setSubStage(proStageData[subIndex]);
-    }else {
+      if (subIndex > -1) setSubStage(proStageData[subIndex]);
+    } else {
       setSubStage({})
     }
     setEditBin(false)
@@ -69,14 +69,14 @@ export const ProcessFifo = React.memo((props) => {
     setDelBin([])
     props.closeDialog();
   }
-  
+
   const handleEditBin = () => {
     setEditBin(prevState => !prevState)
     setDelBin([]);
   }
 
-  const addToDelBin = (e, fifoItem,type) => {
-    if (type === "stage"){
+  const addToDelBin = (e, fifoItem, type) => {
+    if (type === "stage") {
       let bin_to_del = [...delBin]
       let element_num = fifoItem.element_num;
       const selectedIndex = bin_to_del.indexOf(element_num);
@@ -87,7 +87,7 @@ export const ProcessFifo = React.memo((props) => {
       }
       setDelBin(bin_to_del);
     }
-    else if(type === "substage"){
+    else if (type === "substage") {
       let bin_to_del = [...delSubBin]
       let element_num = fifoItem.element_num;
       const selectedIndex = bin_to_del.indexOf(element_num);
@@ -98,15 +98,15 @@ export const ProcessFifo = React.memo((props) => {
       }
       setDelSubBin(bin_to_del);
     }
-      
+
   }
 
   const computeBin = () => {
     setConfirm(false);
-    if(delBin.length && delSubBin.length){
+    if (delBin.length && delSubBin.length) {
 
     }
-    else if (delBin.length  === 1) {
+    else if (delBin.length === 1) {
       setConfirm(true);
     }
     else if (delSubBin.length === 1) {
@@ -116,33 +116,31 @@ export const ProcessFifo = React.memo((props) => {
   const updateBin = () => {
     let apiData = {};
     let invokeApi = false;
-    if(delSubBin.length){
+    if (delSubBin.length) {
       let elementIndex = subStage.fifo.findIndex(item => item.element_num === delSubBin[0]);
       apiData.op = "remove_element"
       apiData.process_name = props.processDet.process_name
       apiData.stage_name = subStage.stage_name
       apiData.element_id = subStage.fifo[elementIndex].element_id
       invokeApi = true;
-      console.log("remove sub stage  element apiData here " + JSON.stringify(apiData))
     }
-    if(delBin.length){
+    if (delBin.length) {
       let elementIndex = stage.fifo.findIndex(item => item.element_num === delBin[0]);
       apiData.op = "remove_element"
       apiData.process_name = props.processDet.process_name
       apiData.stage_name = stage.stage_name
-      apiData.element_id = stage.fifo[elementIndex].element_id 
+      apiData.element_id = stage.fifo[elementIndex].element_id
       invokeApi = true;
-      console.log("remove element apiData here "+JSON.stringify(apiData))     
     }
-    
-    if(invokeApi){
+
+    if (invokeApi) {
       ApiService.getAPIRes(apiData, "POST", "fifo").then(apiRes => {
-          if (apiRes && apiRes.status) {
-            Alert.alert("Bin removed");
-            props.okDialog();
-          }
-          else 
-            setApiError("Could not update. try again!")
+        if (apiRes && apiRes.status) {
+          Alert.alert("Bin removed");
+          props.okDialog();
+        }
+        else
+          setApiError("Could not update. try again!")
       })
     }
   }
@@ -152,6 +150,7 @@ export const ProcessFifo = React.memo((props) => {
   }
   return (
     <ScrollView
+      horizontal={true}
       contentContainerStyle={styles.scrollView}
       refreshControl={
         <RefreshControl
@@ -166,79 +165,56 @@ export const ProcessFifo = React.memo((props) => {
         <View style={[styles.dataContainer, {}]}>
           <CustomHeader title="BIN FIFO" align={"center"} />
 
-          <View style={{
-            flexDirection: 'column', margin: 5,
-           padding: 10, borderRadius: 10
-          }}>
-            <View style={{flexDirection:'row'}}>
-              {proStageData.map((item,index) => {
+          <View style={{ flexDirection: 'column', margin: 5, padding: 10, borderRadius: 10 }}>
+            <View style={{ flexDirection: 'row' }}>
+              {proStageData.map((item, index) => {
                 return (
-                   <TouchableOpacity style={{}} key={index}
-                    onPress={(e) => switchStage(e, item)} >  
-                <Text key={index} style={[styles.tableHeader, {
-                  marginBottom: 1, flex: 1,
-                  padding: 10, width: '100%', borderColor: 'grey', borderWidth: 0.5,
-                  color: stage.stage_name === item.stage_name ? appTheme.colors.cardTitle : 'grey'}
-
-                ]}
-                
-                >{item.stage_name}
-                </Text></TouchableOpacity>)
+                  <TouchableOpacity style={{}} key={index}
+                    onPress={(e) => switchStage(e, item)} >
+                    <Text key={index} style={[styles.tableHeader, {
+                      marginBottom: 1, padding: 10, width: '100%', borderColor: 'grey', borderWidth: 0.5,
+                      color: stage.stage_name === item.stage_name ? appTheme.colors.cardTitle : 'grey'}]}>
+                        {item.stage_name}
+                    </Text></TouchableOpacity>)
               })}
             </View>
-            {stage && stage.fifo && stage.fifo.length ? 
+            {stage && stage.fifo && stage.fifo.length ?
               false :
-              <Text align="left" style={[AppStyles.warnButtonTxt,{color:appTheme.colors.warnAction}]}>No Bins</Text>
-}
-              
-              <View style={{flexDirection:'row',margin:1}}>
-                {stage && stage.fifo && stage.fifo.map((fifoItem, fifoIndex) => {
+                         <View style={{ flexDirection: 'row', margin: 1, alignSelf: 'center',borderWidth:0.5,margin:10,padding:10,width:'30%' }}>
+ <Text align="left" style={[AppStyles.warnButtonTxt, { color: appTheme.colors.warnAction }]}>No Bins</Text></View>
+            }
+            {stage && stage.fifo && stage.fifo.length ?
+            <View style={{ flexDirection: 'row', margin: 1, alignSelf: 'center',borderWidth:0.5,margin:10,padding:10,width:'30%' }}>
+              {stage && stage.fifo && stage.fifo.map((fifoItem, fifoIndex) => {
                 return (
                   <TouchableOpacity style={{}} key={fifoIndex}
                     disabled={userState.user && userState.user.role === roles.PL ? false : true}
-                    onPress={(e) => addToDelBin(e, fifoItem,"stage")} >  
-                <Text style={[{
-                  padding: 5, fontSize:18,
-                  color: delBin.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black' 
-                }
-
-                    ]}>{fifoItem.element_num}
-                </Text></TouchableOpacity>)
-              })}
-
-              {/* {subStage && subStage.fifo && subStage.fifo.map((fifoItem, fifoIndex) => {
-                return (
-                  <TouchableOpacity style={{}} key={fifoIndex}
-                    disabled={userState.user && userState.user.role === roles.PL ? false : true}
-                    onPress={(e) => addToDelBin(e, fifoItem,"substage")} >
-                    <Text style={[{
-                      padding: 5, fontSize: 18,
-                      color: delSubBin.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black'
-                    }
-
-                    ]}>{fifoItem.element_num}
+                    onPress={(e) => addToDelBin(e, fifoItem, "stage")} >
+                    <Text style={[{ padding: 5, fontSize: 18, 
+                      color: delBin.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black' } ]}>
+                        {fifoItem.element_num}
                     </Text></TouchableOpacity>)
-              })} */}
-              </View>
+              })}</View> : false}
 
-            {delBin.length ? <Text style={{color:'red',fontSize:14,padding:10}}>Only one bin can be removed at a time</Text>:false}
-            {(delBin.length || delSubBin.length)?
-            <View style={{ display: 'flex', flexDirection: 'row', alignSelf: 'center',width:"50%" }}>
-              <TouchableOpacity style={[styles.sucButtonContainer, { 
-                flex: 1,padding:5,paddingLeft:10,paddingRight:10 }]}
-                onPress={(e) => isConfirm ? updateBin(e) : computeBin(e)}
+            {delBin.length ? <Text style={{ color: 'red', fontSize: 14, padding: 10 }}>Only one bin can be removed at a time</Text> : false}
+            {(delBin.length || delSubBin.length) ?
+              <View style={{ display: 'flex', flexDirection: 'row', alignSelf: 'center', width: "50%" }}>
+                <TouchableOpacity style={[styles.sucButtonContainer, {
+                  flex: 1, padding: 5, paddingLeft: 10, paddingRight: 10
+                }]}
+                  onPress={(e) => isConfirm ? updateBin(e) : computeBin(e)}
                 >
-                <Text style={styles.sucButtonText}>{isConfirm ? 'CONFIRM' : 'REMOVE'}</Text>
-              </TouchableOpacity>
+                  <Text style={styles.sucButtonText}>{isConfirm ? 'CONFIRM' : 'REMOVE'}</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={[styles.canButtonContainer, {
                   flex: 1, padding: 5, paddingLeft: 10, paddingRight: 10
                 }]}
-                onPress={(e) => closeDialog(e)} 
+                  onPress={(e) => closeDialog(e)}
                 >
                   <Text style={styles.canButtonTxt}>CANCEL</Text>
                 </TouchableOpacity>
-            </View> 
-            : false}
+              </View>
+              : false}
             {/* {!delBin.length ? 
             <View style={{ display: 'flex', flexDirection: 'row', alignSelf: 'center', width: "20%" }}>
                 <TouchableOpacity style={[styles.canButtonContainer, {
@@ -260,46 +236,26 @@ export const ProcessFifo = React.memo((props) => {
             <View style={{ flexDirection: 'row' }}>
               {proStageData.map((item, index) => {
                 return (
-                  <TouchableOpacity style={{}} key={index}
-                    onPress={(e) => setBinStage(item)} >
+                  <View style={{ flexDirection: 'column' }}>
                     <Text key={index} style={[styles.tableHeader, {
-                      marginBottom: 1, flex: 1,
-                      padding: 10, width: '100%', borderColor: 'grey', borderWidth: 0.5,
-                      color: binStage.stage_name === item.stage_name ? appTheme.colors.cardTitle : 'grey'
-                    }
-
-                    ]}
-
-                    >{item.stage_name}
-                    </Text></TouchableOpacity>)
+                      padding: 5, width: '100%', borderColor: 'grey', borderWidth: 0.5,
+                    }]}>{item.stage_name}</Text>
+                    <Text key={index} style={[styles.tableHeader, {
+                      padding: 5, width: '100%', borderColor: 'grey', borderLeftWidth:0.5,borderRightWidth:0.5,borderBottomWidth:0.5,
+                    }]}>{item.last_popped_element && item.last_popped_element.length ? item.last_popped_element : ' '}</Text>
+                   
+                  </View>)
               })}
             </View>
-            
-
-            <View style={{ flexDirection: 'row', margin: 10 }}>
-              {binStage && binStage.last_poped_element && binStage.last_poped_element.element_num ? 
-                    <Text style={[{
-                      padding: 5, fontSize: 18,
-                      color: 'black'
-                    }
-
-                ]}>{binStage.last_poped_element.element_num}
-                    </Text> : false
-}
-            </View>
-
-        
-          
-
           </View>
 
-            <TouchableOpacity style={[styles.canButtonContainer, {
-              width:'20%',alignSelf:'center'
-            }]}
-              onPress={(e) => closeDialog(e)}
-            >
-              <Text style={styles.canButtonTxt}>CLOSE</Text>
-            </TouchableOpacity>
+          <TouchableOpacity style={[styles.canButtonContainer, {
+            width: '20%', alignSelf: 'center'
+          }]}
+            onPress={(e) => closeDialog(e)}
+          >
+            <Text style={styles.canButtonTxt}>CLOSE</Text>
+          </TouchableOpacity>
 
         </View>
 
@@ -331,7 +287,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
     fontFamily: appTheme.fonts.bold,
-    color:'grey'
+    color: 'grey'
   },
   tableCell: {
     textAlign: 'center',

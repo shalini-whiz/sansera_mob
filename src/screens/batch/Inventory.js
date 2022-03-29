@@ -33,9 +33,7 @@ export default Inventory = React.memo((props) => {
  
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollView}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+    <View style={{flexDirection:'column',flex:1}}>
       <View style={{ flexDirection: 'row', backgroundColor: 'white', padding: 10 }}>
         <TouchableOpacity style={{
           flexDirection: 'row', padding: 8,
@@ -43,10 +41,7 @@ export default Inventory = React.memo((props) => {
           backgroundColor: tab === "batchInventory" ? appTheme.colors.cardTitle : appTheme.colors.inactiveTab
         }}
           onPress={(e) => tabChange("batchInventory")} >
-          <Text style={[styles.filterText, {
-            fontFamily: appTheme.fonts.bold,
-            color: tab === "batchInventory" ? 'white' : appTheme.colors.cardTitle,
-          }]}>BATCH INVENTORY </Text>
+          <Text style={[styles.filterText, { fontFamily: appTheme.fonts.bold, color: tab === "batchInventory" ? 'white' : appTheme.colors.cardTitle, }]}>BATCH INVENTORY </Text>
         </TouchableOpacity>
         <Text style={{ padding: 8 }}> / </Text>
         <TouchableOpacity
@@ -56,20 +51,16 @@ export default Inventory = React.memo((props) => {
             backgroundColor: tab === "rackData" ? appTheme.colors.cardTitle : appTheme.colors.inactiveTab
           }}
           onPress={(e) => tabChange("rackData")} >
-          <Text style={[styles.filterText, {
-            fontFamily: appTheme.fonts.bold,
-            color: tab === "rackData" ? 'white' : appTheme.colors.cardTitle,
-          }]}>RACK DATA
-          </Text>
+          <Text style={[styles.filterText, { fontFamily: appTheme.fonts.bold, color: tab === "rackData" ? 'white' : appTheme.colors.cardTitle, }]}>RACK DATA </Text>
          
         </TouchableOpacity>
 
       </View>
-      <View style={styles.mainContainer}>
+      <View style={[styles.mainContainer,{flex:4}]}>
         {tab === "batchInventory" ? <ClearInventory/> : false}
         {tab === "rackData" ? <RackData /> : false}
       </View>
-    </ScrollView>
+    </View>
   )
 })
 

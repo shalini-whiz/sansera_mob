@@ -9,6 +9,8 @@ import ApproveBatch from './ApproveBatch';
 import { appTheme } from '../../lib/Themes';
 import Inventory from './Inventory';
 import { FifoBoard } from '../process/FifoBoard';
+import { BatchBoard } from './BatchBoard';
+
 
 
 
@@ -56,7 +58,7 @@ export default function BatchHome() {
                 }
               },
             })} />
-          <Tab.Screen name="FIFO Board" component={FifoBoard}
+          <Tab.Screen name="FIFO Board" component={BatchBoard}
             listeners={({ navigation, route }) => ({
               tabPress: e => {
                 if (route.state && route.state.routeNames.length > 0) {

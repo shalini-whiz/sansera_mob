@@ -17,6 +17,7 @@ import { mqttOptions } from "../../constants";
 import MQTT from 'sp-react-native-mqtt';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from "../../components/ErrorModal";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 
 let rejection_schema = [
@@ -53,6 +54,7 @@ export default function RawMaterial(props) {
   const [addRacks,setAddRacks] = useState('')
   const [curFifo,setCurFifo] = useState({})
   const [client, setClient] = useState(undefined);
+  const { appProcess } = React.useContext(EmptyBinContext)
 
   useEffect(() => {
     if (isFocused) {
@@ -103,11 +105,11 @@ export default function RawMaterial(props) {
       let formDataInput = [...formData]
       let bundleInput = formDataInput.find(item => item.key === "reject_weight");
       dialogTitle = "Reject Weight";
-      dialogMessage = "Are you sure you wish to Reject Weight " + bundleInput.value +" (kg) of " + props.processEntity.process_name
+      dialogMessage = "Are you sure you wish to Reject Weight " + bundleInput.value +" (kg) of " + appProcess.process_name
     }
     if (type === "partial") {
       dialogTitle = "Partial Return"
-      dialogMessage = "Are you sure you wish to partial return weight "+partialWeight+" kg of " + props.processEntity.process_name
+      dialogMessage = "Are you sure you wish to partial return weight "+partialWeight+" kg of " + appProcess.process_name
     }
     setDialogTitle(dialogTitle);
     setDialogMessage(dialogMessage);
@@ -145,7 +147,7 @@ export default function RawMaterial(props) {
     let apiData = {}
     apiData.op = "update_material_fifo"
     apiData.partial_return_weight = partialWeight
-    apiData.batch_num = props.processEntity.batch_num
+    apiData.batch_num = appProcess.batch_num
     let curFifoArr = [curFifo]
     apiData.fifo = [...curFifoArr,...batchDetails.fifo]
     setApiStatus(true);
@@ -153,7 +155,8 @@ export default function RawMaterial(props) {
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
-          props.setProcessEntity(apiRes.response.message)
+          //check here
+          //props.setProcessEntity(apiRes.response.message)
         }
       }
       else if (apiRes && apiRes.response.message)
@@ -164,14 +167,15 @@ export default function RawMaterial(props) {
   const setRejectWeight = async () =>{
     let apiData = await util.filterFormData([...formData]);
     apiData.op = "update_raw_material"
-    apiData.batch_num = props.processEntity.batch_num
+    apiData.batch_num = appProcess.batch_num
     setApiStatus(true);
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
           Alert.alert("Reject Weight updated");
-          props.setProcessEntity(apiRes.response.message)
+          //check here
+          //props.setProcessEntity(apiRes.response.message)
           setBatchDet(apiRes.response.message);
           //openDialog(apiRes.response.message);
           util.resetForm(formData);
@@ -202,7 +206,7 @@ export default function RawMaterial(props) {
     if(!batchDet._id){
       let apiData = {
         "op": "get_batch_details",
-        "batch_num": props.processEntity.batch_num
+        "batch_num": appProcess.batch_num
       }
       ApiService.getAPIRes(apiData,"POST","batch").then(apiRes => {
         if(apiRes.status && apiRes.response.message){
@@ -382,11 +386,11 @@ export default function RawMaterial(props) {
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <ProcessDetails
                 title="Process Details"
-                processEntity={props && props.processEntity ? props.processEntity : {}} />
+                processEntity={appProcess} />
             </View>
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <WeightDetails title="Weight Details"
-                processEntity={props && props.processEntity ? props.processEntity : {}} />
+                processEntity={appProcess} />
             </View>
 
           </View>

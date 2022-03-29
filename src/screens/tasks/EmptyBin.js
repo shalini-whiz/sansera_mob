@@ -14,7 +14,6 @@ import { RadioButton } from "react-native-paper";
 import { stageType } from "../../constants/appConstants";
 
 
-
   export const EmptyBin = React.memo((props) =>{
 
   const [apiError, setApiError] = useState('')
@@ -32,15 +31,13 @@ import { stageType } from "../../constants/appConstants";
   const [currentStage,setCurrentStage] = useState({})
   const [nextStageName,setNextStageName] = useState('')
   const [nextStage,setNextStage] = useState({})
-  const {  setUnReadEmptyBinData } = React.useContext(EmptyBinContext)
+  const {  setUnReadEmptyBinData,appProcess } = React.useContext(EmptyBinContext)
   useEffect(() => {
     if (isFocused) {
-     
       loadData();
-     
     }
     return () => { }
-  }, [isFocused])
+  }, [isFocused,appProcess.process_name])
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -53,19 +50,25 @@ import { stageType } from "../../constants/appConstants";
     setNotifications(JSON.parse(request))   
     let stage = await AsyncStorage.getItem("stage");
     setStage(stage)
-    let currentStage = props.processEntity.process.find(item => item.stage_name === stage)
+    let currentStage = appProcess.process.find(item => item.stage_name === stage)
+    //hardcode
+    //if (currentStage.stage_name.toLowerCase() === stageType.visual) currentStage.output_stage = stageType.shotblasting
     setCurrentStage(currentStage)
-    let nextStage = props.processEntity.process.find(item => item.order === currentStage.order + 1);
-    if(nextStage) {
-      setNextStageName(nextStage.stage_name)
-      setNextStage(nextStage)
+    //hardcode
+    // if(currentStage.stage_name.toLowerCase() === stageType.forging) currentStage.sub_stage = stageType.underheat
+    console.log("currentStage here "+JSON.stringify(currentStage))
+    if(currentStage.order){
+      let nextStage = appProcess.process.find(item => item.order === currentStage.order + 1);
+      console.log("nextStage here "+JSON.stringify(nextStage))
+      if(nextStage) {
+        console.log("defulat "+nextStage.stage_name)
+        setNextStageName(nextStage.stage_name)
+        setNextStage(nextStage)
+      }
     }
     setTimeout(() => {
-      console.log("reset here ")
       setUnReadEmptyBinData("0");
     }, 3000)
-    
-    
   }
   
   const closeDialog = () => {
@@ -109,24 +112,26 @@ import { stageType } from "../../constants/appConstants";
     }
     if(dialogType === "accept"){
       let apiData = {"op":"push_element"}
-      apiData.process_name = props.processEntity.process_name
+      apiData.process_name = appProcess.process_name
       apiData.element_num = bin.element_num
       apiData.element_id = bin.element_id
 
-      let currentStage = props.processEntity.process.find(item => item.stage_name === stage)
-      
-      if (currentStage && currentStage.parent_stage && currentStage.parent_stage.length){
-        if(currentStage.stage_name.toLowerCase() === stageType.billetpunching) currentStage.output_stage = "Forging"
+      let currentStage = appProcess.process.find(item => item.stage_name === stage)
+      //hardcode
+      if(currentStage.stage_name.toLowerCase() === stageType.visual) currentStage.output_stage = stageType.shotblasting
+      console.log(currentStage.output_stage)
+      apiData.stage_name = nextStage.stage_name
+      console.log("apiData 1"+JSON.stringify(apiData))
+      console.log(nextStageName)
+      if(nextStageName.length)
+        apiData.stage_name = nextStageName
+      if (currentStage && currentStage.output_stage && currentStage.output_stage.length && nextStageName.length === 0) {
         apiData.stage_name = currentStage.output_stage
       }
-      else if(nextStageName.length)
-        apiData.stage_name = nextStageName
-      else{
-       // let nextStage = props.processEntity.process.find(item => item.order === currentStage.order + 1);
-        apiData.stage_name = nextStage.stage_name
-      }
+    
      
-      console.log(apiData);
+      console.log("apiData here "+JSON.stringify(apiData))
+      
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
         setApiStatus(false);
@@ -192,7 +197,7 @@ import { stageType } from "../../constants/appConstants";
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Process : </Text>
-                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{props.processEntity.process_name} </Text>
+                <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{appProcess.process_name} </Text>
               </View>
               {currentStage.sub_stage && currentStage.sub_stage.length ? 
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
@@ -213,6 +218,24 @@ import { stageType } from "../../constants/appConstants";
                   </View>
               </View>  : false}
              
+              {/* {currentStage.order && currentStage.output_stage && currentStage.output_stage.length ?
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
+                  <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Move Bin to : </Text>
+                  <View style={{ flex: 2 }}>
+                    <RadioButton.Group
+                      onValueChange={(value) => setNextStageName(value)}
+                      value={nextStageName}
+                      style={{}}
+                    >
+                      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }} >
+                        <RadioButton value={nextStage.stage_name} />
+                        <Text style={[AppStyles.radioText, { color: appTheme.colors.cardTitle, marginRight: 15, fontSize: 20 }]}>{nextStage.stage_name}</Text>
+                        <RadioButton value={currentStage.output_stage} />
+                        <Text style={[AppStyles.radioText, { color: appTheme.colors.cardTitle, fontSize: 20 }]}>{currentStage.output_stage}</Text>
+                      </View>
+                    </RadioButton.Group>
+                  </View>
+                </View> : false} */}
             </View>
             }
 

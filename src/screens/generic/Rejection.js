@@ -10,6 +10,7 @@ import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import ProcessInfo from "../process/ProcessInfo";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
 
 
 
@@ -30,13 +31,14 @@ export const  Rejection = React.memo((props) => {
   const [rejError,setRejError] = useState('')
   const isFocused = useIsFocused();
   const [rackData, setRackData] = useState({})
+  const { appProcess } = React.useContext(EmptyBinContext)
 
   useEffect(() => {
     if (isFocused) {
       loadData();
     }
     return () => { }
-  }, [isFocused])
+  }, [isFocused,appProcess])
 
 
   const onRefresh = React.useCallback(() => {
@@ -47,7 +49,7 @@ export const  Rejection = React.memo((props) => {
     let apiData = {
       "op": "get_rejections",
     }
-    apiData.process_name = props.processEntity.process_name
+    apiData.process_name =appProcess.process_name
     apiData.stage_name = await AsyncStorage.getItem("stage")
     setRefreshing(false);
     setRejCount(0);
@@ -138,7 +140,7 @@ export const  Rejection = React.memo((props) => {
 
   const updateRejections = async () => {
     let apiData = { op: "update_rejection" }
-    apiData.process_name = props.processEntity.process_name
+    apiData.process_name = appProcess.process_name
     apiData.stage_name = await AsyncStorage.getItem("stage")
 
     let rejReasonObj = {};
@@ -156,7 +158,7 @@ export const  Rejection = React.memo((props) => {
         setRejCount(0)
         closeDialog();
         loadData()
-        props.setProcessEntity(apiRes.response.message)
+        //props.setProcessEntity(apiRes.response.message)
         props.updateProcess()
       }
       else if (apiRes && apiRes.response.message)
@@ -220,7 +222,7 @@ export const  Rejection = React.memo((props) => {
             <View style={{ flex: 1, backgroundColor: 'white', margin: 5, padding: 5 }}>
               <ProcessInfo
                 title="PROCESS DETAILS"
-                processEntity={props && props.processEntity ? props.processEntity : {}}
+                processEntity={appProcess}
                 fields={["total_rejections"]}                
                 />
                 

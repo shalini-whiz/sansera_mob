@@ -11,6 +11,8 @@ import DateTimePicker from "@react-native-community/datetimepicker"
 import AppStyles from "../../styles/AppStyles";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { EmptyBinContext } from "../../context/EmptyBinContext";
+
 
 const shearing_consumption_schema = [
   { key: "slNo", displayName: "Sl No"},
@@ -19,6 +21,8 @@ const shearing_consumption_schema = [
   { key:"component_id",displayName:"Component"},
   { key: "ok_end_billets", displayName: "OK End Billets" },
   { key: "ok_end_billets_in_kg", displayName: "OK End Billets (kg)" },
+  { key: "ok_bits_count", displayName: "OK Bits" },
+  { key: "ok_bits_weight", displayName: "OK Bits (kg)" },
   { key: "total_quantity", displayName: "Total Quanity (kg)" },
   { key: "balance_quantity", displayName: "Balance Quanity (kg)" },
 
@@ -34,6 +38,8 @@ export const ConsumptionData = React.memo((props) => {
   const [tableSchema,setTableSchema] = useState([])
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
+  const { appProcess } = React.useContext(EmptyBinContext)
+
   useEffect(() => {
     if (isFocused) {
       loadProcess();
@@ -43,10 +49,8 @@ export const ConsumptionData = React.memo((props) => {
 
  
   const loadProcess = async () => {
-    console.log("props here "+JSON.stringify(props))
     let curStage = props.stageName ? props.stageName : await AsyncStorage.getItem("stage");
-    let curProcess = props.processEntity.process_name ? props.processEntity.process_name : props.processName;
-    console.log("curStage schema : "+curStage.toLowerCase())
+    let curProcess = appProcess.process_name ? appProcess.process_name : props.processName;
     setTableSchema([])
     setConData([])
     setApiMsg('')
@@ -61,7 +65,6 @@ export const ConsumptionData = React.memo((props) => {
         stage_name: curStage,
       }
       apiData.date = await dateUtil.toDateFormat(date, "YYYY-MM-DD")
-      console.log("apiData here " + JSON.stringify(apiData))
       setRefreshing(false);
       
       ApiService.getAPIRes(apiData, "POST", "process_consumption").then(apiRes => {
