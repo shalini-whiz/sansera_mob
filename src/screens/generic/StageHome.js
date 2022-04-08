@@ -12,6 +12,7 @@ import { Rejection } from "./Rejection"
 import { WorkPlan } from "./WorkPlan"
 import TaskHome from "../tasks/TaskHome";
 import { EmptyBinContext } from "../../context/EmptyBinContext";
+import { FifoBoard } from "../process/FifoBoard";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -50,7 +51,7 @@ export const StageHome = React.memo((props) => {
           children={() => <WorkPlan updateProcess={updateProcess} />}
           listeners={{ tabPress: (e) => { setRoute('Work Plan') } }}
         />
-        {(processStage.toLowerCase() !== "oiling") ?
+        {(processStage.toLowerCase() !== "oiling" && processStage.toLowerCase() != "mpi" && processStage.toLowerCase() != "dispatch") ?
           <Tab.Screen name="Rejection"
             children={() => <Rejection updateProcess={updateProcess} />}
             listeners={{ tabPress: (e) => { setRoute('Rejection') }, }}
@@ -59,6 +60,15 @@ export const StageHome = React.memo((props) => {
           name="Tasks"
           children={() => <TaskHome updateProcess={updateProcess} />}
           listeners={{ tabPress: (e) => { setRoute('Tasks') }, }}
+        />
+        <Tab.Screen
+          name="FIFO Board"
+          children={() => <FifoBoard />}
+          listeners={{
+            tabPress: (e) => {
+              setRoute('FIFO Board')
+            },
+          }}
         />
 
       </Tab.Navigator>

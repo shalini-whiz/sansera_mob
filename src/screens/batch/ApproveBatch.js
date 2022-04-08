@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView, RefreshControl,ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView, 
+  RefreshControl,ActivityIndicator, NativeModules, Button } from "react-native";
 import { util } from "../../commons";
 import { appTheme } from "../../lib/Themes";
 import { Picker } from '@react-native-picker/picker';
@@ -11,11 +12,11 @@ import UserContext from "../UserContext";
 import { useIsFocused } from '@react-navigation/native';
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import CustomHeader from "../../components/CustomHeader";
-import { act } from "react-test-renderer";
 import AppStyles from "../../styles/AppStyles";
 import ErrorModal from "../../components/ErrorModal";
-
-
+import DocumentPicker from 'react-native-document-picker';
+// import PSPDFKitView from 'react-native-pspdfkit';
+// import Pdf from 'react-native-pdf';
 
 export default function ApproveBatch({navigation}) {
   const userState = React.useContext(UserContext);
@@ -33,6 +34,7 @@ export default function ApproveBatch({navigation}) {
   const [dialogMessage, setDialogMessage] = useState('');
   const [action,setAction] = useState('')
   const [refreshing, setRefreshing] = useState(false)
+  const [doc,setDoc] = useState(null)
 
   const [batchOptions, setBatchOptions] = useState({
     keyName: "_id", valueName: "batch_num",
@@ -71,9 +73,11 @@ export default function ApproveBatch({navigation}) {
     apiData.status = status.length ? status : "NEW";
     apiData.sort_by = 'updated_on'
     apiData.sort_order = 'DSC'
+    console.log(JSON.stringify(apiData))
     ApiService.getAPIRes(apiData, "POST", "list_raw_material_by_status").then(apiRes => {
       setApiStatus(false);
       setRefreshing(false);
+      console.log("api res here " + JSON.stringify(apiRes))
 
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length) {
@@ -208,6 +212,26 @@ export default function ApproveBatch({navigation}) {
     }
     else{
       setApiError("Racks are empty")
+    }
+  }
+  const validatePDF = async(file) => {
+    console.log(file)
+    try {
+      const file = await DocumentPicker.pick({
+        type: [DocumentPicker.types.pdf],
+        copyTo: 'documentDirectory',
+      });
+      setDoc(decodeURI(
+        file.fileCopyUri.replace('file://', ''),
+      ))
+      
+    } catch (error) {
+      if (DocumentPicker.isCancel(error)) {
+        // The user canceled the document picker.
+      } else {
+        console.log(error)
+        throw error;
+      }
     }
   }
   const updateBatch = () => {
@@ -400,6 +424,37 @@ export default function ApproveBatch({navigation}) {
                   </Picker>
                 </View> : false
               }
+
+              {action === "approved" ?  doc == null ? (
+                <View style={styles.container}>
+                  <Button
+                    onPress={async () => {
+                      try {
+                        const file = await DocumentPicker.pick({
+                          type: [DocumentPicker.types.pdf],
+                          copyTo: 'documentDirectory',
+                        });
+                        console.log(file)
+                        setDoc(decodeURI(
+                            file[0].fileCopyUri.replace('file://', ''),
+                          ))
+                        
+                      } catch (error) {
+                        if (DocumentPicker.isCancel(error)) {
+                          // The user canceled the document picker.
+                        } else {
+                          throw error;
+                        }
+                      }
+                    }}
+                    title="Upload PDF Document"
+                  />
+                </View>
+              ) : (
+                // <Pdf source={doc} style={styles.pdf} />
+               false
+                
+              ) : false}
               <View style={{ flex: 1,marginTop:40,justifyContent:'center',padding:20 }}>
                 {batchNum && batchNum.length && action.length? <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                   <TouchableOpacity style={[AppStyles.successBtn, { flexDirection: 'row',width:'60%',padding:10 }]} onPress={(e) => openDialog(e)} >

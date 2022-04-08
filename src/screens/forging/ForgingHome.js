@@ -10,6 +10,7 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
 import TaskHome from "../tasks/TaskHome";
 import { WorkPlan } from "./WorkPlan";
 import { Rejection } from "./Rejection";
+import { FifoBoard } from "../process/FifoBoard";
 
 
 const Tab = createMaterialTopTabNavigator();
@@ -84,8 +85,15 @@ export const ForgingHome = React.memo((props) => {
           }}
          
         />
-
-
+        <Tab.Screen
+          name="FIFO Board"
+          children={() => <FifoBoard />}
+          listeners={{
+            tabPress: (e) => {
+              setRoute('FIFO Board')
+            },
+          }}
+        />
       </Tab.Navigator>
     </NavigationContainer>)
   })

@@ -56,16 +56,20 @@ export const ConsumptionData = React.memo((props) => {
     setApiMsg('')
     if(curStage.toLowerCase() === stageType.shearing) 
     {
-      setApiStatus(true);
 
       setTableSchema(shearing_consumption_schema)
+      console.log(curProcess+" .. "+curStage)
       let apiData = {
         "op": "get_process_consumption",
         process_name: curProcess,
         stage_name: curStage,
       }
       apiData.date = await dateUtil.toDateFormat(date, "YYYY-MM-DD")
+      console.log(JSON.stringify(apiData))
+      if(!curProcess)
+        return;
       setRefreshing(false);
+      setApiStatus(true);
       
       ApiService.getAPIRes(apiData, "POST", "process_consumption").then(apiRes => {
         setApiStatus(false);

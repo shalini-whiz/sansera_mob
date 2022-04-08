@@ -236,7 +236,7 @@ export const ProcessFifo = React.memo((props) => {
             <View style={{ flexDirection: 'row' }}>
               {proStageData.map((item, index) => {
                 return (
-                  <View style={{ flexDirection: 'column' }}>
+                  <View style={{ flexDirection: 'column' }} key={index}>
                     <Text key={index} style={[styles.tableHeader, {
                       padding: 5, width: '100%', borderColor: 'grey', borderWidth: 0.5,
                     }]}>{item.stage_name}</Text>

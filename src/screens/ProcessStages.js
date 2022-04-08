@@ -14,6 +14,7 @@ import BilletHome from './billet/BilletHome';
 import { ForgingHome } from './forging/ForgingHome';
 import { ShearingHome } from './shearing/ShearingHome';
 import { StageHome } from './generic/StageHome';
+import { DispatchHome } from './dispatch/DispatchHome';
 
 const styles = StyleSheet.create({
 
@@ -104,7 +105,8 @@ const  ProcessStages = (props) => {
   }
 
   const stageNavigation = (stage) => {
-    let validStages = ["shearing", "forging", "shot blasting", "visual/mpi", "shot peening","oiling","billet punching"];
+    let validStages = ["shearing", "forging", "shot blasting", "visual","mpi", "shot peening","oiling",
+    "billet punching","dispatch"];
     if (validStages.includes(stage.toLowerCase())) {
       setStage(stage.toLowerCase())
       AsyncStorage.setItem("stage", stage)
@@ -122,8 +124,10 @@ const  ProcessStages = (props) => {
       {processStage && processStage.toLowerCase() === stageType.shearing ? <ShearingHome stage={stage}/> : false}
       {processStage && processStage.toLowerCase() === stageType.forging ? <ForgingHome stage={stage} /> : false}
       {processStage && (processStage.toLowerCase() === stageType.shotblasting || 
-      processStage.toLowerCase() === stageType.visual || processStage.toLowerCase() === stageType.shotpeening || 
-        processStage.toLowerCase() === stageType.oiling) ? <StageHome stage={stage} /> : false}
+      processStage.toLowerCase() === stageType.visual  ||processStage.toLowerCase() === stageType.mpi || processStage.toLowerCase() === stageType.shotpeening || 
+        processStage.toLowerCase() === stageType.oiling ) ? <StageHome stage={stage} /> : false}
+
+        {processStage && processStage.toLowerCase() === stageType.dispatch ? <DispatchHome stage={stage}/> : false}
       {processStage && processStage.toLowerCase() === stageType.billetpunching ? <BilletHome stage={stage} /> : false}
 
       {processStage == null ? 

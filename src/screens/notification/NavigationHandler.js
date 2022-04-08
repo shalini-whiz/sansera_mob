@@ -40,6 +40,7 @@ export const handleNotificationNavig = async (notification, openNotificationHand
             let processStage = notifyData.stage.toLowerCase();
             if (processStage.toLowerCase() === stageType.shotblasting ||
                 processStage.toLowerCase() === stageType.visual ||
+                processStage.toLowerCase() === stageType.mpi ||
                 processStage.toLowerCase() === stageType.shotpeening ||
                 processStage.toLowerCase() === stageType.oiling)
                 navigationPage = 'StageHome';

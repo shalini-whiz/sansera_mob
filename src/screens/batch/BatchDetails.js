@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert, SegmentedControlIOSComponent } from "react-native";
 import { dateUtil, util } from "../../commons";
 import FormGen from "../../lib/FormGen"
 import CustomHeader from "../../components/CustomHeader";
@@ -23,6 +23,13 @@ let batchSchema = [
     required: true, lowerCase: true, "label": "Material Code", select: true,
     options: [],
     keyName: "material_code", valueName: "material_code", lowerCase: false
+  },
+  {
+    "key": "material_grade", displayName: "Material Grade", placeholder: "", value: "", error: "",
+    required: true, lowerCase: true, "label": "Material Grade", select: true,
+    options: [],
+    //keyName: "material_grade", valueName: "material_grade",
+     lowerCase: false
   },
   // {
   //   "key": "type", displayName: "Type", placeholder: "", value: "steel", error: "",
@@ -176,16 +183,26 @@ export default function BatchDetails(props) {
     let sIndex = formData.findIndex(item => item.key === "supplier_id");
     let sItem = formData[sIndex]
     let mIndex = formData.findIndex(materialItem => materialItem.key === "material_code");
+    let mgIndex = formData.findIndex(materialItem => materialItem.key === "material_grade");
+
     if (mIndex != -1 && sIndex != -1) {
       let selectedSupplierIndex = sItem.options.findIndex(item => item._id === sItem.value);
       let updatedItem = formData[mIndex];
+      let updatedMaterialGrade = formData[mgIndex]
       if (selectedSupplierIndex != -1) {
         let material_details = sItem.options[selectedSupplierIndex].material_details
         if (material_details) {
           setMaterials(material_details)
           if (material_details.length && material_details[0]) updatedItem.value = material_details[0].material_code
           updatedItem.options = material_details;
+          updatedMaterialGrade.options = material_details[0].material_grade
+          console.log(material_details[0].material_code[0])
+          updatedMaterialGrade.value = material_details[0].material_grade[0];
+          updatedMaterialGrade.options = material_details[0].material_grade;
+          //console.log("updatedMaterialGrade" + JSON.stringify(updatedMaterialGrade))
           let updatedBatchData = [...formData.slice(0, mIndex), updatedItem, ...formData.slice(mIndex + 1)];
+          updatedBatchData[mgIndex] = updatedMaterialGrade;
+          //console.log(JSON.stringify(updatedBatchData))
           setBatchFormData([...updatedBatchData]);
         }
       }
@@ -236,11 +253,15 @@ export default function BatchDetails(props) {
     if (!isError) {
       let apiData = await util.filterFormData([...batchFormData]);
       apiData.total_weight = parseFloat(apiData.total_weight)
-      apiData.created_by = userState.user.id;
+      //apiData.created_by = userState.user.id;
       apiData.op = "add_raw_material";
       apiData.type = "Steel";
+      console.log("apiData "+JSON.stringify(apiData))
       setApiStatus(true);
+      console.log("apiData here "+JSON.stringify(apiData))
+      
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "batch");
+      console.log("ApiRes here "+JSON.stringify(apiRes));
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {

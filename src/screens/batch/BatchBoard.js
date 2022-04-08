@@ -61,7 +61,7 @@ export const BatchBoard = React.memo((props) => {
       <Text style={[styles.tableDataCell, {}]}>{item.heat_num}</Text>
       <Text style={[styles.tableDataCell, {}]}>{item.supplier}</Text>
       <Text style={[styles.tableDataCell, {}]}>{item.total_weight}</Text>
-      <Text style={[styles.tableDataCell, {}]}>{dateUtil.toDateFormat(item.created_on, "DD MMM YYYY")}</Text>
+      <Text style={[styles.tableDataCell, {}]}>{dateUtil.toFormat(item.created_on, "DD MMM YYYY")}</Text>
       <Text style={[styles.tableDataCell, {}]}>{item.status}</Text>
     </View>
   );

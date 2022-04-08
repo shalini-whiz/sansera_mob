@@ -71,6 +71,11 @@ let three_punch_billet_schema = {
   "key": "three punch billet", displayName: "Three Punch Billet", placeholder: "", value: 0,
     error: "", required: true, label: "Three Punch Billet", type: "number", defaultValue: 0
 }
+
+let total_count_schema = {
+  "key": "ok_component", displayName: "Total Count", placeholder: "", value: 0,
+  error: "", required: true, label: "Total Count", type: "number", defaultValue: 0
+}
 let billet_schema = []
 export default function ProcessInfo(props) {
   const [batchFormData, setBatchFormData] = useState([])
@@ -112,11 +117,18 @@ export default function ProcessInfo(props) {
         //processSchema.push(three_punch_billet_schema)
       }
       if ( currentStage && (currentStage.toLowerCase() === stageType.shotblasting || currentStage.toLowerCase() === stageType.visual || 
+      currentStage.toLowerCase() === stageType.mpi ||
       currentStage.toLowerCase() === stageType.shotpeening || currentStage.toLowerCase() === stageType.oiling)) {
         processSchema = [...created_process_schema]
         processSchema.push(ok_component_schema);
         processSchema.push(rejection_schema)
        
+      }
+
+      if (currentStage && currentStage.toLowerCase() === stageType.dispatch) {
+        processSchema = [...created_process_schema]
+        processSchema.push(total_count_schema)
+     
       }
       processSchema.map(item => {
         item["value"] = props.processEntity[item.key] ? props.processEntity[item.key] + "" : "";
@@ -161,6 +173,14 @@ export default function ProcessInfo(props) {
             }
           })
         }
+      }
+
+      if (currentStage && currentStage.toLowerCase() === stageType.dispatch){
+        let stage_index = props.processEntity.process.findIndex(item => item.stage_name === currentStage)
+        let ok_comp_index = processSchema.findIndex(item => item.key === "ok_component")
+        let prev_stage = props.processEntity.process.findIndex(item => item.order === props.processEntity.process[stage_index].order - 1)
+        processSchema[ok_comp_index].value = props.processEntity.process[prev_stage].ok_component
+
       }
       setBatchFormData(processSchema)
     }

@@ -10,6 +10,7 @@ import BinMqtt from "../mqtt/BinMqtt";
 import TaskHome from "../tasks/TaskHome";
 import { Rejection } from "../generic/Rejection";
 import { EmptyBinContext } from "../../context/EmptyBinContext";
+import { FifoBoard } from "../process/FifoBoard";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -55,6 +56,13 @@ export default function BilletHome() {
           children={() => <TaskHome updateProcess={updateProcess} />}
           listeners={{
             tabPress: (e) => { setRoute('Tasks') },
+          }}
+        />
+        
+        <Tab.Screen name="FIFO Board"
+          children={() => <FifoBoard />}
+          listeners={{
+            tabPress: (e) => { setRoute('FIFO Board') },
           }}
         />
       </Tab.Navigator>

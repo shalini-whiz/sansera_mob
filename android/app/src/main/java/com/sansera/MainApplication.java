@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+// import com.RNFetchBlob.RNFetchBlobPackage;
+// import org.wonday.pdf.RCTPdfView;
 import com.reactnativecommunity.netinfo.NetInfoPackage;
 // import com.tuanpm.RCTMqtt.RCTMqttPackage;
 import com.peel.react.TcpSocketsModule;

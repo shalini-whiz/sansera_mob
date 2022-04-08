@@ -47,6 +47,7 @@ export const FifoBoard = React.memo((props) => {
     setProcess([])
     ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {
       setApiStatus(false);
+     // console.log(JSON.stringify(apiRes.response.message))
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length) {
           setProcess(apiRes.response.message)
@@ -116,8 +117,7 @@ export const FifoBoard = React.memo((props) => {
       <Text style={[styles.tableDataCell, {}]}>{item.supplier}</Text>
       <Text style={[styles.tableDataCell, {}]}>{item.process_name}</Text>
       <Text style={[styles.tableDataCell, {}]}>{item.component_weight}</Text>
-      <Text style={[styles.tableDataCell, {}]}>{dateUtil.toDateFormat(item.created_on, "DD MMM YYYY")}</Text>
-
+      <Text style={[styles.tableDataCell, {}]}>{dateUtil.toFormat(item.created_on, "DD MMM YYYY")}</Text>
       <Text style={[styles.tableDataCell, {}]}>{item.status}</Text>
     </View>
   );

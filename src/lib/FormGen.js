@@ -38,9 +38,11 @@ export default class FormGen extends Component {
                           itemStyle={{}}
                           dropdownIconColor={appTheme.colors.cardTitle}
                         >
+                          {console.log("item options "+JSON.stringify(item.options))}
                           {item.options && item.options.map((pickerItem, pickerIndex) => {
-                            let labelV = (item.keyName && pickerItem[item.keyName]) ? pickerItem[item.keyName] : (pickerItem.key ? pickerItem.key : "");
-                            let label = (item.valueName && pickerItem[item.valueName]) ? pickerItem[item.valueName] : (pickerItem.value ? pickerItem.value : "");
+                            let labelV = (item.keyName && pickerItem[item.keyName]) ? pickerItem[item.keyName] : (pickerItem.key ? pickerItem.key : pickerItem);
+                            let label = (item.valueName && pickerItem[item.valueName]) ? pickerItem[item.valueName] : (pickerItem.value ? pickerItem.value : pickerItem);
+                            console.log(labelV+" ... "+label)
                             if (item.titleCase) labelV = util.titleCase(labelV)
                             return (<Picker.Item style={{ backgroundColor: "#ECF0FA" }} label={label} value={labelV} key={pickerIndex} />)
                           })}
@@ -97,8 +99,9 @@ export default class FormGen extends Component {
                     dropdownIconColor={appTheme.colors.cardTitle}
                   >
                     {item.options && item.options.map((pickerItem, pickerIndex) => {
-                      let labelV = (item.keyName && pickerItem[item.keyName]) ? pickerItem[item.keyName] : (pickerItem.key ? pickerItem.key : "");
-                      let label = (item.valueName && pickerItem[item.valueName]) ? pickerItem[item.valueName] : (pickerItem.value ? pickerItem.value : "");
+                      let labelV = (item.keyName && pickerItem[item.keyName]) ? pickerItem[item.keyName] : (pickerItem.key ? pickerItem.key : pickerItem);
+                      let label = (item.valueName && pickerItem[item.valueName]) ? pickerItem[item.valueName] : (pickerItem.value ? pickerItem.value : pickerItem);
+                      console.log(labelV+" .. "+label)
                       if (item.titleCase) label = util.titleCase(label); 
                       return (<Picker.Item style={{ backgroundColor: "#ECF0FA" }} label={label} value={labelV} key={pickerIndex} />)
                     })}

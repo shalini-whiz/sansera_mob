@@ -15,7 +15,16 @@ dateUtil.toISODateFormat = (input, dateFormat) => {
 dateUtil.toDateFormat = (input, dateFormat) => {
   if (!input) return "";
   if (!dateFormat) dateFormat = "DD-MM-YYYY";
+  //return input;
   return moment(new Date(input)).format(dateFormat);
+};
+dateUtil.toFormat = (input, dateFormat) => { 
+  if (!input) return "";
+  if (!dateFormat) dateFormat = "DD-MM-YYYY";
+  console.log(input);
+  console.log(moment(input))
+  return input;
+  return moment(input).format(dateFormat);
 };
 dateUtil.toTimeFormat = (input, dateFormat) => {
   if (!input) return "";
