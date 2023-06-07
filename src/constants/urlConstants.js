@@ -1,10 +1,4 @@
-//var liveAddress = "http://192.168.0.107:7000/";
-var liveAddress_old = "https://p-san-forge-feature.herokuapp.com/";
-var liveAddress1 = 'https://p-san-forge-mobile.herokuapp.com/'
-var liveAddress2 = 'http://103.162.246.110:8081/'
-var liveAddress3 = 'http://103.162.246.109:8086/'
 var liveAddress = 'http://203.129.243.94:8086/'
-
 var mqttAddress = 'mqtt://203.129.243.94:1883'
 let oldmqttOptions = {
     uri: "mqtt" + "://mqtt.meti.in:1884",

@@ -86,6 +86,7 @@ export default function Login() {
       setApiStatus(true)
       let apiData = await util.filterFormData([...loginData]);
       apiData.op = "login"
+      console.log("login data "+JSON.stringify(apiData))
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "login")
       console.log("login response : " + JSON.stringify(apiRes));
 
