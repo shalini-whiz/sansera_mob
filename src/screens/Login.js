@@ -86,7 +86,7 @@ export default function Login() {
       setApiStatus(true)
       let apiData = await util.filterFormData([...loginData]);
       apiData.op = "login"
-      console.log("login data "+JSON.stringify(apiData))
+      console.log("login data " + JSON.stringify(apiData))
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "login")
       console.log("login response : " + JSON.stringify(apiRes));
 
@@ -112,21 +112,27 @@ export default function Login() {
           console.log("topics : " + JSON.stringify(topicRes.response))
           let rackSwitch = []
           let binSwitch = []
+          let devices = []
           let switchPressedRacks = topicRes.response.message.reduce(function (acc, obj) {
             // let key = obj["topic_name"]
             // if (key.includes("/get/switch")) {
             if (obj.type === 'rack') {
               rackSwitch.push(obj)
               acc.push(obj)
+              devices.push(obj.device_id)
             }
-            else if (obj.type === "bin")
+            else if (obj.type === "bin") {
+              devices.push(obj.device_id)
               binSwitch.push(obj)
+
+            }
             // }
             return acc
           }, []);
 
           AsyncStorage.setItem("racks", JSON.stringify(switchPressedRacks));
           AsyncStorage.setItem("bins", JSON.stringify(binSwitch));
+          AsyncStorage.setItem("devices", JSON.stringify(devices))
           setBinTopics(JSON.stringify(binSwitch))
 
           // let emptyBinReq = [

@@ -3,12 +3,7 @@ import MQTT from 'sp-react-native-mqtt';
 import { binMqttOptions } from "../../constants/urlConstants";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const pub_topic_format = (topic) => {
-  return "MWPI2/" + topic + "/set/led1";
-}
-const devices = [
-  '123', '341'
-]
+
 
 
 const PubBatteryMqtt = (props) => {
@@ -31,24 +26,19 @@ const PubBatteryMqtt = (props) => {
     });
 
     client.on('connect', () => {
-      console.log('pub connected' + props.topic);
-      // let topic = pub_topic_format(props.topic)
-      //console.log("publish topic here "+topic);
-      AsyncStorage.getItem("racks").then(item => {
-        let publishParams = {
-          devID: item,
-          data: "GB"
-        }
-        console.log("publishParams here " + JSON.stringify(publishParams))
-        client.publish("GET_BAT_STS", JSON.stringify(publishParams), 2, false)
-      })
-      AsyncStorage.getItem("bins").then(item => {
-        let publishParams = {
-          devID: item,
-          data: "GB"
-        }
-        console.log("publishParams here " + JSON.stringify(publishParams))
-        client.publish("GET_BAT_STS", JSON.stringify(publishParams), 2, false)
+
+      AsyncStorage.getItem("devices").then(devices => {
+        console.log("devices here 123 " + JSON.parse(devices))
+        JSON.parse(devices).map(item => {
+          console.log("device here " + item)
+
+          let publishParams = {
+            devID: item,
+            data: "GB"
+          }
+          console.log("devices publishParams here " + JSON.stringify(publishParams))
+          client.publish("GET_BAT_STS", JSON.stringify(publishParams), 2, false)
+        })
       })
       client.disconnect()
     });
