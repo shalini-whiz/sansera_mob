@@ -113,6 +113,7 @@ export default function Login() {
           let rackSwitch = []
           let binSwitch = []
           let devices = []
+          let deviceDet = []
           let switchPressedRacks = topicRes.response.message.reduce(function (acc, obj) {
             // let key = obj["topic_name"]
             // if (key.includes("/get/switch")) {
@@ -120,10 +121,12 @@ export default function Login() {
               rackSwitch.push(obj)
               acc.push(obj)
               devices.push(obj.device_id)
+              deviceDet.push(obj)
             }
             else if (obj.type === "bin") {
               devices.push(obj.device_id)
               binSwitch.push(obj)
+              deviceDet.push(obj)
 
             }
             // }
@@ -133,6 +136,8 @@ export default function Login() {
           AsyncStorage.setItem("racks", JSON.stringify(switchPressedRacks));
           AsyncStorage.setItem("bins", JSON.stringify(binSwitch));
           AsyncStorage.setItem("devices", JSON.stringify(devices))
+          AsyncStorage.setItem("deviceDet", JSON.stringify(deviceDet))
+
           setBinTopics(JSON.stringify(binSwitch))
 
           // let emptyBinReq = [

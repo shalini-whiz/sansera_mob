@@ -13,6 +13,7 @@ import ErrorModal from "../../components/ErrorModal";
 import UserContext from "../UserContext";
 import { roles } from "../../constants/appConstants";
 import AppStyles from "../../styles/AppStyles";
+import PubBatterySleep from "../mqtt/PubBatterySleep";
 
 
 
@@ -137,7 +138,9 @@ export const ProcessFifo = React.memo((props) => {
       ApiService.getAPIRes(apiData, "POST", "fifo").then(apiRes => {
         if (apiRes && apiRes.status) {
           Alert.alert("Bin removed");
+          //goto sleep publish
           props.okDialog();
+          //PubBatterySleep({ topic: apiData.element_id })
         }
         else
           setApiError("Could not update. try again!")
@@ -173,28 +176,31 @@ export const ProcessFifo = React.memo((props) => {
                     onPress={(e) => switchStage(e, item)} >
                     <Text key={index} style={[styles.tableHeader, {
                       marginBottom: 1, padding: 10, width: '100%', borderColor: 'grey', borderWidth: 0.5,
-                      color: stage.stage_name === item.stage_name ? appTheme.colors.cardTitle : 'grey'}]}>
-                        {item.stage_name}
+                      color: stage.stage_name === item.stage_name ? appTheme.colors.cardTitle : 'grey'
+                    }]}>
+                      {item.stage_name}
                     </Text></TouchableOpacity>)
               })}
             </View>
             {stage && stage.fifo && stage.fifo.length ?
               false :
-                         <View style={{ flexDirection: 'row', margin: 1, alignSelf: 'center',borderWidth:0.5,margin:10,padding:10,width:'30%' }}>
- <Text align="left" style={[AppStyles.warnButtonTxt, { color: appTheme.colors.warnAction }]}>No Bins</Text></View>
+              <View style={{ flexDirection: 'row', margin: 1, alignSelf: 'center', borderWidth: 0.5, margin: 10, padding: 10, width: '30%' }}>
+                <Text align="left" style={[AppStyles.warnButtonTxt, { color: appTheme.colors.warnAction }]}>No Bins</Text></View>
             }
             {stage && stage.fifo && stage.fifo.length ?
-            <View style={{ flexDirection: 'row', margin: 1, alignSelf: 'center',borderWidth:0.5,margin:10,padding:10,width:'30%' }}>
-              {stage && stage.fifo && stage.fifo.map((fifoItem, fifoIndex) => {
-                return (
-                  <TouchableOpacity style={{}} key={fifoIndex}
-                    disabled={userState.user && userState.user.role === roles.PL ? false : true}
-                    onPress={(e) => addToDelBin(e, fifoItem, "stage")} >
-                    <Text style={[{ padding: 5, fontSize: 18, 
-                      color: delBin.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black' } ]}>
+              <View style={{ flexDirection: 'row', margin: 1, alignSelf: 'center', borderWidth: 0.5, margin: 10, padding: 10, width: '30%' }}>
+                {stage && stage.fifo && stage.fifo.map((fifoItem, fifoIndex) => {
+                  return (
+                    <TouchableOpacity style={{}} key={fifoIndex}
+                      disabled={userState.user && userState.user.role === roles.PL ? false : true}
+                      onPress={(e) => addToDelBin(e, fifoItem, "stage")} >
+                      <Text style={[{
+                        padding: 5, fontSize: 18,
+                        color: delBin.indexOf(fifoItem.element_num) > -1 ? 'red' : 'black'
+                      }]}>
                         {fifoItem.element_num}
-                    </Text></TouchableOpacity>)
-              })}</View> : false}
+                      </Text></TouchableOpacity>)
+                })}</View> : false}
 
             {delBin.length ? <Text style={{ color: 'red', fontSize: 14, padding: 10 }}>Only one bin can be removed at a time</Text> : false}
             {(delBin.length || delSubBin.length) ?
@@ -241,9 +247,9 @@ export const ProcessFifo = React.memo((props) => {
                       padding: 5, width: '100%', borderColor: 'grey', borderWidth: 0.5,
                     }]}>{item.stage_name}</Text>
                     <Text key={index} style={[styles.tableHeader, {
-                      padding: 5, width: '100%', borderColor: 'grey', borderLeftWidth:0.5,borderRightWidth:0.5,borderBottomWidth:0.5,
+                      padding: 5, width: '100%', borderColor: 'grey', borderLeftWidth: 0.5, borderRightWidth: 0.5, borderBottomWidth: 0.5,
                     }]}>{item.last_popped_element && item.last_popped_element.length ? item.last_popped_element : ' '}</Text>
-                   
+
                   </View>)
               })}
             </View>

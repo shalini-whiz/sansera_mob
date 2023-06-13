@@ -8,10 +8,11 @@ import { appTheme } from "../../lib/Themes";
 import { default as AppStyles } from "../../styles/AppStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from "../../components/ErrorModal";
-import { roles, taskState,stageType } from "../../constants/appConstants";
+import { roles, taskState, stageType } from "../../constants/appConstants";
 import PublishMqtt from "../mqtt/PublishMqtt";
 import AppContext from "../../context/AppContext";
 import { EmptyBinContext } from "../../context/EmptyBinContext";
+import PubBatterySleep from "../mqtt/PubBatterySleep";
 
 
 
@@ -29,17 +30,17 @@ export const BinTask = React.memo((props) => {
   const [stage, setStage] = useState('')
   const [task, setTask] = useState({})
   const [binNo, setBinNo] = useState('')
-  const [prevSubStage,setPrevSubStage] = useState('')
-  let {  processStage } = React.useContext(AppContext);
+  const [prevSubStage, setPrevSubStage] = useState('')
+  let { processStage } = React.useContext(AppContext);
   const { setUnReadFilledBinData } = React.useContext(EmptyBinContext)
-  const {  appProcess } = React.useContext(EmptyBinContext)
+  const { appProcess } = React.useContext(EmptyBinContext)
 
   useEffect(() => {
     if (isFocused) {
       loadData();
     }
     return () => { }
-  }, [isFocused,appProcess.process_name])
+  }, [isFocused, appProcess.process_name])
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -51,7 +52,7 @@ export const BinTask = React.memo((props) => {
     let stage = await AsyncStorage.getItem("stage")
     setStage(stage);
     // let currentStage = appProcess.process.find(item => item.stage_name === stage)
-   // setCurrentStage(currentStage)
+    // setCurrentStage(currentStage)
     setTimeout(() => {
       setUnReadFilledBinData("0");
     }, 3000)
@@ -62,10 +63,10 @@ export const BinTask = React.memo((props) => {
     //   currentStage.sub_stage = stageType.underheat
     // }
 
-   // if(props.processEntity)
+    // if(props.processEntity)
     //  apiData.process_name =  props.processEntity.process_name 
-    apiData.process_name = appProcess.process_name 
-    if(stage && stage.toLowerCase() === stageType.shotblasting){
+    apiData.process_name = appProcess.process_name
+    if (stage && stage.toLowerCase() === stageType.shotblasting) {
       let inputStageList = await appProcess.process.reduce(async function (accumulator, item) {
         const accum = await accumulator;
         if (item.output_stage === stage && item.order === null)
@@ -77,20 +78,20 @@ export const BinTask = React.memo((props) => {
       apiData.stage = inputStageList;
     }
     else apiData.stage = stage
-    if(userState.user.role === roles.MO)
+    if (userState.user.role === roles.MO)
       apiData.task_state = ["REQUESTED", "DELIVERED"]
-    else if(userState.user.role === roles.FO)
+    else if (userState.user.role === roles.FO)
       apiData.task_state = ["REQUESTED"]
-    if(userState.user.role === roles.FO)
+    if (userState.user.role === roles.FO)
       apiData.resolver_id = userState.user.id
     apiData.sort_by = 'updated_on'
     apiData.sort_order = 'DSC'
 
 
     setBinTask([])
-    console.log("hit reload "+JSON.stringify(apiData))
+    console.log("hit reload " + JSON.stringify(apiData))
     ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {
-      console.log("apiRes here "+JSON.stringify(apiRes))
+      console.log("apiRes here " + JSON.stringify(apiRes))
       setApiStatus(false)
       setRefreshing(false);
 
@@ -141,7 +142,7 @@ export const BinTask = React.memo((props) => {
         setDialogMessage(dialogMessage);
         setTask(item)
       }
-      else if (type === "delivered"){
+      else if (type === "delivered") {
         showDialog(true);
         dialogTitle = "Deliver Filled Bin Request";
         dialogMessage = "Are you sure you wish to confirm filled bin request "
@@ -179,16 +180,31 @@ export const BinTask = React.memo((props) => {
       apiData.task_state = taskState.FULFILL
       invokeApi = true;
     }
-    else if (dialogType === "cancel") 
+    else if (dialogType === "cancel")
       apiData.task_state = taskState.CANCEL
-    
-    else if (dialogType === "delivered") 
+
+    else if (dialogType === "delivered")
       apiData.task_state = taskState.DELIVER
-    
+
     ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {
       if (apiRes && apiRes.status) {
         let msg = "";
-        if (dialogType === "fulfilled") msg = "Task fulfilled"
+        if (dialogType === "fulfilled") {
+          msg = "Task fulfilled"
+          console.log("binNo .. " + binNo)
+          AsyncStorage.getItem("deviceDet").then(async devices => {
+            console.log("devices here 123 " + JSON.parse(devices))
+            let devicesDet = JSON.parse(devices);
+            let device = devicesDet.find(device => device.element_num === binNo);
+            console.log("device " + JSON.stringify(device))
+            if (device) {
+              console.log(device.device_id)
+              PubBatterySleep({ topic: device.device_id })
+            }
+
+          })
+
+        }
         if (dialogType === "cancel") msg = "Task Cancelled";
         if (dialogType === "delivered") msg = "Task Delivered";
 
@@ -218,22 +234,22 @@ export const BinTask = React.memo((props) => {
                 {item.requester_id === item.resolver_id ? item.stage + " - Requested Filled Bin" : "Requested forklift " + item.resolver_emp_name + " to pick Filled Bin"}</Text> :
                 <Text
                   style={[AppStyles.subtitle, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
-                  {"Supply to " + item.stage + " " + (item.stage.toLowerCase() === stageType.forging ?  " ( "+item.forge_machine_id+" ) " : '')}</Text>)  : 
+                  {"Supply to " + item.stage + " " + (item.stage.toLowerCase() === stageType.forging ? " ( " + item.forge_machine_id + " ) " : '')}</Text>) :
                 <Text
                   style={[AppStyles.subtitle, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
-                  {"Forklift " + item.resolver_emp_name+" delivered filled bin"}</Text>
-                  }
-              
+                  {"Forklift " + item.resolver_emp_name + " delivered filled bin"}</Text>
+              }
+
               {userState.user.role === roles.MO ?
-              <Text
-                style={[AppStyles.info, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
-                  {item.updated_on}</Text> : 
+                <Text
+                  style={[AppStyles.info, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
+                  {item.updated_on}</Text> :
                 <Text
                   style={[AppStyles.info, { justifyContent: 'flex-start', color: 'black', padding: 1 }]}>
                   {"Requested By " + item.requester_emp_name + " " + item.updated_on}</Text>
-                }
+              }
             </View>
-            {item.task_state.toLowerCase() === "requested" && item.requester_id === item.resolver_id && userState.user.role === roles.MO  ?
+            {item.task_state.toLowerCase() === "requested" && item.requester_id === item.resolver_id && userState.user.role === roles.MO ?
               <TouchableOpacity style={[AppStyles.warnButtonContainer, { flex: 1, margin: 10 }]}
                 onPress={(e) => showBin(e, "fulfilled", item)}
               >
@@ -265,7 +281,7 @@ export const BinTask = React.memo((props) => {
               </TouchableOpacity>
 
               : false}
-            {item.task_state.toLowerCase() === "requested"  && userState.user.role === roles.MO ?
+            {item.task_state.toLowerCase() === "requested" && userState.user.role === roles.MO ?
 
               <TouchableOpacity style={[AppStyles.canButtonContainer, { flex: 1, margin: 10 }]}
                 onPress={(e) => openDialog(e, "cancel", item)}
@@ -308,7 +324,7 @@ export const BinTask = React.memo((props) => {
           okDialog={updateRequest} closeDialog={closeDialog}
           container={
             <View style={{ flexDirection: 'column', alignItems: 'center', width: '70%' }}>
-              
+
               <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', padding: 5 }}>
                 <Text style={[AppStyles.subtitle, { flex: 1, justifyContent: 'flex-start', color: 'black' }]}>Stage : </Text>
                 <Text style={[AppStyles.title, { flex: 2, textAlign: 'left', color: appTheme.colors.cardTitle, fontFamily: appTheme.fonts.bold }]}>{stage} </Text>

@@ -28,6 +28,7 @@ let binMqttOptions = {
     keepalive: 32000
     // keepalive: 60
 }
+
 let oldbinMqttOptions = {
     uri: "mqtt" + "://mqtt.meti.in:1884",
     clientId: "clientId",

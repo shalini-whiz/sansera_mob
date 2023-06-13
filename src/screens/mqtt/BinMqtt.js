@@ -63,8 +63,6 @@ const BinMqtt = (props) => {
     setDialogType(type)
     setDialogTitle(dialogTitle);
     setDialogMessage(dialogMessage);
-    PubBatteryMqtt()
-
     //call publishBatteryMqtt
   }
   const reconnectToBinMQTT = () => {
