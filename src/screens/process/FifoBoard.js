@@ -160,6 +160,7 @@ export const FifoBoard = React.memo((props) => {
         modalVisible={dialog}
         dialogTitle={dialogTitle}
         dialogMessage={dialogMessage}
+        height={'80%'}
         container={<ProcessFifo processDet={processDet} closeDialog={closeDialog} okDialog={updateFifo} />}
       /> : false}
       {apiError && apiError.length ? (<ErrorModal msg={apiError} okAction={errOKAction} />) : false}

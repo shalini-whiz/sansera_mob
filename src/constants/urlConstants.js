@@ -1,5 +1,6 @@
 var liveAddress = 'http://203.129.243.94:8086/'
 var mqttAddress = 'mqtt://203.129.243.94:1883'
+
 let oldmqttOptions = {
     uri: "mqtt" + "://mqtt.meti.in:1884",
     clientId: "clientId",
@@ -19,6 +20,7 @@ let mqttOptions = {
     keepalive: 32000
     // keepalive: 60
 }
+
 let binMqttOptions = {
     uri: mqttAddress,
     clientId: "clientId",
@@ -39,9 +41,7 @@ let oldbinMqttOptions = {
     // keepalive: 60
 }
 
-
 const SERVER_URL = liveAddress;
-
 const urls = {
     login: SERVER_URL + "api/auth",
     getProcess: SERVER_URL + "api/process-line",
@@ -67,7 +67,6 @@ const urls = {
     process_consumption: SERVER_URL + "api/process-consumption",
     compartment: SERVER_URL + "api/compartment"
 };
-
 
 
 export { urls, SERVER_URL, mqttOptions, binMqttOptions };

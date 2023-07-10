@@ -149,6 +149,7 @@ export const RackData = React.memo((props) => {
         {dialog ? <CustomModal
           modalVisible={dialog} dialogTitle={dialogTitle}
           dialogMessage={dialogMessage} closeDialog={closeDialog}
+          height={'70%'}
           container={<RackDetails content={batch}/>
         } /> : false}
         

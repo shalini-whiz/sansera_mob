@@ -14,8 +14,8 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
 import LowBattery from "../battery/LowBattery";
 import CustomModal from "../../components/CustomModal";
 import PubBatteryMqtt from "./PubBatteryMqtt";
-
-
+const { Bar } = require("react-native-progress")
+import * as Progress from 'react-native-progress';
 
 const BinMqtt = (props) => {
   const userState = React.useContext(UserContext);
@@ -28,6 +28,8 @@ const BinMqtt = (props) => {
   const [dialogTitle, setDialogTitle] = useState('')
   const [dialogMessage, setDialogMessage] = useState('');
   const [dialogType, setDialogType] = useState('')
+  const [loadBatteryData, setLoadBatteryData] = useState(false)
+  const [lowBatteryData, setLowBatteryData] = useState([])
 
   useEffect(() => {
     if (isFocused) {
@@ -35,26 +37,22 @@ const BinMqtt = (props) => {
       if (userState && userState.user) setUser(userState.user);
       if (userState && userState.user && userState.user.role === roles.MO) {
         connectBinMQTT()
-
-        // let binTopics;
-        // if (props && props.binTopics && props.binTopics.length)
-        //   binTopics = JSON.parse(props.binTopics)
-        // AsyncStorage.getItem("bins").then(topics => {
-        //   if (topics) binTopics = JSON.parse(topics)
-        //   if (binTopics && binTopics.length)
-        //     connectBinMQTT(binTopics)
-        // })
       }
     }
     return () => {
     }
   }, [isFocused])
 
-  const closeDialog = () => {
+  const closeDialog = async () => {
     showDialog(false)
     setDialogTitle('')
     setDialogMessage('')
     setDialogType('')
+    //clear low battery cache
+    console.log("clear low battery data ")
+    await AsyncStorage.setItem("lowBattery", JSON.stringify([]))
+
+
   }
   const openDialog = (e, type) => {
     showDialog(true);
@@ -63,7 +61,9 @@ const BinMqtt = (props) => {
     setDialogType(type)
     setDialogTitle(dialogTitle);
     setDialogMessage(dialogMessage);
+    //PubBatteryMqtt();
     //call publishBatteryMqtt
+    pubBatteryStatus();
   }
   const reconnectToBinMQTT = () => {
     console.log(111)
@@ -72,19 +72,33 @@ const BinMqtt = (props) => {
     console.log(userState.user.role === roles.MO)
     if (userState && userState.user && userState.user.role === roles.MO) {
       connectBinMQTT()
-
-      // let binTopics;
-      // if (props && props.binTopics && props.binTopics.length)
-      //   binTopics = JSON.parse(props.binTopics)
-      // AsyncStorage.getItem("bins").then(topics => {
-      //   if (topics) binTopics = JSON.parse(topics)
-      //   if (binTopics && binTopics.length)
-      //     // connectBinMQTT(binTopics)
-      // })
     }
   }
 
+  const pubBatteryStatus = () => {
+    try {
+      console.log("binClient here " + binClient);
+      if (binClient) {
+        setLoadBatteryData(true)
 
+        AsyncStorage.getItem("devices").then(devices => {
+          JSON.parse(devices).map((item, index, { length }) => {
+            setTimeout(() => {
+              let publishParams = { devID: item, data: "GB" }
+              console.log("devices publishParams here " + JSON.stringify(publishParams))
+              binClient.publish("GET_BAT_STS", JSON.stringify(publishParams), 2, false)
+              if (index + 1 === length) {
+                setLoadBatteryData(false)
+                //client.disconnect()
+              }
+            }, 1000 * index)
+          });
+        })
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
   const connectBinMQTT = () => {
     let options = { ...binMqttOptions }
     options.clientId = "binclientId" + Date
@@ -134,25 +148,27 @@ const BinMqtt = (props) => {
     });
   }
 
+  const publishData = (publishData) => {
+    binClient.on('connect', () => {
+      console.log('publish data connected');
+
+    });
+  }
   const setUnReadEmptyBin = (count) => {
     setUnReadEmptyBinData(count.toString())
   }
 
   const handleBatSts = (dataJson) => {
-    console.log("low battery " + JSON.stringify(dataJson))
     let batteryJson = { devID: dataJson.devID, createdOn: new Date(), data: dataJson.data }
     AsyncStorage.getItem("lowBattery").then(data => {
-      console.log("data here " + data)
-      console.group(typeof data)
-
       if (data !== null) {
         // We have data!!
-        console.log(JSON.parse(data));
+        console.log("which data : " + JSON.parse(data));
         let batteryData = JSON.parse(data);
         batteryData.push(batteryJson)
-        AsyncStorage.setItem("lowBattery", JSON.stringify(batteryData))
+        setLowBatteryData(batteryData)
+        //AsyncStorage.setItem("lowBattery", JSON.stringify(batteryData))
       }
-
     })
   }
 
@@ -160,10 +176,8 @@ const BinMqtt = (props) => {
     let deviceId = dataJson.devID;
     let apiData = { op: "get_device", device_id: deviceId, unit_num: userState.user.unit_number };
     ApiService.getAPIRes(apiData, "POST", "mqtt").then(apiRes => {
-      console.log("apiRes here binmqtt " + JSON.stringify(apiRes))
       if (apiRes && apiRes.status) {
         let deviceList = apiRes.response.message;
-        console.log(deviceList[0].type)
         if (deviceList[0].type === "rack") return;
         let curTop = {
           "topic_name": msg.topic, "element_id": deviceList[0].device_id,
@@ -233,9 +247,21 @@ const BinMqtt = (props) => {
           </TouchableOpacity>
         </View>) : false}
 
-      {dialog && (dialogType === "batteryStatus") ? <CustomModal modalVisible={dialog} dialogTitle={dialogTitle}
+      {dialog && (dialogType === "batteryStatus") ? <CustomModal 
+      modalVisible={dialog} dialogTitle={dialogTitle}
+      height={'70%'}
         dialogMessage={dialogMessage} okDialog={closeDialog}
-        okTitle={"BATTERY STATUS"} container={<LowBattery />}
+        loadBatteryData={loadBatteryData}
+        okTitle={"BATTERY STATUS"}
+
+        container={
+          <>
+            <Bar progress={0.3} width={loadBatteryData ? 1000 : 0} />
+            <LowBattery loadBatteryData={loadBatteryData} batteryData={lowBatteryData} />
+          </>
+
+
+        }
       /> : false}
 
     </View>

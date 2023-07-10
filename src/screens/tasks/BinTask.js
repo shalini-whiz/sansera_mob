@@ -201,7 +201,6 @@ export const BinTask = React.memo((props) => {
               console.log(device.device_id)
               PubBatterySleep({ topic: device.device_id })
             }
-
           })
 
         }

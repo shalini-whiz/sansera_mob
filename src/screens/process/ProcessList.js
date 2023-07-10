@@ -249,6 +249,7 @@ export default function ProcessList() {
         dialogTitle={dialogTitle}
         dialogMessage={dialogMessage}
         closeDialog={closeDialog}
+
         container={<RejectionData processEntity={processDet} />}
       /> : false}
 
@@ -257,6 +258,7 @@ export default function ProcessList() {
         modalVisible={dialog}
         dialogTitle={dialogTitle}
         dialogMessage={dialogMessage}
+        height={'80%'}
         // closeDialog={closeDialog}
         container={<ProcessFifo processDet={processDet} closeDialog={closeDialog} okDialog={updateFifo} />}
       /> : false}

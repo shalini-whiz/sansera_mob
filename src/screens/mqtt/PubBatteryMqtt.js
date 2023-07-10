@@ -28,18 +28,15 @@ const PubBatteryMqtt = (props) => {
 
     client.on('connect', () => {
       AsyncStorage.getItem("devices").then(devices => {
-        console.log("devices here 123 " + JSON.parse(devices))
         JSON.parse(devices).map((item, index, { length }) => {
-          console.log("device here " + item)
           setTimeout(() => {
             let publishParams = { devID: item, data: "GB" }
             console.log("devices publishParams here " + JSON.stringify(publishParams))
             client.publish("GET_BAT_STS", JSON.stringify(publishParams), 2, false)
-            console.log("compare " + index + " ... " + length)
             if (index + 1 === length) {
               client.disconnect()
             }
-          }, 5000 * index)
+          }, 1000 * index)
           //last element
 
         });

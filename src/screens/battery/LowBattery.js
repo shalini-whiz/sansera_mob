@@ -10,7 +10,7 @@ import AppStyles from "../../styles/AppStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { dateUtil } from "../../commons";
 
-export default function LowBattery() {
+export default function LowBattery(props) {
   const userState = React.useContext(UserContext);
   const isFocused = useIsFocused();
   const [apiError, setApiError] = useState('')
@@ -24,14 +24,16 @@ export default function LowBattery() {
       loadProcess();
     }
     return () => { }
-  }, [isFocused])
+  }, [isFocused, props.batteryData])
 
   const loadProcess = () => {
-    AsyncStorage.getItem("lowBattery").then(data => {
-      if (data != null)
-        data = JSON.parse(data);
-      setBattery(data)
-    })
+    // AsyncStorage.getItem("lowBattery").then(data => {
+    //   if (data != null)
+    //     data = JSON.parse(data);
+    //   setBattery(data)
+    // })
+    console.log("load props batteryData " + JSON.stringify(props.batteryData))
+    setBattery(props.batteryData)
 
     setApiStatus(false)
   }
@@ -63,23 +65,22 @@ export default function LowBattery() {
   };
   return (
 
-    <ScrollView
-      contentContainerStyle={styles.scrollView}
+    // <ScrollView
+    //   contentContainerStyle={styles.scrollView}
 
-    >
-      <View style={styles.container}>
-        {battery.length ? <FlatList
-          data={battery}
-          horizontal={false}
-          renderItem={renderItem}
-          keyExtractor={item => item.createdOn}
-          onRefresh={() => onRefresh()}
-          refreshing={refreshing}
-          numColumns={1}
-        /> : false}
+    // >
+    <View style={styles.container}>
+      {battery.length ? <FlatList
+        data={battery}
+        horizontal={false}
+        renderItem={renderItem}
+        keyExtractor={item => item.createdOn}
+        onRefresh={() => onRefresh()}
+        refreshing={refreshing}
+        numColumns={1}
+      />: false}
 
-      </View>
-    </ScrollView>
+      </View> 
   )
 }
 const styles = StyleSheet.create({

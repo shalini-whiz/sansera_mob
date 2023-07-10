@@ -25,7 +25,7 @@ const PubBatterySleep = (props) => {
       console.log('pub connected' + props.topic);
       let publishParams = {
         devID: props.topic,
-        data: "SL 1"
+        data: "SL"
       }
       console.log("publishParams here " + JSON.stringify(publishParams))
       client.publish("GOTO_SLEEP", JSON.stringify(publishParams), 2, false)
