@@ -27,14 +27,7 @@ export default function LowBattery(props) {
   }, [isFocused, props.batteryData])
 
   const loadProcess = () => {
-    // AsyncStorage.getItem("lowBattery").then(data => {
-    //   if (data != null)
-    //     data = JSON.parse(data);
-    //   setBattery(data)
-    // })
-    console.log("load props batteryData " + JSON.stringify(props.batteryData))
     setBattery(props.batteryData)
-
     setApiStatus(false)
   }
 
@@ -48,10 +41,7 @@ export default function LowBattery(props) {
   }
 
   const renderItem = ({ item, index }) => {
-    console.log(index);
-    console.log(dateUtil.formatDate(item.createdOn, "DD MMM YYYY"))
     return (
-
       <View style={{
         flexDirection: 'row', backgroundColor: 'white', margin: 5, padding: 5,
         flex: 1

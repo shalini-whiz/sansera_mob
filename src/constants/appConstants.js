@@ -10,7 +10,6 @@ export const taskState = {
   "FULFILL":"FULFILLED",
   "CANCEL":"CANCELLED",
   "DELIVER": "DELIVERED"
-
 }
 export const stageColors = {
   "shearing": { color1: "#3366cc", color2: "#66ccff" },

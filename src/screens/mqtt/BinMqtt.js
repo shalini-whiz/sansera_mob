@@ -33,7 +33,6 @@ const BinMqtt = (props) => {
 
   useEffect(() => {
     if (isFocused) {
-      console.log("user effect binmqtt ")
       if (userState && userState.user) setUser(userState.user);
       if (userState && userState.user && userState.user.role === roles.MO) {
         connectBinMQTT()
@@ -50,6 +49,7 @@ const BinMqtt = (props) => {
     setDialogType('')
     //clear low battery cache
     console.log("clear low battery data ")
+    setLowBatteryData([])
     await AsyncStorage.setItem("lowBattery", JSON.stringify([]))
 
 
@@ -77,8 +77,10 @@ const BinMqtt = (props) => {
 
   const pubBatteryStatus = () => {
     try {
-      console.log("binClient here " + binClient);
       if (binClient) {
+        setLowBatteryData([])
+        AsyncStorage.setItem("lowBattery", JSON.stringify([]))
+
         setLoadBatteryData(true)
 
         AsyncStorage.getItem("devices").then(devices => {
@@ -103,7 +105,6 @@ const BinMqtt = (props) => {
     let options = { ...binMqttOptions }
     options.clientId = "binclientId" + Date
       .now()
-    console.log(options);
     MQTT.createClient(options).then((client) => {
       setBinClient(client)
       client.connect();
@@ -167,12 +168,14 @@ const BinMqtt = (props) => {
         let batteryData = JSON.parse(data);
         batteryData.push(batteryJson)
         setLowBatteryData(batteryData)
-        //AsyncStorage.setItem("lowBattery", JSON.stringify(batteryData))
+        AsyncStorage.setItem("lowBattery", JSON.stringify(batteryData))
       }
     })
   }
 
   const handleSwitchPress = (dataJson, msg) => {
+    console.log("handleSwitchPress msg : " + JSON.stringify(msg))
+    console.log("handleSwitchPress dataJson : "+JSON.stringify(dataJson))
     let deviceId = dataJson.devID;
     let apiData = { op: "get_device", device_id: deviceId, unit_num: userState.user.unit_number };
     ApiService.getAPIRes(apiData, "POST", "mqtt").then(apiRes => {
@@ -247,9 +250,9 @@ const BinMqtt = (props) => {
           </TouchableOpacity>
         </View>) : false}
 
-      {dialog && (dialogType === "batteryStatus") ? <CustomModal 
-      modalVisible={dialog} dialogTitle={dialogTitle}
-      height={'70%'}
+      {dialog && (dialogType === "batteryStatus") ? <CustomModal
+        modalVisible={dialog} dialogTitle={dialogTitle}
+        height={'70%'}
         dialogMessage={dialogMessage} okDialog={closeDialog}
         loadBatteryData={loadBatteryData}
         okTitle={"BATTERY STATUS"}

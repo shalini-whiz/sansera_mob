@@ -28,8 +28,6 @@ dateUtil.toDateFormat = (input, dateFormat) => {
 dateUtil.formatDate = (input,dateFormat) => {
   if (!input) return "";
   if (!dateFormat) dateFormat = "DD-MM-YYYY";
-  console.log(dateFormat)
-  console.log(input);
   //return input;
   return moment(new Date(input)).format(dateFormat);
 }
