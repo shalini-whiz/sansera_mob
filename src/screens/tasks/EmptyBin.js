@@ -56,12 +56,9 @@ import { stageType } from "../../constants/appConstants";
     setCurrentStage(currentStage)
     //hardcode
     // if(currentStage.stage_name.toLowerCase() === stageType.forging) currentStage.sub_stage = stageType.underheat
-    console.log("currentStage here "+JSON.stringify(currentStage))
     if(currentStage.order){
       let nextStage = appProcess.process.find(item => item.order === currentStage.order + 1);
-      console.log("nextStage here "+JSON.stringify(nextStage))
       if(nextStage) {
-        console.log("defulat "+nextStage.stage_name)
         setNextStageName(nextStage.stage_name)
         setNextStage(nextStage)
       }
@@ -119,10 +116,7 @@ import { stageType } from "../../constants/appConstants";
       let currentStage = appProcess.process.find(item => item.stage_name === stage)
       //hardcode
       if(currentStage.stage_name.toLowerCase() === stageType.visual) currentStage.output_stage = stageType.shotblasting
-      console.log(currentStage.output_stage)
       apiData.stage_name = nextStage.stage_name
-      console.log("apiData 1"+JSON.stringify(apiData))
-      console.log(nextStageName)
       if(nextStageName.length)
         apiData.stage_name = nextStageName
       if (currentStage && currentStage.output_stage && currentStage.output_stage.length && nextStageName.length === 0) {
@@ -130,7 +124,6 @@ import { stageType } from "../../constants/appConstants";
       }
     
      
-      console.log("apiData here "+JSON.stringify(apiData))
       
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {

@@ -34,7 +34,6 @@ const BatteryMqtt = (props) => {
   const connectBinMQTT = () => {
     let options = { ...binMqttOptions }
     options.clientId = "binclientId" + Date.now()
-    console.log(options);
     MQTT.createClient(options).then((client) => {
       setBinClient(client)
       client.connect();
@@ -51,7 +50,6 @@ const BatteryMqtt = (props) => {
 
       client.on('message', (msg) => {
         console.log('mqtt.event.message', msg);
-        console.log("bin request : " + JSON.stringify(msg))
         let dataJson = JSON.parse(msg.data)
         let deviceId = dataJson.devID;
        

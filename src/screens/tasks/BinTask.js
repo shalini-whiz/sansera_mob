@@ -89,9 +89,7 @@ export const BinTask = React.memo((props) => {
 
 
     setBinTask([])
-    console.log("hit reload " + JSON.stringify(apiData))
     ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {
-      console.log("apiRes here " + JSON.stringify(apiRes))
       setApiStatus(false)
       setRefreshing(false);
 
@@ -191,14 +189,10 @@ export const BinTask = React.memo((props) => {
         let msg = "";
         if (dialogType === "fulfilled") {
           msg = "Task fulfilled"
-          console.log("binNo .. " + binNo)
           AsyncStorage.getItem("deviceDet").then(async devices => {
-            console.log("devices here 123 " + JSON.parse(devices))
             let devicesDet = JSON.parse(devices);
             let device = devicesDet.find(device => device.element_num === binNo);
-            console.log("device " + JSON.stringify(device))
             if (device) {
-              console.log(device.device_id)
               PubBatterySleep({ topic: device.device_id })
             }
           })

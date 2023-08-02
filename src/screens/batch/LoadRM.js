@@ -69,7 +69,6 @@ export default function LoadRM() {
     }
     apiData.sort_by = 'updated_on'
     apiData.sort_order = 'DSC'
-    console.log(apiData)
     setRefreshing(false)
     ApiService.getAPIRes(apiData, "POST", "list_raw_material_by_status").then(apiRes => {
       setApiStatus(false);
@@ -182,7 +181,6 @@ export default function LoadRM() {
     }
     let options = { ...mqttOptions }
     options.clientId = "clientId" + Date.now();
-    console.log("otpions 123 " + JSON.stringify(options))
     MQTT.createClient(options).then((client) => {
       setClient(client)
       client.connect();
@@ -206,18 +204,14 @@ export default function LoadRM() {
 
         let batchDetails = { ...batchDet };
         let rackDevices = Object.keys(batchDetails.device_map);
-        console.log(JSON.stringify(batchDetails))
         //let deviceId = msg.topic.split("/")[1];
         let deviceId = dataJson.devID;
         let apiData = { op: "get_device", device_id: deviceId, unit_num: userState.user.unit_number };
         ApiService.getAPIRes(apiData, "POST", "mqtt").then(apiRes => {
-          console.log("apiRes here load raw mqtt " + JSON.stringify(apiRes))
           if (apiRes && apiRes.status) {
             let deviceList = apiRes.response.message;
-            console.log(deviceList[0].type)
             if (deviceList[0].type === "bin") return;
             let deviceExists = rackDevices.indexOf(deviceId);
-            console.log(deviceExists)
             let fifoExists = batchDetails.fifo.findIndex(item => item.element_id === deviceId);
             if (deviceExists > -1 && fifoExists === -1) {
               const selectedIndex = addRacks.indexOf(batchDetails.device_map[deviceId]);
@@ -246,7 +240,6 @@ export default function LoadRM() {
       client.on('connect', () => {
         console.log('connected');
         setListeningEvent(true);
-        console.log(topics)
         // topics.map(item => {
         //   client.subscribe(item.topic_name, 2)
         // })

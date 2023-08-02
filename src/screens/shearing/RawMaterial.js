@@ -153,7 +153,6 @@ export default function RawMaterial(props) {
     apiData.fifo = [...curFifoArr, ...batchDetails.fifo]
     setApiStatus(true);
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
-      console.log("partial return apiRes here "+JSON.stringify(apiRes))
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         closeDialog();
@@ -207,8 +206,7 @@ export default function RawMaterial(props) {
 
   }
   const startListening = () => {
-    console.log(123)
-    console.log(batchDet._id)
+
     if (!batchDet._id) {
       let apiData = {
         "op": "get_batch_details",
@@ -237,9 +235,7 @@ export default function RawMaterial(props) {
   }
 
   const connectMQTT = (topics, batchDetails) => {
-    console.log(123)
     let options = { ...mqttOptions }
-    console.log("connect to mqtt options " + JSON.stringify(options))
     MQTT.createClient(options).then((client) => {
       setClient(client)
       client.connect();
@@ -257,23 +253,18 @@ export default function RawMaterial(props) {
 
       client.on('message', (msg) => {
         
-        console.log('partial return mqtt.event.message', msg);
         let dataJson = JSON.parse(msg.data)
         //this.setState({ message: JSON.stringify(msg) });
         //let deviceId = msg.topic.split("/")[1];
         let deviceId = dataJson.devID;
         let apiData = { op: "get_device", device_id: deviceId, unit_num: userState.user.unit_number };
         ApiService.getAPIRes(apiData, "POST", "mqtt").then(apiRes => {
-          console.log("apiRes here raw material mqtt " + JSON.stringify(apiRes))
           if (apiRes && apiRes.status) {
             let deviceList = apiRes.response.message;
             if (deviceList[0].type === "bin") return;
             let rackDevices = Object.keys(batchDetails.device_map);
             let deviceExists = rackDevices.indexOf(deviceId);
-            console.log(deviceExists)
-            console.log(batchDetails.fifo)
             let fifoExists = batchDetails.fifo.findIndex(item => item.element_id === deviceId);
-            console.log("fifoExists : "+fifoExists)
             if (deviceExists > -1 && fifoExists === -1 && addRacks.length === 0) {
               setAddRacks(batchDetails.device_map[deviceId]);
               setCurFifo({ "element_num": batchDetails.device_map[deviceId], "element_id": deviceId })

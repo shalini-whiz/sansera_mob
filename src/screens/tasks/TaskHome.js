@@ -18,7 +18,6 @@ export default  TaskHome = React.memo((props) => {
 
   useEffect(() => {
     if (isFocused) {
-      console.log("tab here "+tab)
     }
     return () => { }
   }, [isFocused,appProcess])
@@ -28,7 +27,6 @@ export default  TaskHome = React.memo((props) => {
     setTab(value)
   }
   const reloadPage = (response) => {
-    console.log("reload Page here ")
     props.updateProcess()
   }
 

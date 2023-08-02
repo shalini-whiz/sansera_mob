@@ -31,7 +31,6 @@ export const DispatchHome = React.memo((props) => {
 
 
   const updateProcess = e => {
-    console.log('call update')
     processRef.current.setFromOutside(appProcess.process_name)
   }
 
@@ -72,7 +71,6 @@ export const DispatchHome = React.memo((props) => {
 
   return (
     <View style={{ flex: 1, flexDirection: 'column' }}>
-      {console.log("stage home loaded")}
       <BinMqtt />
       <ProcessFilter
         //processEntity={setProcess} 

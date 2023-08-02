@@ -136,7 +136,6 @@ export default function ProcessInfo(props) {
         if (item.type === "date") {
           //convert date here
          // item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
-         console.log(item.value)
           item.value = dateUtil.fromToDateFormat(item.value, "DD/MM/YYYY, hh:mm:ss A", "DD MMM YYYY hh:mm A");
 
         }
@@ -150,7 +149,6 @@ export default function ProcessInfo(props) {
         let rej_comp_index = processSchema.findIndex(item => item.key === "total_rejections")
         let ok_comp_index = processSchema.findIndex(item => item.key === "ok_component")
         let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === currentStage)
-        console.log("rej_comp_index 2222 " + rej_comp_index)
 
         if (stage_ok_comp_index > -1 && props.fields.indexOf("total_rejections") > -1) {
           if (props.processEntity.process[stage_ok_comp_index] && props.processEntity.process[stage_ok_comp_index].total_rejections)

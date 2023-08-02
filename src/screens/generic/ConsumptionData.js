@@ -53,7 +53,6 @@ export const ConsumptionData = React.memo((props) => {
 
  
   const loadProcess = async () => {
-    console.log("props : "+props.stageName+" .. "+props.processName)
     let curStage = props.stageName ? props.stageName : await AsyncStorage.getItem("stage");
     let curProcess = appProcess.process_name ? appProcess.process_name : props.processName;
     setTableSchema([])
@@ -62,7 +61,6 @@ export const ConsumptionData = React.memo((props) => {
     if(curStage.toLowerCase() === stageType.shearing) 
     {
       setTableSchema(shearing_consumption_schema)
-      console.log(curProcess+" .. "+curStage)
       let apiData = {
         "op": "get_process_consumption",
         process_name: curProcess,
@@ -71,14 +69,12 @@ export const ConsumptionData = React.memo((props) => {
 
       }
       apiData.date = await dateUtil.formatDate(date, "YYYY-MM-DD")
-      console.log("get_process_consumption apiData "+JSON.stringify(apiData))
       if(!curProcess)
         return;
       setRefreshing(false);
       setApiStatus(true);
       
       ApiService.getAPIRes(apiData, "POST", "process_consumption").then(apiRes => {
-        console.log("apiRes here "+JSON.stringify(apiRes))
         setApiStatus(false);
         if (apiRes && apiRes.status) {
           if (apiRes.response.message && apiRes.response.message.length) {

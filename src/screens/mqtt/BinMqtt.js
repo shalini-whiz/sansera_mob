@@ -48,7 +48,6 @@ const BinMqtt = (props) => {
     setDialogMessage('')
     setDialogType('')
     //clear low battery cache
-    console.log("clear low battery data ")
     setLowBatteryData([])
     await AsyncStorage.setItem("lowBattery", JSON.stringify([]))
 
@@ -66,10 +65,7 @@ const BinMqtt = (props) => {
     pubBatteryStatus();
   }
   const reconnectToBinMQTT = () => {
-    console.log(111)
-    console.log(userState.user)
-    console.log(roles.MO)
-    console.log(userState.user.role === roles.MO)
+
     if (userState && userState.user && userState.user.role === roles.MO) {
       connectBinMQTT()
     }
@@ -128,7 +124,12 @@ const BinMqtt = (props) => {
         console.log(msg.topic)
         console.log("++++++++")
 
-        if (msg.topic === "SWITCH_PRESS") handleSwitchPress(dataJson, msg)
+        if (msg.topic === "SWITCH_PRESS") {
+          setTimeout(() => {
+            handleSwitchPress(dataJson, msg)
+          }, 10000)
+        }
+
         if (msg.topic === "BAT_STS") handleBatSts(dataJson)
       });
 
@@ -149,12 +150,7 @@ const BinMqtt = (props) => {
     });
   }
 
-  const publishData = (publishData) => {
-    binClient.on('connect', () => {
-      console.log('publish data connected');
 
-    });
-  }
   const setUnReadEmptyBin = (count) => {
     setUnReadEmptyBinData(count.toString())
   }
@@ -164,7 +160,6 @@ const BinMqtt = (props) => {
     AsyncStorage.getItem("lowBattery").then(data => {
       if (data !== null) {
         // We have data!!
-        console.log("which data : " + JSON.parse(data));
         let batteryData = JSON.parse(data);
         batteryData.push(batteryJson)
         setLowBatteryData(batteryData)
@@ -173,9 +168,88 @@ const BinMqtt = (props) => {
     })
   }
 
-  const handleSwitchPress = (dataJson, msg) => {
+  const handleSwitchPress = async (dataJson, msg) => {
     console.log("handleSwitchPress msg : " + JSON.stringify(msg))
-    console.log("handleSwitchPress dataJson : "+JSON.stringify(dataJson))
+    console.log("handleSwitchPress dataJson : " + JSON.stringify(dataJson))
+    let deviceId = dataJson.devID;
+    let binRequest = await AsyncStorage.getItem("emptyBinReq");
+    console.log("binRequest " + binRequest)
+    let request = [];
+    let updateBinCount = false;
+    let bins = await AsyncStorage.getItem("bins");
+    let binData = JSON.parse(bins)
+    let index = binData.findIndex(item => item.device_id === deviceId)
+    if (index > -1) {
+      let curTop = {
+        "topic_name": msg.topic, "element_id": deviceId,
+        "element_num": binData[index].element_num
+      }
+      console.log("curTop .. " + JSON.stringify(curTop))
+      if (!binRequest) {
+        request.push(curTop)
+        updateBinCount = true;
+      }
+      else {
+        request = JSON.parse(binRequest);
+        let index = request.findIndex(item => item.element_id === curTop.element_id)
+        console.log("check index " + index);
+        if (index > -1) {
+          request.splice(index, 1);
+          request.splice(0, 0, curTop)
+          updateBinCount = true;
+        }
+        else {
+          request.push(curTop)
+          updateBinCount = true
+        }
+      }
+      AsyncStorage.setItem("emptyBinReq", JSON.stringify(request));
+    }
+
+    // let apiRes = await ApiService.getAPIRes(apiData, "POST", "mqtt")
+    // console.log("apiRes .. " + JSON.stringify(apiRes))
+    // if (apiRes && apiRes.status) {
+    //   let deviceList = apiRes.response.message;
+    //   if (deviceList[0].type === "rack") return;
+    //   let curTop = {
+    //     "topic_name": msg.topic, "element_id": deviceList[0].device_id,
+    //     "element_num": deviceList[0].element_num
+    //   }
+    //   let binRequest = await AsyncStorage.getItem("emptyBinReq");
+    //   console.log("binRequest " + binRequest)
+    //   let request = [];
+    //   let updateBinCount = false;
+    //   if (!binRequest) {
+    //     request.push(curTop)
+    //     updateBinCount = true;
+    //   }
+    //   else {
+    //     request = JSON.parse(binRequest);
+    //     let index = request.findIndex(item => item.element_id === curTop.element_id)
+    //     if (index > -1) {
+    //       request.splice(index, 1);
+    //       request.splice(0, 0, curTop)
+    //       updateBinCount = true;
+    //     }
+    //     else {
+    //       request.push(curTop)
+    //       updateBinCount = true
+    //     }
+    //   }
+    //   AsyncStorage.setItem("emptyBinReq", JSON.stringify(request));
+    //   if (updateBinCount) {
+    //     let count = await AsyncStorage.getItem("emptyBinCount")
+    //     let newEmptyBinCount = 1;
+    //     if (count && count.length)
+    //       newEmptyBinCount = parseInt(count) + 1;
+    //     setUnReadEmptyBin(newEmptyBinCount);
+    //   }
+    // }
+
+  }
+
+  const handleSwitchPress1 = (dataJson, msg) => {
+
     let deviceId = dataJson.devID;
     let apiData = { op: "get_device", device_id: deviceId, unit_num: userState.user.unit_number };
     ApiService.getAPIRes(apiData, "POST", "mqtt").then(apiRes => {
@@ -219,7 +293,6 @@ const BinMqtt = (props) => {
       }
     })
   }
-
   return (
     <View style={{ flexDirection: 'column', padding: 5 }}>
       {user && user.role === roles.MO ? (binListeningEvent ?

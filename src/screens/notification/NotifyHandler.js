@@ -56,18 +56,14 @@ export const initNotification = async (openNotificationHandler) => {
 
             // (required) Called when a remote is received or opened, or local notification is opened
             //notification.userInteraction = 1;
-            console.log("userInteraction " + notification.userInteraction)
             let notifyData = JSON.parse(notification.data.data);
-            console.log("notify data on load " + JSON.stringify(notifyData))
 
             //check if rack or bin
 
             if (notification.userInteraction) {
-                console.log('notification on user interaction ', notification);
                 handleNotificationNavig(notification, openNotificationHandler);
             }
             else if (notification.data && notification.foreground && !notifyData.sender) {
-                console.log("background notficiation without user interaction " + JSON.stringify(notification.data))
                 handleNotificationNavig(notification, openNotificationHandler)
             }
         },
@@ -76,7 +72,6 @@ export const initNotification = async (openNotificationHandler) => {
     });
     PushNotification.deleteChannel('com.sansera');
     PushNotification.channelExists('com.sansera', (resp) => {
-        console.log(`createChannel created '${resp}'`);
         if (!resp) {
             //create channel for receiving notification on active state of phone
             PushNotification.createChannel(
@@ -120,10 +115,7 @@ export const initNotification = async (openNotificationHandler) => {
         .getInitialNotification()
         .then(async (remoteMessage) => {
             if (remoteMessage) {
-                console.log(
-                    'getInitialNotification:' +
-                    'Notification caused app to open from quit state',
-                );
+                
                 console.log(remoteMessage);
             }
         });

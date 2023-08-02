@@ -44,12 +44,9 @@ export default function ShowRack(props) {
           props.reloadPage();
 
           AsyncStorage.getItem("deviceDet").then(async devices => {
-            console.log("devices here 123 " + JSON.parse(devices))
             let devicesDet = JSON.parse(devices);
             let device = devicesDet.find(device => device.element_num === props.rackData.element_num);
-            console.log("device rack " + JSON.stringify(device))
             if (device) {
-              console.log(device.device_id)
               PubBatterySleep({ topic: device.device_id })
             }
           })

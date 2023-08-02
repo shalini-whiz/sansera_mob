@@ -42,9 +42,7 @@ export default function RequestBin(props) {
     setStage(stage)
     setNextStageName(stage)
     let currentStage = props.processEntity.process.find(item => item.stage_name === stage)
-    console.log("currentStage : "+JSON.stringify(currentStage))
     let previousStage = props.processEntity.process.find(item => item.order === currentStage.order - 1);
-    console.log("previousStage : " + JSON.stringify(previousStage))
     setPrevStage(previousStage)
 
     let inputStageList = props.processEntity.process.filter(item => {
@@ -54,7 +52,6 @@ export default function RequestBin(props) {
     if(inputStageList && inputStageList.length) setInputStages(inputStageList)
     // if (previousStage && previousStage.stage_name.toLowerCase() === stageType.forging) {
     //   //setPrevSubStage(previousStage.sub_stage)
-    //   console.log("entered here ")
     //   setPrevSubStage(stageType.underheat)
     // }
   }
@@ -80,7 +77,6 @@ export default function RequestBin(props) {
       apiData.resolver_id = requestType === "self" ? userState.user.id : forkOp
       apiData.stage = nextStageName.length ? nextStageName :  await AsyncStorage.getItem("stage");
 
-      console.log("apiData here "+JSON.stringify(apiData))
       ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {
         setApiStatus(false);
         if (apiRes && apiRes.status) {

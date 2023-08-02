@@ -46,10 +46,8 @@ export default function RequestBin(props) {
       apiData.op = "create"
       apiData.resolver_id = requestType === "self" ? userState.user.id : forkOp
       apiData.stage = await AsyncStorage.getItem("stage");
-      console.log("request bin apiData "+JSON.stringify(apiData))
 
       ApiService.getAPIRes(apiData, "POST", "task").then(apiRes => {
-        console.log("request bin res "+JSON.stringify(apiRes))
         setApiStatus(false);
         if (apiRes && apiRes.status) {
           Alert.alert("Filled Bin Requested")

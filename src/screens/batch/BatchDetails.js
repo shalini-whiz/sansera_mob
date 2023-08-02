@@ -128,11 +128,7 @@ export default function BatchDetails(props) {
       batchSchemaData.map(item => {
         item["value"] = props._id ? props.content[item.key] + "" : "";
         if (item.type === "date") {
-          //convert date here
-          console.log("before "+item.value)
           item.value = dateUtil.fromToDateFormat(item.value,"DD/MM/YYYY, hh:mm:ss A", "DD MMM YYYY hh:mm A");
-          console.log("after " + item.value)
-
         }
         if (item.key === "status" && props.content[item.key].toLowerCase() === "new")
           item.value = "HOLD"
@@ -199,13 +195,10 @@ export default function BatchDetails(props) {
           if (material_details.length && material_details[0]) updatedItem.value = material_details[0].material_code
           updatedItem.options = material_details;
           updatedMaterialGrade.options = material_details[0].material_grade
-          console.log(material_details[0].material_code[0])
           updatedMaterialGrade.value = material_details[0].material_grade[0];
           updatedMaterialGrade.options = material_details[0].material_grade;
-          //console.log("updatedMaterialGrade" + JSON.stringify(updatedMaterialGrade))
           let updatedBatchData = [...formData.slice(0, mIndex), updatedItem, ...formData.slice(mIndex + 1)];
           updatedBatchData[mgIndex] = updatedMaterialGrade;
-          //console.log(JSON.stringify(updatedBatchData))
           setBatchFormData([...updatedBatchData]);
         }
       }
@@ -259,12 +252,8 @@ export default function BatchDetails(props) {
       //apiData.created_by = userState.user.id;
       apiData.op = "add_raw_material";
       apiData.type = "Steel";
-      console.log("apiData "+JSON.stringify(apiData))
-      setApiStatus(true);
-      console.log("apiData here "+JSON.stringify(apiData))
-      
+      setApiStatus(true);      
       let apiRes = await ApiService.getAPIRes(apiData, "POST", "batch");
-      console.log("ApiRes here "+JSON.stringify(apiRes));
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {

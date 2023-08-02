@@ -125,9 +125,7 @@ export default function WorkPlan(props) {
     try{
     let apiData = { op: "get_next_raw_material_item" }
     apiData.batch_num = appProcess.batch_num
-    console.log(JSON.stringify(apiData))
     ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
-      console.log("apiRes here "+JSON.stringify(apiRes))
       if (apiRes && apiRes.status && apiRes.response && apiRes.response.message) {
         PublishMqtt({ "topic": apiRes.response.message.element_id})
         setRackData(apiRes.response.message);

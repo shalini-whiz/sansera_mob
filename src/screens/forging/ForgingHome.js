@@ -32,7 +32,6 @@ export const ForgingHome = React.memo((props) => {
 
   const TabNavigation = memo(() => {
     const { unReadTask } = React.useContext(EmptyBinContext)
-    console.log("route here "+route);
 
     return (<NavigationContainer independent={true}>
       <Tab.Navigator
