@@ -300,7 +300,7 @@ import { EmptyBinContext } from "../../context/EmptyBinContext";
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', margin: 5, padding: 5 }}>
                   <Text style={[AppStyles.filterLabel, { flex: 1 }]}>Rejection Count <Text style={{ color: 'red' }}>* </Text> ({curRejCount})</Text>
-                  <TextInput keyboardType="numeric" style={[AppStyles.filterText, { flex: 2 }]} onChangeText={value => setRejCount(value)} value={rejCount}></TextInput>
+                  <TextInput keyboardType="numeric" style={[AppStyles.filterText, { flex: 2  }]} onChangeText={value => setRejCount(value)} value={rejCount}></TextInput>
                 </View>
               </View>
               

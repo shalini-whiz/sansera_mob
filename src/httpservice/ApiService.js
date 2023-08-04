@@ -43,6 +43,7 @@ ApiService.onFailure = function (errorRes) {
 };
 
 ApiService.getAPIRes = async(params, type, api, props) => {
+    
     try {
         let res = {
             status: "failure",

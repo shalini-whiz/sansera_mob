@@ -11,5 +11,4 @@ export default React.createContext({
   setTaskCount:(count) => {},
   //setEmptyBinCount:(count) => {},
   setFilledBinCount:(count) => {},
- 
 });

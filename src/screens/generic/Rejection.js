@@ -62,7 +62,7 @@ export const  Rejection = React.memo((props) => {
       if (apiRes) {
         if (apiRes.status && apiRes.response.message && apiRes.response.message.rejections) {
           let rejections = apiRes.response.message.rejections
-          setRejections(rejections)
+          setRejections( )
          // setRejections(rejections)
           let stage_name = await AsyncStorage.getItem("stage");
           let curKey = Object.keys(rejections[0])[0]

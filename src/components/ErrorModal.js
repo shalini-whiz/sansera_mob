@@ -4,6 +4,7 @@ import { title } from "../constants/appConstants";
 import { appTheme } from "../lib/Themes";
 import { useIsFocused } from '@react-navigation/native';
 import { util } from "../commons";
+
 const ErrorModal = (props) => {
   const isFocused = useIsFocused();
 
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: appTheme.colors.cardTitle,
     fontFamily: appTheme.fonts.bold,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
 });
 

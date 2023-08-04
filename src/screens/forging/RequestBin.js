@@ -119,7 +119,7 @@ export default function RequestBin(props) {
         </View>: false}
         
        
-        <View style={{ flexDirection: 'row', width: '60%', flex: 1,margin:10,marginTop:100 }}>
+        <View style={{ flexDirection: 'row', width: '60%', flex: 1,margin:10,marginTop:60}}>
          
           <TouchableOpacity style={[AppStyles.canButtonContainer, { flex: 1, marginRight: 10 }]}
             onPress={(e) => closeDialog(e)}
