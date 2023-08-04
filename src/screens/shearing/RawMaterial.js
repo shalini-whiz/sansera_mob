@@ -184,8 +184,12 @@ export default function RawMaterial(props) {
     let curFifoArr = [curFifo];
     apiData.fifo = [...curFifoArr, ...batchDetails.fifo];
     setApiStatus(true);
+<<<<<<< HEAD
     ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
       console.log('partial return apiRes here ' + JSON.stringify(apiRes));
+=======
+    ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         closeDialog();
@@ -234,8 +238,12 @@ export default function RawMaterial(props) {
     setCurFifo({});
   };
   const startListening = () => {
+<<<<<<< HEAD
     console.log(123);
     console.log(batchDet._id);
+=======
+
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
     if (!batchDet._id) {
       let apiData = {
         op: 'get_batch_details',
@@ -261,6 +269,7 @@ export default function RawMaterial(props) {
   };
 
   const connectMQTT = (topics, batchDetails) => {
+<<<<<<< HEAD
     console.log(123);
     let options = {...mqttOptions};
     console.log('connect to mqtt options ' + JSON.stringify(options));
@@ -272,6 +281,45 @@ export default function RawMaterial(props) {
         client.on('closed', () => {
           console.log('mqtt.event.closed');
           setListeningEvent(false);
+=======
+    let options = { ...mqttOptions }
+    MQTT.createClient(options).then((client) => {
+      setClient(client)
+      client.connect();
+
+      client.on('closed', () => {
+        console.log('mqtt.event.closed');
+        setListeningEvent(false);
+
+      });
+
+      client.on('error', (msg) => {
+        console.log('mqtt.event.error', msg);
+        setListeningEvent(false);
+      });
+
+      client.on('message', (msg) => {
+        
+        let dataJson = JSON.parse(msg.data)
+        //this.setState({ message: JSON.stringify(msg) });
+        //let deviceId = msg.topic.split("/")[1];
+        let deviceId = dataJson.devID;
+        let apiData = { op: "get_device", device_id: deviceId, unit_num: userState.user.unit_number };
+        ApiService.getAPIRes(apiData, "POST", "mqtt").then(apiRes => {
+          if (apiRes && apiRes.status) {
+            let deviceList = apiRes.response.message;
+            if (deviceList[0].type === "bin") return;
+            let rackDevices = Object.keys(batchDetails.device_map);
+            let deviceExists = rackDevices.indexOf(deviceId);
+            let fifoExists = batchDetails.fifo.findIndex(item => item.element_id === deviceId);
+            if (deviceExists > -1 && fifoExists === -1 && addRacks.length === 0) {
+              setAddRacks(batchDetails.device_map[deviceId]);
+              setCurFifo({ "element_num": batchDetails.device_map[deviceId], "element_id": deviceId })
+              setRackErr('')
+            }
+
+          }
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
         });
 
         client.on('error', msg => {

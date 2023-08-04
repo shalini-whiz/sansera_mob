@@ -238,6 +238,7 @@ export default function ProcessInfo(props) {
 
         if (item.type === 'date') {
           //convert date here
+<<<<<<< HEAD
           // item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
           console.log(item.value);
           item.value = dateUtil.fromToDateFormat(
@@ -245,6 +246,11 @@ export default function ProcessInfo(props) {
             'DD/MM/YYYY, hh:mm:ss A',
             'DD MMM YYYY hh:mm A',
           );
+=======
+         // item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
+          item.value = dateUtil.fromToDateFormat(item.value, "DD/MM/YYYY, hh:mm:ss A", "DD MMM YYYY hh:mm A");
+
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
         }
         if (item.key === 'created_by') {
           item.value =
@@ -255,6 +261,7 @@ export default function ProcessInfo(props) {
         }
       });
       if (props.fields && props.fields.length) {
+<<<<<<< HEAD
         let rej_comp_index = processSchema.findIndex(
           item => item.key === 'total_rejections',
         );
@@ -265,6 +272,11 @@ export default function ProcessInfo(props) {
           item => item.stage_name === currentStage,
         );
         console.log('rej_comp_index 2222 ' + rej_comp_index);
+=======
+        let rej_comp_index = processSchema.findIndex(item => item.key === "total_rejections")
+        let ok_comp_index = processSchema.findIndex(item => item.key === "ok_component")
+        let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === currentStage)
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
 
         if (
           stage_ok_comp_index > -1 &&

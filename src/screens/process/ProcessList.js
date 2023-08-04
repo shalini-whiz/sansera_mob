@@ -67,14 +67,10 @@ export default function ProcessList() {
   }, []);
 
   const publishBin = (data) => {
-    console.log("publish bin data "+JSON.stringify(data))
     if (data.status === "HOLD"){
-      console.log(JSON.stringify(processDet))
       processDet.process.map(stageItem => {
-        console.log("stageItem . "+stageItem);
         if(stageItem.fifo && stageItem.fifo.length){
           stageItem.fifo.map(fifoItem => {
-            console.log("fifoItem . " + fifoItem.element_id);
             PublishMqtt({ "topic": fifoItem.element_id })
           })
         }

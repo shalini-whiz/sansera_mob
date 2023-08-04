@@ -78,11 +78,9 @@ export default function ApproveBatch({navigation}) {
     apiData.status = status.length ? status : "NEW";
     apiData.sort_by = 'updated_on'
     apiData.sort_order = 'DSC'
-    console.log(JSON.stringify(apiData))
     ApiService.getAPIRes(apiData, "POST", "list_raw_material_by_status").then(apiRes => {
       setApiStatus(false);
       setRefreshing(false);
-      console.log("api res here " + JSON.stringify(apiRes))
 
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length) {
@@ -263,7 +261,6 @@ export default function ApproveBatch({navigation}) {
 
      }
       let fileData = await RNFetchBlob.fs.readFile(doc, 'base64');
-      console.log("fileData .. "+fileData)
       apiData.appr_certificate = "data:application/pdf;base64,"+fileData;
     }
 
@@ -455,7 +452,6 @@ export default function ApproveBatch({navigation}) {
                           type: [DocumentPicker.types.pdf],
                           copyTo: 'documentDirectory',
                         });
-                        console.log(file[0])
                         setDoc(decodeURI(
                             file[0].fileCopyUri.replace('file://', ''),
                           ))
@@ -484,7 +480,6 @@ export default function ApproveBatch({navigation}) {
                             type: [DocumentPicker.types.pdf],
                             copyTo: 'documentDirectory',
                           });
-                          console.log(file[0])
                           setDoc(decodeURI(
                             file[0].fileCopyUri.replace('file://', ''),
                           ))

@@ -46,7 +46,10 @@ const BinMqtt = props => {
 
   useEffect(() => {
     if (isFocused) {
+<<<<<<< HEAD
       console.log('user effect binmqtt ');
+=======
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
       if (userState && userState.user) setUser(userState.user);
       if (
         userState &&
@@ -65,9 +68,17 @@ const BinMqtt = props => {
     setDialogMessage('');
     setDialogType('');
     //clear low battery cache
+<<<<<<< HEAD
     console.log('clear low battery data ');
     await AsyncStorage.setItem('lowBattery', JSON.stringify([]));
   };
+=======
+    setLowBatteryData([])
+    await AsyncStorage.setItem("lowBattery", JSON.stringify([]))
+
+
+  }
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
   const openDialog = (e, type) => {
     showDialog(true);
     let dialogTitle = 'Battery Status';
@@ -94,6 +105,7 @@ const BinMqtt = props => {
   };
 
   const reconnectToBinMQTT = () => {
+<<<<<<< HEAD
     console.log(111);
     console.log(userState.user);
     console.log(roles.MO);
@@ -104,14 +116,27 @@ const BinMqtt = props => {
       (userState.user.role === roles.MO || userState.user.role === roles.FO)
     ) {
       connectBinMQTT();
+=======
+
+    if (userState && userState.user && userState.user.role === roles.MO) {
+      connectBinMQTT()
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
     }
   };
 
   const pubBatteryStatus = () => {
     try {
+<<<<<<< HEAD
       console.log('binClient here ' + binClient);
       if (binClient) {
         setLoadBatteryData(true);
+=======
+      if (binClient) {
+        setLowBatteryData([])
+        AsyncStorage.setItem("lowBattery", JSON.stringify([]))
+
+        setLoadBatteryData(true)
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
 
         AsyncStorage.getItem('devices').then(devices => {
           JSON.parse(devices).map((item, index, {length}) => {
@@ -139,6 +164,7 @@ const BinMqtt = props => {
     }
   };
   const connectBinMQTT = () => {
+<<<<<<< HEAD
     let options = {...binMqttOptions};
     options.clientId = 'binclientId' + Date.now();
     console.log(options);
@@ -146,6 +172,14 @@ const BinMqtt = props => {
       .then(client => {
         setBinClient(client);
         client.connect();
+=======
+    let options = { ...binMqttOptions }
+    options.clientId = "binclientId" + Date
+      .now()
+    MQTT.createClient(options).then((client) => {
+      setBinClient(client)
+      client.connect();
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
 
         client.on('closed', () => {
           console.log('mqtt.event.closed');
@@ -186,6 +220,7 @@ const BinMqtt = props => {
       });
   };
 
+<<<<<<< HEAD
   const publishData = publishData => {
     binClient.on('connect', () => {
       console.log('publish data connected');
@@ -194,6 +229,52 @@ const BinMqtt = props => {
   const setUnReadEmptyBin = count => {
     setUnReadEmptyBinData(count.toString());
   };
+=======
+      client.on('error', (msg) => {
+        console.log('bin mqtt.event.error', msg);
+        setBinListeningEvent(false);
+      });
+
+      client.on('message', (msg) => {
+        console.log('mqtt.event.message bin mqtt', msg);
+        console.log("bin request : " + JSON.stringify(msg))
+        let dataJson = JSON.parse(msg.data)
+        console.log(dataJson)
+        console.log("++++++++")
+        console.log(msg.topic)
+        console.log("++++++++")
+
+        if (msg.topic === "SWITCH_PRESS") {
+          setTimeout(() => {
+            handleSwitchPress(dataJson, msg)
+          }, 10000)
+        }
+
+        if (msg.topic === "BAT_STS") handleBatSts(dataJson)
+      });
+
+      client.on('connect', () => {
+        console.log('connected');
+        setBinListeningEvent(true);
+        let mqttTopics = ['SWITCH_PRESS', 'BAT_STS']
+        mqttTopics.map(item => {
+          client.subscribe(item, 2)
+        })
+
+      });
+      setBinClient(client)
+
+    }).catch((err) => {
+      console.log("bin switch err : " + err);
+      setBinListeningEvent(false);
+    });
+  }
+
+
+  const setUnReadEmptyBin = (count) => {
+    setUnReadEmptyBinData(count.toString())
+  }
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
 
   const handleBatSts = dataJson => {
     let batteryJson = {
@@ -204,15 +285,23 @@ const BinMqtt = props => {
     AsyncStorage.getItem('lowBattery').then(data => {
       if (data !== null) {
         // We have data!!
+<<<<<<< HEAD
         console.log('which data : ' + JSON.parse(data));
         let batteryData = JSON.parse(data);
         batteryData.push(batteryJson);
         setLowBatteryData(batteryData);
         AsyncStorage.setItem('lowBattery', JSON.stringify(batteryData));
+=======
+        let batteryData = JSON.parse(data);
+        batteryData.push(batteryJson)
+        setLowBatteryData(batteryData)
+        AsyncStorage.setItem("lowBattery", JSON.stringify(batteryData))
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
       }
     });
   };
 
+<<<<<<< HEAD
   //switch press event handled here
   const handleSwitchPress = (dataJson, msg) => {
     //
@@ -221,6 +310,89 @@ const BinMqtt = props => {
 
     // switch press event msg
     console.log('switch press event msg ' + JSON.stringify(msg));
+=======
+  const handleSwitchPress = async (dataJson, msg) => {
+    console.log("handleSwitchPress msg : " + JSON.stringify(msg))
+    console.log("handleSwitchPress dataJson : " + JSON.stringify(dataJson))
+    let deviceId = dataJson.devID;
+    let binRequest = await AsyncStorage.getItem("emptyBinReq");
+    console.log("binRequest " + binRequest)
+    let request = [];
+    let updateBinCount = false;
+    let bins = await AsyncStorage.getItem("bins");
+    let binData = JSON.parse(bins)
+    let index = binData.findIndex(item => item.device_id === deviceId)
+    if (index > -1) {
+      let curTop = {
+        "topic_name": msg.topic, "element_id": deviceId,
+        "element_num": binData[index].element_num
+      }
+      console.log("curTop .. " + JSON.stringify(curTop))
+      if (!binRequest) {
+        request.push(curTop)
+        updateBinCount = true;
+      }
+      else {
+        request = JSON.parse(binRequest);
+        let index = request.findIndex(item => item.element_id === curTop.element_id)
+        console.log("check index " + index);
+        if (index > -1) {
+          request.splice(index, 1);
+          request.splice(0, 0, curTop)
+          updateBinCount = true;
+        }
+        else {
+          request.push(curTop)
+          updateBinCount = true
+        }
+      }
+      AsyncStorage.setItem("emptyBinReq", JSON.stringify(request));
+    }
+
+    // let apiRes = await ApiService.getAPIRes(apiData, "POST", "mqtt")
+    // console.log("apiRes .. " + JSON.stringify(apiRes))
+    // if (apiRes && apiRes.status) {
+    //   let deviceList = apiRes.response.message;
+    //   if (deviceList[0].type === "rack") return;
+    //   let curTop = {
+    //     "topic_name": msg.topic, "element_id": deviceList[0].device_id,
+    //     "element_num": deviceList[0].element_num
+    //   }
+    //   let binRequest = await AsyncStorage.getItem("emptyBinReq");
+    //   console.log("binRequest " + binRequest)
+    //   let request = [];
+    //   let updateBinCount = false;
+    //   if (!binRequest) {
+    //     request.push(curTop)
+    //     updateBinCount = true;
+    //   }
+    //   else {
+    //     request = JSON.parse(binRequest);
+    //     let index = request.findIndex(item => item.element_id === curTop.element_id)
+    //     if (index > -1) {
+    //       request.splice(index, 1);
+    //       request.splice(0, 0, curTop)
+    //       updateBinCount = true;
+    //     }
+    //     else {
+    //       request.push(curTop)
+    //       updateBinCount = true
+    //     }
+    //   }
+    //   AsyncStorage.setItem("emptyBinReq", JSON.stringify(request));
+    //   if (updateBinCount) {
+    //     let count = await AsyncStorage.getItem("emptyBinCount")
+    //     let newEmptyBinCount = 1;
+    //     if (count && count.length)
+    //       newEmptyBinCount = parseInt(count) + 1;
+    //     setUnReadEmptyBin(newEmptyBinCount);
+    //   }
+    // }
+
+  }
+
+  const handleSwitchPress1 = (dataJson, msg) => {
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
 
     let deviceId = dataJson.devID;
     let apiData = {
@@ -304,9 +476,14 @@ const BinMqtt = props => {
           }
         });
       }
+<<<<<<< HEAD
     });
   };
 
+=======
+    })
+  }
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
   return (
     <View style={{flexDirection: 'column', padding: 5}}>
       {user && (user.role === roles.MO || user.role === roles.FO) ? (
@@ -448,6 +625,7 @@ const BinMqtt = props => {
             />
           </View>
 
+<<<<<<< HEAD
           {/* Clear Button */}
           <View
             style={{
@@ -481,6 +659,14 @@ const BinMqtt = props => {
           </View>
         </View>
       ) : null}
+=======
+      {dialog && (dialogType === "batteryStatus") ? <CustomModal
+        modalVisible={dialog} dialogTitle={dialogTitle}
+        height={'70%'}
+        dialogMessage={dialogMessage} okDialog={closeDialog}
+        loadBatteryData={loadBatteryData}
+        okTitle={"BATTERY STATUS"}
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
 
       {dialog ? (
         <CustomModal

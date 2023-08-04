@@ -57,7 +57,10 @@ export const FifoBoard = React.memo(props => {
     setProcess([]);
     ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
       setApiStatus(false);
+<<<<<<< HEAD
       // console.log(JSON.stringify(apiRes.response.message))
+=======
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length) {
           setProcess(apiRes.response.message);

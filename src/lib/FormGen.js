@@ -11,6 +11,7 @@ import {Picker} from '@react-native-picker/picker';
 import {util} from '../commons';
 
 export default class FormGen extends Component {
+<<<<<<< HEAD
   constructor(props) {
     super(props);
   }
@@ -85,6 +86,46 @@ export default class FormGen extends Component {
                                 key={pickerIndex}
                               />
                             );
+=======
+    constructor(props) {
+      super(props);
+    }
+    componentDidMount(){
+
+    }
+    render(){
+      let content = <></>;
+      if(this.props.groupBy){
+        let flexNo = 1;
+        if (this.props.groupBy === 2) flexNo = 1
+        content = this.props.groups.map((groupItem, groupIndex) => {
+          return (
+            <View
+              key={groupIndex}
+              style={{flexDirection: 'row', flexWrap: 'wrap',backgroundColor:'white',flex:1}}
+            >
+              {groupItem.map((item, index) => {
+                return (
+                  <View key={index} style={{backgroundColor:'white',flex:1,margin:5}}>
+                    <View style={this.props.labelDataInRow ? styles.formDataItemRow : styles.formItem} >
+                      {item.displayName && item.displayName.length ? <Text style={styles.formLabel}>
+                        {item.displayName}
+                      </Text> : false}
+                      {item.select ?
+                        <Picker
+                          selectedValue={item.titleCase ? util.capitalizeWord(item.value) : item.value}
+                          onValueChange={this.props.handleChange(item.key)}
+                          mode="dialog"
+                          style={{ backgroundColor: "#ECF0FA" }}
+                          itemStyle={{}}
+                          dropdownIconColor={appTheme.colors.cardTitle}
+                        >
+                          {item.options && item.options.map((pickerItem, pickerIndex) => {
+                            let labelV = (item.keyName && pickerItem[item.keyName]) ? pickerItem[item.keyName] : (pickerItem.key ? pickerItem.key : pickerItem);
+                            let label = (item.valueName && pickerItem[item.valueName]) ? pickerItem[item.valueName] : (pickerItem.value ? pickerItem.value : pickerItem);
+                            if (item.titleCase) labelV = util.titleCase(labelV)
+                            return (<Picker.Item style={{ backgroundColor: "#ECF0FA" }} label={label} value={labelV} key={pickerIndex} />)
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
                           })}
                       </Picker>
                     ) : (
@@ -169,6 +210,7 @@ export default class FormGen extends Component {
                       },
                     ]}
                     itemStyle={{}}
+<<<<<<< HEAD
                     dropdownIconColor={appTheme.colors.cardTitle}>
                     {item.options &&
                       item.options.map((pickerItem, pickerIndex) => {
@@ -195,6 +237,16 @@ export default class FormGen extends Component {
                           />
                         );
                       })}
+=======
+                    dropdownIconColor={appTheme.colors.cardTitle}
+                  >
+                    {item.options && item.options.map((pickerItem, pickerIndex) => {
+                      let labelV = (item.keyName && pickerItem[item.keyName]) ? pickerItem[item.keyName] : (pickerItem.key ? pickerItem.key : pickerItem);
+                      let label = (item.valueName && pickerItem[item.valueName]) ? pickerItem[item.valueName] : (pickerItem.value ? pickerItem.value : pickerItem);
+                      if (item.titleCase) label = util.titleCase(label); 
+                      return (<Picker.Item style={{ backgroundColor: "#ECF0FA" }} label={label} value={labelV} key={pickerIndex} />)
+                    })}
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
                   </Picker>
                 ) : (
                   <TextInput

@@ -88,10 +88,28 @@ export default function LoadRM() {
             bOptions.options = apiRes.response.message;
             setBatchOptions(bOptions);
 
+<<<<<<< HEAD
             if (bOptions.options[0] && batchNum === '') {
               setBatchNum(bOptions.options[0]._id);
               setBatchDet(bOptions.options[0]);
             }
+=======
+    }
+    apiData.sort_by = 'updated_on'
+    apiData.sort_order = 'DSC'
+    setRefreshing(false)
+    ApiService.getAPIRes(apiData, "POST", "list_raw_material_by_status").then(apiRes => {
+      setApiStatus(false);
+      if (apiRes && apiRes.status) {
+        if (apiRes.response.message && apiRes.response.message.length) {
+          let bOptions = { ...batchOptions }
+          bOptions.options = apiRes.response.message;
+          setBatchOptions(bOptions)
+
+          if (bOptions.options[0] && batchNum === '') {
+            setBatchNum(bOptions.options[0]._id)
+            setBatchDet(bOptions.options[0])
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
           }
         } else if (apiRes && apiRes.response.message)
           setApiError(apiRes.response.message);
@@ -192,6 +210,7 @@ export default function LoadRM() {
       client.disconnect();
       setClient(null);
     }
+<<<<<<< HEAD
     let options = {...mqttOptions};
     options.clientId = 'clientId' + Date.now();
     console.log('otpions 123 ' + JSON.stringify(options));
@@ -199,6 +218,13 @@ export default function LoadRM() {
       .then(client => {
         setClient(client);
         client.connect();
+=======
+    let options = { ...mqttOptions }
+    options.clientId = "clientId" + Date.now();
+    MQTT.createClient(options).then((client) => {
+      setClient(client)
+      client.connect();
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
 
         client.on('closed', () => {
           console.log('mqtt.event.closed');
@@ -252,10 +278,39 @@ export default function LoadRM() {
                     newRacks.push({element_num: itemV, element_id: key});
                   });
 
+<<<<<<< HEAD
                   // let newRack = { "element_num": batchDetails.device_map[deviceId],"element_id":deviceId}
                   //newRacks.push(newRack)
                   setNewFifo(newRacks);
                 }
+=======
+        let batchDetails = { ...batchDet };
+        let rackDevices = Object.keys(batchDetails.device_map);
+        //let deviceId = msg.topic.split("/")[1];
+        let deviceId = dataJson.devID;
+        let apiData = { op: "get_device", device_id: deviceId, unit_num: userState.user.unit_number };
+        ApiService.getAPIRes(apiData, "POST", "mqtt").then(apiRes => {
+          if (apiRes && apiRes.status) {
+            let deviceList = apiRes.response.message;
+            if (deviceList[0].type === "bin") return;
+            let deviceExists = rackDevices.indexOf(deviceId);
+            let fifoExists = batchDetails.fifo.findIndex(item => item.element_id === deviceId);
+            if (deviceExists > -1 && fifoExists === -1) {
+              const selectedIndex = addRacks.indexOf(batchDetails.device_map[deviceId]);
+              if (selectedIndex === -1) {
+                addRacks.push(batchDetails.device_map[deviceId]);
+                let newRacks = []
+                addRacks.map(itemV => {
+                  let key = Object.keys(batchDetails.device_map).find(k => batchDetails.device_map[k] === itemV);
+                  let obj = { element_num: itemV, element_id: key }
+                  newRacks.push({ element_num: itemV, element_id: key })
+                })
+
+
+                // let newRack = { "element_num": batchDetails.device_map[deviceId],"element_id":deviceId}
+                //newRacks.push(newRack)
+                setNewFifo(newRacks)
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
               }
             }
           });
@@ -278,7 +333,29 @@ export default function LoadRM() {
       .catch(err => {
         console.log('load raw naterial ' + err);
       });
+<<<<<<< HEAD
   };
+=======
+
+      client.on('connect', () => {
+        console.log('connected');
+        setListeningEvent(true);
+        // topics.map(item => {
+        //   client.subscribe(item.topic_name, 2)
+        // })
+        let mqttTopics = ['SWITCH_PRESS']
+        mqttTopics.map(item => {
+          client.subscribe(item, 2)
+        })
+
+      });
+      setClient(client)
+
+    }).catch((err) => {
+      console.log("load raw naterial " + err);
+    });
+  }
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
   const stopLoading = () => {
     if (client) client.disconnect();
     setClient(undefined);

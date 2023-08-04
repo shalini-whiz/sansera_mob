@@ -48,11 +48,15 @@ export const RackData = React.memo(props => {
   }, [isFocused]);
 
   const loadBatches = () => {
+<<<<<<< HEAD
     let apiData = {
       op: 'get_compartments',
       unit_num: userState.user.unit_number,
     };
     console.log('get_compartments' + JSON.stringify(apiData));
+=======
+    let apiData = { "op": "get_compartments","unit_num":userState.user.unit_number    }
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
     setRefreshing(false);
     ApiService.getAPIRes(apiData, 'POST', 'compartment').then(async apiRes => { 
       setApiStatus(false);
@@ -103,8 +107,12 @@ export const RackData = React.memo(props => {
       unit_num: userState.user.unit_number,
     };
 
+<<<<<<< HEAD
     console.log('rack data ' + JSON.stringify(apiData));
     let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'batch');
+=======
+    let apiRes = await ApiService.getAPIRes(apiData, "POST", "batch")
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
     if (apiRes.status && apiRes.response.message) {
       setBatch(apiRes.response.message);
     }

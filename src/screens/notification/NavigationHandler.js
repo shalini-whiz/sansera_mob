@@ -11,27 +11,19 @@ export const handleNotificationNavig = async (notification, openNotificationHand
     try {
         let currentPage = navigationRef && navigationRef.current &&
             navigationRef.current.getCurrentRoute().name;
-        console.log("current Page " + currentPage)
         let notifyData = JSON.parse(notification.data.data);
-        console.log("notifyData here " + JSON.stringify(notifyData))
 
         let navigationPage = '';
         let currentStage = await AsyncStorage.getItem("stage");
 
-        console.log("currentStage : " + currentStage + " .... " + notifyData.stage);
 
-        console.log("notify data on load " + JSON.stringify(notifyData))
         if (notifyData.process_name && notifyData.stage && notifyData.task_id) {
             let storageName = notifyData.process_name + "_" + notifyData.stage
-            console.log("storageName : " + storageName)
             AsyncStorage.getItem(storageName).then(count => {
-                console.log("task count" + count);
                 let newFilledBinCount = 1;
                 if (count && count.length)
                     newFilledBinCount = parseInt(count) + 1;
-                console.log("final task count " + newFilledBinCount);
                 AsyncStorage.setItem(storageName, newFilledBinCount.toString());
-                console.log("notification set " + newFilledBinCount)
                 setUnReadFilledBinData(newFilledBinCount.toString())
             })
         }
@@ -55,7 +47,6 @@ export const handleNotificationNavig = async (notification, openNotificationHand
 
         openNotificationHandler(navigationPage, () => {
             if (navigationRef && navigationRef.current) {
-                console.log("navigate page ");
                 navigationRef.current.navigate({ name: navigationPage, params: notifyData });
             }
         });

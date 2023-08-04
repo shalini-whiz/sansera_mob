@@ -61,6 +61,7 @@ export default function ShowRack(props) {
             apiData.bundle_weight = bundleWeight;
             apiData.op = 'pop_material';
 
+<<<<<<< HEAD
             ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
               console.log('api Data');
               setApiStatus(false);
@@ -96,6 +97,18 @@ export default function ShowRack(props) {
       }); //
     } else {
       setBundleWeightErr('Please enter valid bundle weight');
+=======
+          AsyncStorage.getItem("deviceDet").then(async devices => {
+            let devicesDet = JSON.parse(devices);
+            let device = devicesDet.find(device => device.element_num === props.rackData.element_num);
+            if (device) {
+              PubBatterySleep({ topic: device.device_id })
+            }
+          })
+          //here do goto_sleep
+        }
+      });
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
     }
   };
 

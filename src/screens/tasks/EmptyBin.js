@@ -69,6 +69,7 @@ export const EmptyBin = React.memo(props => {
     setCurrentStage(currentStage);
     //hardcode
     // if(currentStage.stage_name.toLowerCase() === stageType.forging) currentStage.sub_stage = stageType.underheat
+<<<<<<< HEAD
     console.log('currentStage here ' + JSON.stringify(currentStage));
     if (currentStage.order) {
       let nextStage = appProcess.process.find(
@@ -79,6 +80,13 @@ export const EmptyBin = React.memo(props => {
         console.log('defulat ' + nextStage.stage_name);
         setNextStageName(nextStage.stage_name);
         setNextStage(nextStage);
+=======
+    if(currentStage.order){
+      let nextStage = appProcess.process.find(item => item.order === currentStage.order + 1);
+      if(nextStage) {
+        setNextStageName(nextStage.stage_name)
+        setNextStage(nextStage)
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
       }
     }
     setTimeout(() => {
@@ -125,6 +133,7 @@ export const EmptyBin = React.memo(props => {
         if (index !== undefined) {
           binReq.splice(index, 1);
 
+<<<<<<< HEAD
     
             AsyncStorage.setItem('emptyBinReq', JSON.stringify(binReq));
        
@@ -162,6 +171,20 @@ export const EmptyBin = React.memo(props => {
 
       console.log('apiData here ' + JSON.stringify(apiData));
 
+=======
+      let currentStage = appProcess.process.find(item => item.stage_name === stage)
+      //hardcode
+      if(currentStage.stage_name.toLowerCase() === stageType.visual) currentStage.output_stage = stageType.shotblasting
+      apiData.stage_name = nextStage.stage_name
+      if(nextStageName.length)
+        apiData.stage_name = nextStageName
+      if (currentStage && currentStage.output_stage && currentStage.output_stage.length && nextStageName.length === 0) {
+        apiData.stage_name = currentStage.output_stage
+      }
+    
+     
+      
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
       setApiStatus(true);
       ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
         setApiStatus(false);

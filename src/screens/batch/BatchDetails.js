@@ -219,6 +219,7 @@ export default function BatchDetails(props) {
     if (props._id) {
       batchSchemaData = [...createdBatch];
       batchSchemaData.map(item => {
+<<<<<<< HEAD
         item['value'] = props._id ? props.content[item.key] + '' : '';
         if (item.type === 'date') {
           //convert date here
@@ -229,6 +230,11 @@ export default function BatchDetails(props) {
             'DD MMM YYYY hh:mm A',
           );
           console.log('after ' + item.value);
+=======
+        item["value"] = props._id ? props.content[item.key] + "" : "";
+        if (item.type === "date") {
+          item.value = dateUtil.fromToDateFormat(item.value,"DD/MM/YYYY, hh:mm:ss A", "DD MMM YYYY hh:mm A");
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
         }
         if (
           item.key === 'status' &&
@@ -310,6 +316,7 @@ export default function BatchDetails(props) {
           if (material_details.length && material_details[0])
             updatedItem.value = material_details[0].material_code;
           updatedItem.options = material_details;
+<<<<<<< HEAD
           updatedMaterialGrade.options = material_details[0].material_grade;
           console.log(material_details[0].material_code[0]);
           updatedMaterialGrade.value = material_details[0].material_grade[0];
@@ -320,8 +327,13 @@ export default function BatchDetails(props) {
             updatedItem,
             ...formData.slice(mIndex + 1),
           ];
+=======
+          updatedMaterialGrade.options = material_details[0].material_grade
+          updatedMaterialGrade.value = material_details[0].material_grade[0];
+          updatedMaterialGrade.options = material_details[0].material_grade;
+          let updatedBatchData = [...formData.slice(0, mIndex), updatedItem, ...formData.slice(mIndex + 1)];
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
           updatedBatchData[mgIndex] = updatedMaterialGrade;
-          //console.log(JSON.stringify(updatedBatchData))
           setBatchFormData([...updatedBatchData]);
         }
       }
@@ -377,6 +389,7 @@ export default function BatchDetails(props) {
       let apiData = await util.filterFormData([...batchFormData]);
       apiData.total_weight = parseFloat(apiData.total_weight);
       //apiData.created_by = userState.user.id;
+<<<<<<< HEAD
       apiData.op = 'add_raw_material';
       apiData.type = 'Steel';
       console.log('apiData ' + JSON.stringify(apiData));
@@ -385,6 +398,12 @@ export default function BatchDetails(props) {
 
       let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'batch');
       console.log('ApiRes here ' + JSON.stringify(apiRes));
+=======
+      apiData.op = "add_raw_material";
+      apiData.type = "Steel";
+      setApiStatus(true);      
+      let apiRes = await ApiService.getAPIRes(apiData, "POST", "batch");
+>>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {

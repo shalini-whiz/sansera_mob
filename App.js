@@ -43,9 +43,6 @@ function App() {
   //open page notification onclick of notification
   const openNotificationHandler = (pMoveTo, navigateTo) => {
     setTimeout(() => {
-      console.log("pMoveTo ... " + JSON.stringify(pMoveTo))
-
-      console.log("navigateTo ... "+JSON.stringify(navigateTo))
       navigateTo();
 
 
