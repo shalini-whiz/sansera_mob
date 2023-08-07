@@ -166,12 +166,11 @@ export default function WorkPlan(props) {
     setDialogMessage(dialogMessage);
   };
 
-<<<<<<< HEAD
   const showRack = e => {
     try {
       let apiData = {op: 'get_next_raw_material_item'};
       apiData.batch_num = appProcess.batch_num;
-      console.log( JSON.stringify(apiData));
+      console.log(JSON.stringify(apiData));
       ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
         console.log('apiRes here ' + JSON.stringify(apiRes));
         if (
@@ -192,28 +191,6 @@ export default function WorkPlan(props) {
       console.log(e);
     }
   };
-=======
-  const showRack = (e) => {
-    try{
-    let apiData = { op: "get_next_raw_material_item" }
-    apiData.batch_num = appProcess.batch_num
-    ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
-      if (apiRes && apiRes.status && apiRes.response && apiRes.response.message) {
-        PublishMqtt({ "topic": apiRes.response.message.element_id})
-        setRackData(apiRes.response.message);
-        setDialogTitle("SHOW RACK")
-        setDialogMessage("Rack : " + apiRes.response.message.element_num)
-        showDialog(true);
-      }
-      else if(apiRes && apiRes.response.message)
-        setApiError(apiRes.response.message)
-    });
-  }catch(e){
-    console.log(e)
-  }
-
-  }
->>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
   const handleSubmit = async () => {
     let loginFormData = [...batchFormData];
     let validFormData = await util.validateFormData(loginFormData);

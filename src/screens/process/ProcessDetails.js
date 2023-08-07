@@ -283,7 +283,6 @@ export default function ProcessDetails(props) {
             props.processEntity[item.key] +
             ')';
         }
-<<<<<<< HEAD
         if (
           props.processEntity &&
           props.processEntity.process &&
@@ -300,13 +299,6 @@ export default function ProcessDetails(props) {
             let stage_ok_comp_index = props.processEntity.process.findIndex(
               item => item.stage_name === value,
             );
-=======
-        if(props.processEntity && props.processEntity.process && props.processEntity.process.length){
-          AsyncStorage.getItem("stage").then(value => {
-            let rej_comp_index = created_process_schema.findIndex(item => item.key === "total_rejections")
-            let ok_comp_index = created_process_schema.findIndex(item => item.key === "ok_component")
-            let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === value)
->>>>>>> 07d2d1f4919fb55d2430a5997aca9f41e6730369
 
             if (
               value &&
