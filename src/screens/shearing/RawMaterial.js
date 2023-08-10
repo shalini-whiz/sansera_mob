@@ -93,9 +93,6 @@ export default function RawMaterial(props) {
 
   const handleChange = name => value => {
     let formDataInput = [...formData];
-    console.log('formDataInput####################################');
-    console.log(formDataInput);
-    console.log('####################################formDataInput');
     let index = formDataInput.findIndex(item => item.key === name);
     if (index != -1) {
       let updatedItem = formDataInput[index];

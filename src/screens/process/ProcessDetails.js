@@ -362,7 +362,7 @@ export default function ProcessDetails(props) {
   const loadData = () => {
     setApiStatus(true);
     setRefreshing(false);
-
+    setForgeErr('');
     let cust_apiData = {op: 'get_customers'};
     let forge_apiData = {
       op: 'list_forge_machines',

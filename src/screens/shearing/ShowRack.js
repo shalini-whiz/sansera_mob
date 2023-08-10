@@ -44,17 +44,10 @@ export default function ShowRack(props) {
       };
 
       ApiService.getAPIRes(apiData1, 'POST', 'batch').then(apiRes => {
-        console.log('apiRes ++++++++++++++++++++++++++++++++++++++++++++++++');
-        console.log(JSON.stringify(apiRes));
-        console.log('++++++++++++++++++++++++++++++++++++++++++++++++');
         setApiStatus(false);
         if (apiRes && apiRes.status) {
           let renderedBatch = apiRes.response.message;
-          console.log('renderedBatch ++++++++++++++++++++++++++++++++++');
-          console.log(renderedBatch);
-          console.log('++++++++++++++++++++++++++++++++++++++++++++++++');
           if (renderedBatch.total_weight >= bundleWeight) {
-            console.log('1st if');
             setApiStatus(true);
             let apiData = {};
             apiData.batch_num = props.processEntity.batch_num;
@@ -62,23 +55,16 @@ export default function ShowRack(props) {
             apiData.op = 'pop_material';
 
             ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
-              console.log('api Data');
               setApiStatus(false);
-              console.log(apiRes);
               if (apiRes && apiRes.status) {
-                console.log('2nd if');
                 props.closeDialog();
                 props.reloadPage();
                 AsyncStorage.getItem('deviceDet').then(async devices => {
-                  console.log('async loop');
-                  console.log('devices here 123 ' + JSON.parse(devices));
                   let devicesDet = JSON.parse(devices);
                   let device = devicesDet.find(
                     device => device.element_num === props.rackData.element_num,
                   );
-                  console.log('device rack ' + JSON.stringify(device));
                   if (device) {
-                    console.log(device.device_id);
                     PubBatterySleep({topic: device.device_id});
                   }
                 });

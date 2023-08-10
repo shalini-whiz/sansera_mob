@@ -54,16 +54,17 @@ export default function LoadRM() {
   useEffect(() => {
     if (isFocused) {
       setApiStatus(true);
-      setNewFifo([]); // by rakshith
-      setDelRacks([]);
-      setAddRacks([]);
+      // setNewFifo([]); // by rakshith
+      // setDelRacks([]);
+      // setAddRacks([]);
+      // setEditRack(false);
+      if (newFifo.length || addRacks.length) setListeningEvent(true);
+      else setListeningEvent(false);
       showDialog(false);
       setDialogMessage('');
       setDialogType('');
       setDialogTitle('');
-      setListeningEvent(false);
       loadBatches();
-      setEditRack(false);
       stopLoading();
     }
     return () => {};
@@ -84,7 +85,9 @@ export default function LoadRM() {
         if (apiRes && apiRes.status) {
           if (apiRes.response.message && apiRes.response.message.length) {
             let bOptions = {...batchOptions};
-            bOptions.options = apiRes.response.message;
+            bOptions.options = apiRes.response.message.sort(
+              (a, b) => a.batch_num < b.batch_num,
+            );
             setBatchOptions(bOptions);
             if (bOptions.options[0] && batchNum === '') {
               setBatchNum(bOptions.options[0]._id);
@@ -106,8 +109,9 @@ export default function LoadRM() {
     setEditRack(false);
     setListeningEvent(false);
     // by Rakshith
-
     loadBatches();
+    console.log('#########');
+    console.log('#########');
   });
 
   const handleEditRack = () => {
@@ -130,8 +134,8 @@ export default function LoadRM() {
         let bOptions = [...batchOptions.options];
         let bDet = bOptions[index];
         setBatchDet(bDet);
-        setEditRack(false);
-        setListeningEvent(false); // by rakshith
+        setEditRack(false); // by Rakshith
+        setListeningEvent(false); // by Rakshith
       }
     }
   };
@@ -148,10 +152,7 @@ export default function LoadRM() {
     setNewFifo([]);
     setListeningEvent(false);
     setEditRack(false);
-    showDialog(false);
-    setDialogTitle('');
-    setDialogMessage('');
-    setDialogType('');
+    closeDialog();
   };
 
   const removeRacks = () => {};
@@ -242,6 +243,7 @@ export default function LoadRM() {
                 if (selectedIndex === -1) {
                   addRacks.push(batchDetails.device_map[deviceId]);
                   let newRacks = [];
+
                   addRacks.map(itemV => {
                     let key = Object.keys(batchDetails.device_map).find(
                       k => batchDetails.device_map[k] === itemV,
@@ -250,6 +252,7 @@ export default function LoadRM() {
                     newRacks.push({element_num: itemV, element_id: key});
                   });
                   setNewFifo(newRacks);
+                  setAddRacks(newRacks[0].element_num); // by Rakshith
                 }
               }
             }
@@ -292,7 +295,14 @@ export default function LoadRM() {
       let updatedFifo = batchDet.fifo.filter(
         ar => !racks_to_del.find(rm => rm === ar.element_num),
       );
-      let mergeFifo = [...updatedFifo, ...newFifo]; // by Rakshith
+
+      //
+      let updatedFifo2 = newFifo.filter(
+        ar => !racks_to_del.find(rm => rm === ar.element_num),
+      );
+      // by Rakshith
+
+      let mergeFifo = [...updatedFifo, ...updatedFifo2]; // by Rakshith
       apiData.fifo = mergeFifo;
       invokeApi = true; // by Rakshith
     } else if (racks_to_add.length) {
@@ -312,10 +322,6 @@ export default function LoadRM() {
     if (invokeApi) {
       setApiStatus(true);
       ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
-        // console.log("'invoke' racks_to_del #################");
-        // console.log(JSON.stringify(apiRes));
-        // console.log("################# 'invoke'");
-
         setApiStatus(false);
         if (apiRes && !apiRes.status) {
           Alert.alert(apiRes.response.message);

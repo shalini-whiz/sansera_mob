@@ -54,10 +54,7 @@ export const EmptyBin = React.memo(props => {
   const loadData = async () => {
     let request = await AsyncStorage.getItem('emptyBinReq');
 
-    setNotifications(JSON.parse(request));
-
-    //
-    // console.log('notifications ++++ ' + request);
+    setNotifications(JSON.parse(request)); 
 
     let stage = await AsyncStorage.getItem('stage');
     setStage(stage);
@@ -120,10 +117,10 @@ export const EmptyBin = React.memo(props => {
         if (index !== undefined) {
           binReq.splice(index, 1);
 
-    
-            AsyncStorage.setItem('emptyBinReq', JSON.stringify(binReq));
-       
 
+          AsyncStorage.setItem('emptyBinReq', JSON.stringify(binReq));
+
+          
           setNotifications(binReq);
           closeDialog();
         }

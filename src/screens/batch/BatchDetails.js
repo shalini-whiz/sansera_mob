@@ -244,6 +244,7 @@ export default function BatchDetails(props) {
     } else {
       batchSchemaData = [...batchSchema];
       //let formData = await util.formatForm(batchSchemaData);
+      batchSchemaData.map(item => (item['error'] = ''));   // by Rakshith
       setBatchFormData(batchSchemaData);
     }
     setCount(previousCount => previousCount + 1);

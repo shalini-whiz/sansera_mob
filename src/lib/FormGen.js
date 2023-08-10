@@ -58,9 +58,9 @@ export default class FormGen extends Component {
                         style={{backgroundColor: '#ECF0FA'}}
                         itemStyle={{}}
                         dropdownIconColor={appTheme.colors.cardTitle}>
-                        {console.log(
+                        {/* {console.log(
                           'item options ' + JSON.stringify(item.options),
-                        )}
+                        )} */}
                         {item.options &&
                           item.options.map((pickerItem, pickerIndex) => {
                             let labelV =
@@ -75,7 +75,7 @@ export default class FormGen extends Component {
                                 : pickerItem.value
                                 ? pickerItem.value
                                 : pickerItem;
-                            console.log(labelV + ' ... ' + label);
+                            // console.log(labelV + ' ... ' + label);
                             if (item.titleCase) labelV = util.titleCase(labelV);
                             return (
                               <Picker.Item
@@ -184,7 +184,7 @@ export default class FormGen extends Component {
                             : pickerItem.value
                             ? pickerItem.value
                             : pickerItem;
-                        console.log(labelV + ' .. ' + label);
+                        // console.log(labelV + ' .. ' + label);
                         if (item.titleCase) label = util.titleCase(label);
                         return (
                           <Picker.Item
@@ -224,7 +224,20 @@ export default class FormGen extends Component {
               </View>
             </View>
             {item.error && item.error.length ? (
-              <Text style={styles.error}> {item.error} </Text>
+              <Text
+                style={[
+                  styles.error,
+                  {
+                    position: item.error.includes('component_weight')
+                      ? 'relative'
+                      : 'absolute',
+                    paddingTop: item.error.includes('component_weight')
+                      ? null
+                      : '4%',
+                  },
+                ]}>
+                {item.error}
+              </Text>
             ) : (
               false
             )}
@@ -269,8 +282,6 @@ const styles = StyleSheet.create({
   error: {
     color: 'red',
     fontSize: 14,
-    position: 'absolute',
-    paddingTop: '4%',
     marginLeft: -5,
   },
   formLabel: {

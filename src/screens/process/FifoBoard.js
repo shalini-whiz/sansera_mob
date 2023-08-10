@@ -104,6 +104,7 @@ export const FifoBoard = React.memo(props => {
 
   const renderItem = ({item, index}) => (
     <View style={[styles.tableData, {flexDirection: 'row'}]} key={index}>
+      {console.log(item, index)}
       <View
         style={[
           styles.tableDataCell,
@@ -164,7 +165,7 @@ export const FifoBoard = React.memo(props => {
             data={process}
             horizontal={false}
             renderItem={renderItem}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item.process_name}
             onRefresh={() => onRefresh()}
             refreshing={refreshing}
             ListHeaderComponent={() => {
