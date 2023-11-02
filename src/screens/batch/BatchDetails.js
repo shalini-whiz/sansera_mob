@@ -199,7 +199,7 @@ export default function BatchDetails(props) {
       loadForm();
     }
     return () => {};
-  }, [isFocused, props.content && props.content._id]);
+  }, [isFocused, props.content && props.content._id,props]);
 
   useEffect(() => {
     if (!props._id) {
@@ -245,6 +245,7 @@ export default function BatchDetails(props) {
       batchSchemaData = [...batchSchema];
       //let formData = await util.formatForm(batchSchemaData);
       batchSchemaData.map(item => (item['error'] = ''));   // by Rakshith
+      batchSchemaData.map(item => (item['value'] = ''));   // by Rakshith
       setBatchFormData(batchSchemaData);
     }
     setCount(previousCount => previousCount + 1);

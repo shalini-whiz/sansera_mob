@@ -10,7 +10,6 @@ const pub_topic_format = (topic) => {
 const PublishMqtt = (props) => {
   let options = { ...binMqttOptions }
   options.clientId = "pubclientId" + Date.now()
-  console.log(options)
   MQTT.createClient(options).then((client) => {
     client.connect();
 

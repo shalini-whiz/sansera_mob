@@ -52,9 +52,8 @@ export const RackData = React.memo(props => {
       op: 'get_compartments',
       unit_num: userState.user.unit_number,
     };
-    console.log('get_compartments' + JSON.stringify(apiData));
     setRefreshing(false);
-    ApiService.getAPIRes(apiData, 'POST', 'compartment').then(async apiRes => { 
+    ApiService.getAPIRes(apiData, 'POST', 'compartment').then(async apiRes => {
       setApiStatus(false);
 
       if (apiRes && apiRes.status) {
@@ -103,7 +102,6 @@ export const RackData = React.memo(props => {
       unit_num: userState.user.unit_number,
     };
 
-    console.log('rack data ' + JSON.stringify(apiData));
     let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'batch');
     if (apiRes.status && apiRes.response.message) {
       setBatch(apiRes.response.message);
@@ -177,7 +175,6 @@ export const RackData = React.memo(props => {
       );
     }
   };
-
   return (
     <View style={[styles.container, {flexDirection: 'column', flex: 1}]}>
       {racks.length ? (

@@ -17,18 +17,18 @@ import { ConsumptionData } from "../generic/ConsumptionData";
 const Tab = createMaterialTopTabNavigator();
 
 
-export const ShearingHome = React.memo((props) =>  {
+export const ShearingHome = memo((props) =>  {
   const processRef = useRef()
   const isFocused = useIsFocused();
-  const [processDet, setProcessDet] = React.useState({});
+  const [processDet, setProcessDet] = useState({});
   let { appProcess } = React.useContext(EmptyBinContext);
-  const [route, setRoute] = React.useState('')
-  useEffect(() => {
-    if (isFocused) {
+  const [route, setRoute] = useState('')
+  // useEffect(() => {
+  //   if (isFocused) {
      
-    }
-    return () => { }
-  }, [])
+  //   }
+  //   return () => { }
+  // }, [])
 
   const setProcess = (data) => {
     setProcessDet(data)
@@ -37,7 +37,7 @@ export const ShearingHome = React.memo((props) =>  {
   const updateProcess = e => {
     processRef.current.setFromOutside(appProcess.process_name)
 
-    //processRef.current.setFromOutside('HELLO from Parent')
+    // processRef.current.setFromOutside('HELLO from Parent')
   }
   
   const TabNavigation = memo(() => {

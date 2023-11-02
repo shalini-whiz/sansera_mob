@@ -34,6 +34,8 @@ export const BatchBoard = React.memo(props => {
       op: 'list_raw_material_by_status',
       status: ['NEW', 'APPROVED', 'REJECTED'],
       unit_num: userState.user.unit_number,
+      sort_by: 'status',
+      // sort_order: 'DSC',
     };
     // apiData.sort_by = 'updated_on'
     //apiData.sort_order = 'DSC'
@@ -82,11 +84,6 @@ export const BatchBoard = React.memo(props => {
     //   refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }
     // >
     <View style={styles.container}>
-      {apiStatus ? (
-        <ActivityIndicator size="large" animating={apiStatus} />
-      ) : (
-        false
-      )}
       {process.length ? (
         <View style={{backgroundColor: 'white', margin: 2, padding: 5}}>
           <FlatList
@@ -115,7 +112,7 @@ export const BatchBoard = React.memo(props => {
             }}></FlatList>
         </View>
       ) : (
-        false
+        <ActivityIndicator size="large" />
       )}
 
       {apiError && apiError.length ? (

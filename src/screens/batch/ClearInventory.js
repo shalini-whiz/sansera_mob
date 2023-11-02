@@ -37,6 +37,7 @@ export default function ClearInventory() {
   const [dialogType, setDialogType] = useState('');
   const [editRack, setEditRack] = useState(false);
   const [delRacks, setDelRacks] = useState([]);
+  const [indicator, setIndicator] = useState(false);
   const userState = React.useContext(UserContext);
 
   const [batchOptions, setBatchOptions] = useState({
@@ -47,8 +48,9 @@ export default function ClearInventory() {
 
   useEffect(() => {
     if (isFocused) {
-      setApiStatus(true);
       loadBatches();
+      setEditRack(false); 
+      setDelRacks([]);// by rakshith
     }
     return () => {};
   }, [isFocused]);
@@ -59,8 +61,9 @@ export default function ClearInventory() {
       status: ['APPROVED', 'REJECTED'],
       unit_num: userState.user.unit_number,
     };
-    apiData.sort_by = 'updated_on';
+    apiData.sort_by = 'created_on';
     apiData.sort_order = 'DSC';
+    setApiStatus(true);
     setRefreshing(false);
     ApiService.getAPIRes(apiData, 'POST', 'list_raw_material_by_status').then(
       apiRes => {
@@ -68,11 +71,10 @@ export default function ClearInventory() {
         if (apiRes && apiRes.status) {
           if (apiRes.response.message && apiRes.response.message.length) {
             let bOptions = {...batchOptions};
-            bOptions.options = apiRes.response.message.sort((a, b) => {
-              return a.batch_num < b.batch_num;
-            });
+            bOptions.options = apiRes.response.message;
             setBatchOptions(bOptions);
-            if (bOptions.options[0] && batchNum === '') {
+            // if (bOptions.options[0] && batchNum === '') { // by Rakshith
+            if (bOptions.options[0]) {
               setBatchNum(bOptions.options[0]._id);
               setBatchDet(bOptions.options[0]);
             }
@@ -83,14 +85,18 @@ export default function ClearInventory() {
             setBatchNum('');
             setBatchDet({});
           }
-        } else if (apiRes && apiRes.response.message)
+        } else if (apiRes && apiRes.response.message) {
           setApiError(apiRes.response.message);
+          setIndicator(false);
+        }
       },
     );
   };
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+    setEditRack(false);
+    setDelRacks([]);
     loadBatches();
   });
 
@@ -153,17 +159,25 @@ export default function ClearInventory() {
     apiData.op = 'update_material_fifo';
     apiData.fifo = [];
     setApiStatus(true);
+    setIndicator(true);
+    closeDialog();
     ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
-      setApiStatus(false);
+      setIndicator(false);
+      Alert.alert('Batch Removed');
+      setTimeout(() => {
+        loadBatches();
+      }, 100);
       if (apiRes && apiRes.status) {
+        loadBatches();
         if (apiRes.response.message) {
-          closeDialog();
           loadBatches();
           setBatchDet({});
           setBatchNum('');
         }
-      } else if (apiRes && apiRes.response.message)
+      } else if (apiRes && apiRes.response.message) {
         setApiError(apiRes.response.message);
+        setIndicator(false);
+      }
     });
   };
 
@@ -191,12 +205,15 @@ export default function ClearInventory() {
     apiData.fifo = updatedFifo;
     setEditRack(false); // by Rakshith
     setApiStatus(true);
+    setIndicator(true);
+    showDialog(false);
     ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
       setApiStatus(false);
+      setIndicator(false);
       if (apiRes && apiRes.status) {
         Alert.alert('Racks updated !');
         setDelRacks([]);
-        showDialog(false);
+        loadBatches();
         setDialogMessage('');
         setDialogTitle('');
 
@@ -207,253 +224,285 @@ export default function ClearInventory() {
         bOptions.options[batchIndex].fifo = apiRes.response.message.fifo;
         setBatchOptions(bOptions);
         setBatchDet(apiRes.response.message);
-      } else if (apiRes && apiRes.response.message)
+      } else if (apiRes && apiRes.response.message) {
         setApiError(apiRes.response.message);
+        setIndicator(false);
+      }
     });
   };
   const errOKAction = () => {
     setApiError('');
   };
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollView}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }>
-      <View style={styles.container}>
+    <>
+      {/* start <--- */}
+
+      {indicator ? (
         <View
-          style={{flexDirection: 'row', backgroundColor: 'white', padding: 5}}>
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            width: '100%',
+            height: 2000,
+            position: 'absolute',
+            zIndex: 1,
+            alignItems: 'center',
+          }}></View>
+      ) : (
+        false
+      )}
+
+      {/*---> end by Rakshith */}
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <View style={styles.container}>
           <View
             style={{
-              flex: 2,
-              margin: 2,
               flexDirection: 'row',
-              alignItems: 'center',
+              backgroundColor: 'white',
+              padding: 5,
             }}>
-            <Text style={{padding: 5, fontSize: 14}}>Select Batch</Text>
-            <Picker
-              selectedValue={batchNum}
-              onValueChange={handleChange('batchNum')}
-              mode="dialog"
-              style={{backgroundColor: '#ECF0FA', flex: 1}}
-              itemStyle={{}}
-              dropdownIconColor={appTheme.colors.cardTitle}>
-              {batchOptions.options.map((pickerItem, pickerIndex) => {
-                let labelV =
-                  batchOptions.keyName && pickerItem[batchOptions.keyName]
-                    ? pickerItem[batchOptions.keyName]
-                    : pickerItem.key
-                    ? pickerItem.key
-                    : '';
-                let label =
-                  batchOptions.valueName && pickerItem[batchOptions.valueName]
-                    ? pickerItem[batchOptions.valueName]
-                    : pickerItem.value
-                    ? pickerItem.value
-                    : '';
-                return (
-                  <Picker.Item
-                    style={{backgroundColor: '#ECF0FA'}}
-                    label={label}
-                    value={labelV}
-                    key={pickerIndex}
-                  />
-                );
-              })}
-            </Picker>
-          </View>
-          <View style={{flex: 3, margin: 2}}></View>
-        </View>
-        {apiStatus ? (
-          <ActivityIndicator size="large" animating={apiStatus} />
-        ) : (
-          false
-        )}
-
-        {batchDet && batchDet._id ? (
-          <View style={{flexDirection: 'row'}}>
             <View
-              style={[
-                styles.sectionContainer,
-                {flex: 2, flexDirection: 'column'},
-              ]}>
-              <View
-                style={{
-                  flexDirection: 'column',
-                  border: 'grey',
-                  borderWidth: 0.5,
-                  borderRadius: 10,
-                  padding: 10,
-                  margin: 10,
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    padding: 10,
-                  }}>
-                  <CustomHeader title={'Rack Numbers'} size={18} style={{}} />
-                  {batchDet.status.toLowerCase() != 'rejected' ? (
-                    <TouchableOpacity
-                      style={{}}
-                      onPress={e => handleEditRack(e)}>
-                      <MaterialIcons
-                        name="edit"
-                        size={25}
-                        style={{marginLeft: 10}}
-                        color={editRack ? 'red' : 'green'}></MaterialIcons>
-                    </TouchableOpacity>
-                  ) : (
-                    false
-                  )}
-                </View>
+              style={{
+                flex: 2,
+                margin: 2,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <Text style={{padding: 5, fontSize: 14}}>Select Batch</Text>
+              <Picker
+                selectedValue={batchNum}
+                onValueChange={handleChange('batchNum')}
+                mode="dialog"
+                style={{backgroundColor: '#ECF0FA', flex: 1}}
+                itemStyle={{}}
+                dropdownIconColor={appTheme.colors.cardTitle}>
+                {batchOptions.options.map((pickerItem, pickerIndex) => {
+                  let labelV =
+                    batchOptions.keyName && pickerItem[batchOptions.keyName]
+                      ? pickerItem[batchOptions.keyName]
+                      : pickerItem.key
+                      ? pickerItem.key
+                      : '';
+                  let label =
+                    batchOptions.valueName && pickerItem[batchOptions.valueName]
+                      ? pickerItem[batchOptions.valueName]
+                      : pickerItem.value
+                      ? pickerItem.value
+                      : '';
+                  return (
+                    <Picker.Item
+                      style={{backgroundColor: '#ECF0FA'}}
+                      label={label}
+                      value={labelV}
+                      key={pickerIndex}
+                    />
+                  );
+                })}
+              </Picker>
+            </View>
+            <View style={{flex: 3, margin: 2}}></View>
+          </View>
+          {apiStatus ? (
+            <ActivityIndicator size="large" animating={apiStatus} />
+          ) : (
+            false
+          )}
 
+          {batchDet && batchDet._id ? (
+            <View style={{flexDirection: 'row'}}>
+              <View
+                style={[
+                  styles.sectionContainer,
+                  {flex: 2, flexDirection: 'column'},
+                ]}>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    flex: 1,
+                    flexDirection: 'column',
+                    border: 'grey',
+                    borderWidth: 0.5,
+                    borderRadius: 10,
                     padding: 10,
                     margin: 10,
                   }}>
-                  <View style={{flexDirection: 'column', flex: 2}}>
-                    <View style={{flexDirection: 'row'}}>
-                      {batchDet.fifo.map((fifoItem, fifoIndex) => {
-                        let fifoRack =
-                          fifoIndex === 0
-                            ? fifoItem.element_num
-                            : '  |   ' + fifoItem.element_num;
-                        return (
-                          <TouchableOpacity
-                            style={{}}
-                            key={fifoIndex}
-                            onPress={e => addToDelRacks(e, fifoItem)}
-                            disabled={!editRack}>
-                            <Text
-                              style={{
-                                fontSize: 14,
-                                color:
-                                  delRacks.indexOf(fifoItem.element_num) > -1
-                                    ? 'red'
-                                    : 'black',
-                              }}
-                              key={fifoIndex}>
-                              {fifoRack}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-                    <View style={{flexDirection: 'row'}}>
-                      {delRacks.length ? (
-                        <Text
-                          style={{color: 'red', fontSize: 14, paddingTop: 10}}>
-                          Racks to be deleted are red in color
-                        </Text>
-                      ) : (
-                        false
-                      )}
-                    </View>
-
-                    {delRacks.length ? (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      padding: 10,
+                    }}>
+                    <CustomHeader title={'Rack Numbers'} size={18} style={{}} />
+                    {batchDet.status.toLowerCase() != 'rejected' ? (
                       <TouchableOpacity
-                        style={[
-                          {
-                            flexDirection: 'row',
-                            marginRight: 50,
-                            marginTop: 10,
-                            justifyContent: 'flex-end',
-                          },
-                        ]}
-                        onPress={e => openDialog(e, 'racks')}>
-                        <Text
-                          style={[
-                            AppStyles.successText,
-                            {color: 'red', fontFamily: appTheme.fonts.bold},
-                          ]}>
-                          REMOVE
-                        </Text>
+                        style={{}}
+                        onPress={e => handleEditRack(e)}>
+                        <MaterialIcons
+                          name="edit"
+                          size={25}
+                          style={{marginLeft: 10}}
+                          color={editRack ? 'red' : 'green'}></MaterialIcons>
                       </TouchableOpacity>
                     ) : (
                       false
                     )}
                   </View>
-                </View>
-              </View>
 
-              <View style={{flex: 1, marginTop: 50}}>
-                {batchNum &&
-                batchNum.length &&
-                batchDet.status.toLowerCase() === 'rejected' ? (
                   <View
                     style={{
-                      display: 'flex',
                       flexDirection: 'row',
-                      justifyContent: 'center',
+                      flex: 1,
+                      padding: 10,
+                      margin: 10,
                     }}>
-                    <TouchableOpacity
-                      style={[AppStyles.successBtn, {flexDirection: 'row'}]}
-                      onPress={e => openDialog(e, 'inventory')}>
-                      <Text style={AppStyles.successText}>CLEAR INVENTORY</Text>
-                    </TouchableOpacity>
+                    <View style={{flexDirection: 'column', flex: 2}}>
+                      <View style={{flexDirection: 'row'}}>
+                        {batchDet.fifo.map((fifoItem, fifoIndex) => {
+                          let fifoRack =
+                            fifoIndex === 0
+                              ? fifoItem.element_num
+                              : '  |   ' + fifoItem.element_num;
+                          return (
+                            <TouchableOpacity
+                              style={{}}
+                              key={fifoIndex}
+                              onPress={e => addToDelRacks(e, fifoItem)}
+                              disabled={!editRack}>
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  color:
+                                    delRacks.indexOf(fifoItem.element_num) > -1
+                                      ? 'red'
+                                      : 'black',
+                                }}
+                                key={fifoIndex}>
+                                {fifoRack}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                      <View style={{flexDirection: 'row'}}>
+                        {delRacks.length ? (
+                          <Text
+                            style={{
+                              color: 'red',
+                              fontSize: 14,
+                              paddingTop: 10,
+                            }}>
+                            Racks to be deleted are red in color
+                          </Text>
+                        ) : (
+                          false
+                        )}
+                      </View>
+
+                      {delRacks.length ? (
+                        <TouchableOpacity
+                          style={[
+                            {
+                              flexDirection: 'row',
+                              marginRight: 50,
+                              marginTop: 10,
+                              justifyContent: 'flex-end',
+                            },
+                          ]}
+                          onPress={e => openDialog(e, 'racks')}>
+                          <Text
+                            style={[
+                              AppStyles.successText,
+                              {color: 'red', fontFamily: appTheme.fonts.bold},
+                            ]}>
+                            REMOVE
+                          </Text>
+                        </TouchableOpacity>
+                      ) : (
+                        false
+                      )}
+                    </View>
                   </View>
-                ) : (
-                  false
-                )}
+                </View>
+
+                <View style={{flex: 1, marginTop: 50}}>
+                  {batchNum &&
+                  batchNum.length &&
+                  batchDet.status.toLowerCase() === 'rejected' ? (
+                    <View
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                      }}>
+                      <TouchableOpacity
+                        style={[AppStyles.successBtn, {flexDirection: 'row'}]}
+                        onPress={e => openDialog(e, 'inventory')}>
+                        <Text style={AppStyles.successText}>
+                          CLEAR INVENTORY
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    false
+                  )}
+                </View>
               </View>
-            </View>
-            <View style={[styles.sectionContainer, {flex: 2}]}>
-              <BatchDetails
-                content={batchDet}
-                editMode={false}
-                _id={batchDet._id}
-                title="BATCH DETAILS"
-              />
-            </View>
-            {dialog && dialogType === 'inventory' ? (
-              <CustomModal
-                modalVisible={dialog}
-                dialogTitle={dialogTitle}
-                dialogMessage={dialogMessage}
-                closeDialog={closeDialog}
-                okDialog={removeBatch}
-              />
-            ) : (
-              false
-            )}
+              <View style={[styles.sectionContainer, {flex: 2}]}>
+                <BatchDetails
+                  content={batchDet}
+                  editMode={false}
+                  _id={batchDet._id}
+                  title="BATCH DETAILS"
+                />
+              </View>
+              {dialog && dialogType === 'inventory' ? (
+                <CustomModal
+                  modalVisible={dialog}
+                  dialogTitle={dialogTitle}
+                  dialogMessage={dialogMessage}
+                  closeDialog={closeDialog}
+                  okDialog={removeBatch}
+                />
+              ) : (
+                false
+              )}
 
-            {dialog && dialogType === 'racks' ? (
-              <CustomModal
-                modalVisible={dialog}
-                dialogTitle={dialogTitle}
-                dialogMessage={dialogMessage}
-                closeDialog={closeDialog}
-                okDialog={saveRacks}
-              />
-            ) : (
-              false
-            )}
+              {dialog && dialogType === 'racks' ? (
+                <CustomModal
+                  modalVisible={dialog}
+                  dialogTitle={dialogTitle}
+                  dialogMessage={dialogMessage}
+                  closeDialog={closeDialog}
+                  okDialog={saveRacks}
+                />
+              ) : (
+                false
+              )}
 
-            {dialog && dialogType === 'switchBatch' ? (
-              <CustomModal
-                modalVisible={dialog}
-                dialogTitle={dialogTitle}
-                dialogMessage={dialogMessage}
-                closeDialog={closeDialog}
-              />
-            ) : (
-              false
-            )}
-          </View>
-        ) : (
-          false
-        )}
-        {apiError && apiError.length ? (
-          <ErrorModal msg={apiError} okAction={errOKAction} />
-        ) : (
-          false
-        )}
-      </View>
-    </ScrollView>
+              {dialog && dialogType === 'switchBatch' ? (
+                <CustomModal
+                  modalVisible={dialog}
+                  dialogTitle={dialogTitle}
+                  dialogMessage={dialogMessage}
+                  closeDialog={closeDialog}
+                />
+              ) : (
+                false
+              )}
+            </View>
+          ) : (
+            false
+          )}
+          {apiError && apiError.length ? (
+            <ErrorModal msg={apiError} okAction={errOKAction} />
+          ) : (
+            false
+          )}
+        </View>
+      </ScrollView>
+    </>
   );
 }
 const styles = StyleSheet.create({

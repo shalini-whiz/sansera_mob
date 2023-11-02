@@ -70,10 +70,10 @@ export default function RawMaterial(props) {
   const [curFifo, setCurFifo] = useState({});
   const [client, setClient] = useState(undefined);
   const {appProcess} = React.useContext(EmptyBinContext);
+  const [indicator, setIndicator] = useState(false);
 
   useEffect(() => {
     if (isFocused) {
-      stopListening();
       loadForm();
     }
     return () => {};
@@ -81,10 +81,12 @@ export default function RawMaterial(props) {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+    loadForm();
   }, []);
 
   const loadForm = () => {
     setFormData(rejection_schema);
+    setRefreshing(false);
   };
   const tabChange = value => {
     setTab(value);
@@ -97,6 +99,7 @@ export default function RawMaterial(props) {
     if (index != -1) {
       let updatedItem = formDataInput[index];
       updatedItem['value'] = value;
+      updatedItem['error'] = '';
       let updatedBatchData = [
         ...formDataInput.slice(0, index),
         updatedItem,
@@ -166,9 +169,9 @@ export default function RawMaterial(props) {
       if (item.error.length) return item;
     });
     if (!isError) {
-      //setFormData(validFormData)
       openDialog(type);
     } else {
+      setFormData(validFormData);
     }
   };
 
@@ -181,10 +184,14 @@ export default function RawMaterial(props) {
     let curFifoArr = [curFifo];
     apiData.fifo = [...curFifoArr, ...batchDetails.fifo];
     setApiStatus(true);
-    ApiService.getAPIRes(apiData, "POST", "batch").then(apiRes => {
+    setIndicator(true);
+    closeDialog();
+    ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
       setApiStatus(false);
       if (apiRes && apiRes.status) {
-        closeDialog();
+        Alert.alert('Weight updated');
+        console.log('apiRes', JSON.stringify(apiRes));
+        setIndicator(false);
 
         if (apiRes.response.message) {
           //check here
@@ -192,28 +199,50 @@ export default function RawMaterial(props) {
         }
       } else if (apiRes && apiRes.response.message)
         setApiError(apiRes.response.message);
+      setIndicator(false);
     });
   };
 
   const setRejectWeight = async () => {
-    let apiData = await util.filterFormData([...formData]);
-    apiData.op = 'update_raw_material';
-    apiData.batch_num = appProcess.batch_num;
+    let apiData1 = {
+      op: 'get_rejections',
+      process_name: appProcess.process_name,
+      unit_num: appProcess.unit_num,
+      stage_name: 'Shearing',
+    };
+
+    const res = await ApiService.getAPIRes(apiData1, 'POST', 'rejection');
+    const reasons = res.response.message.rejections[0].Shearing[0];
+    let rejWeight = await util.filterFormData([...formData]);
+    let apiData = {op: 'update_rejection'};
+    apiData.process_name = appProcess.process_name;
+    apiData.stage_name = await AsyncStorage.getItem('stage');
+
+    let rejReasonObj = {};
+    rejReasonObj[Object.keys(reasons)[0]] = parseInt(rejWeight.reject_weight);
+    let rejObj = {};
+    rejObj['Shearing'] = rejReasonObj;
+    apiData.rejections = rejObj;
+
     setApiStatus(true);
-    ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
+    closeDialog();
+    setIndicator(true);
+    ApiService.getAPIRes(apiData, 'POST', 'rejection').then(apiRes => {
       setApiStatus(false);
+      setIndicator(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
           Alert.alert('Reject Weight updated');
           //check here
           //props.setProcessEntity(apiRes.response.message)
           setBatchDet(apiRes.response.message);
-          //openDialog(apiRes.response.message);
+          // openDialog(apiRes.response.message);
           util.resetForm(formData);
-          closeDialog();
+          props.updateProcess();
         }
       } else if (apiRes && apiRes.response.message)
         setApiError(apiRes.response.message);
+      setIndicator(false);
     });
   };
   const handleSubmit = async () => {
@@ -255,7 +284,6 @@ export default function RawMaterial(props) {
   };
 
   const connectMQTT = (topics, batchDetails) => {
-    console.log(123);
     let options = {...mqttOptions};
     console.log('connect to mqtt options ' + JSON.stringify(options));
     MQTT.createClient(options)
@@ -293,12 +321,9 @@ export default function RawMaterial(props) {
               if (deviceList[0].type === 'bin') return;
               let rackDevices = Object.keys(batchDetails.device_map);
               let deviceExists = rackDevices.indexOf(deviceId);
-              console.log(deviceExists);
-              console.log(batchDetails.fifo);
               let fifoExists = batchDetails.fifo.findIndex(
                 item => item.element_id === deviceId,
               );
-              console.log('fifoExists : ' + fifoExists);
               if (
                 deviceExists > -1 &&
                 fifoExists === -1 &&
@@ -339,259 +364,293 @@ export default function RawMaterial(props) {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollView}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }>
-      <View
-        style={{flexDirection: 'row', backgroundColor: 'white', padding: 10}}>
-        <TouchableOpacity
-          style={{
-            flexDirection: 'row',
-            padding: 8,
-            borderRadius: tab === 'rejection' ? 15 : 0,
-            backgroundColor:
-              tab === 'rejection' ? appTheme.colors.cardTitle : 'white',
-          }}
-          onPress={e => tabChange('rejection')}>
-          <Text
-            style={[
-              styles.filterText,
-              {
-                fontFamily:
-                  tab === 'rejection'
-                    ? appTheme.fonts.bold
-                    : appTheme.fonts.regular,
-                color:
-                  tab === 'rejection' ? 'white' : appTheme.colors.cardTitle,
-              },
-            ]}>
-            Rejection
-          </Text>
-        </TouchableOpacity>
-        <Text style={{padding: 5}}> / </Text>
-        <TouchableOpacity
-          style={{
-            flexDirection: 'row',
-            padding: 8,
-            borderRadius: tab === 'partial' ? 15 : 0,
-            backgroundColor:
-              tab === 'partial' ? appTheme.colors.cardTitle : 'white',
-          }}
-          onPress={e => tabChange('partial')}>
-          <Text
-            style={[
-              styles.filterText,
-              {
-                fontFamily:
-                  tab === 'partial'
-                    ? appTheme.fonts.bold
-                    : appTheme.fonts.regular,
-                color: tab === 'partial' ? 'white' : appTheme.colors.cardTitle,
-              },
-            ]}>
-            Partial Return
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.mainContainer}>
-        <View style={{flexDirection: 'row'}}>
-          {tab === 'rejection' ? (
-            <View
-              style={{
-                flex: 2,
-                backgroundColor: 'white',
-                margin: 5,
-                padding: 5,
-              }}>
-              <FormGen
-                handleChange={handleChange}
-                formData={formData}
-                labelDataInRow={true}
-              />
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  marginTop: 20,
-                }}>
-                <TouchableOpacity
-                  style={[AppStyles.successBtn, {flexDirection: 'row'}]}
-                  onPress={e => validateForm(e, tab)}>
-                  <Text style={AppStyles.successText}>SAVE</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <View
-              style={{
-                flex: 2,
-                backgroundColor: 'white',
-                margin: 5,
-                padding: 5,
-              }}>
-              <View style={{display: 'flex', flexDirection: 'row'}}>
-                {!listeningEvent ? (
-                  <TouchableOpacity
-                    style={[
-                      AppStyles.warnButtonContainer,
-                      {flexDirection: 'row'},
-                    ]}
-                    onPress={e => startListening(e)}>
-                    <Text style={AppStyles.warnButtonTxt}>ADD TO RACKS</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity style={{flexDirection: 'row', padding: 10}}>
-                    <Text
-                      style={{
-                        color: appTheme.colors.warnAction,
-                        marginRight: 10,
-                        fontFamily: appTheme.fonts.bold,
-                      }}>
-                      Listening to Rack Switch
-                    </Text>
-                    <MaterialCommunityIcons
-                      name="cast-connected"
-                      size={20}
-                      color={appTheme.colors.warnAction}
-                      style={{}}
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  padding: 5,
-                  margin: 5,
-                }}>
-                <CustomHeader title="Rack" />
-                {curFifo && curFifo.element_num ? (
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      color: 'green',
-                      paddingLeft: 10,
-                      fontFamily: appTheme.fonts.bold,
-                    }}>
-                    {curFifo.element_num}
-                  </Text>
-                ) : (
-                  false
-                )}
-              </View>
-              {rackErr && rackErr.length ? (
-                <Text style={AppStyles.error}> {rackErr} </Text>
-              ) : (
-                false
-              )}
+    <>
+      {/* start <--- */}
 
-              <View
-                style={{display: 'flex', flexDirection: 'row', padding: 10}}>
-                <Text style={[AppStyles.filterLabel, {flex: 1, padding: 10}]}>
-                  Enter Weight
-                </Text>
-                <TextInput
-                  style={[AppStyles.filterText, {flex: 2, padding: 10}]}
-                  keyboardType="numeric"
-                  onChangeText={text => setPartialWeight(text)}>
-                  {partialWeight}
-                </TextInput>
-              </View>
-              <View
-                style={{display: 'flex', flexDirection: 'column', padding: 10}}>
-                {partialErr && partialErr.length ? (
-                  <Text style={AppStyles.error}> {partialErr} </Text>
-                ) : (
-                  false
-                )}
-              </View>
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  padding: 10,
-                  justifyContent: 'center',
-                  marginTop: 10,
-                }}>
-                <TouchableOpacity
-                  style={[
-                    AppStyles.successBtn,
-                    {flexDirection: 'row', marginRight: 10},
-                  ]}
-                  onPress={e => validatePartialReturn(e, tab)}>
-                  <Text style={AppStyles.successText}>CONFIRM</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[AppStyles.canButtonContainer, {flexDirection: 'row'}]}
-                  onPress={e => stopListening(e)}>
-                  <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-          <View style={{flex: 3, flexDirection: 'row'}}>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: 'white',
-                margin: 5,
-                padding: 5,
-              }}>
-              <ProcessDetails
-                title="Process Details"
-                processEntity={appProcess}
-              />
-            </View>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: 'white',
-                margin: 5,
-                padding: 5,
-              }}>
-              <WeightDetails
-                title="Weight Details"
-                processEntity={appProcess}
-              />
-            </View>
-          </View>
+      {indicator ? (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            width: '100%',
+            height: 2000,
+            position: 'absolute',
+            zIndex: 1,
+            alignItems: 'center',
+          }}>
+          <ActivityIndicator
+            size={50}
+            style={{marginTop: 200}}></ActivityIndicator>
         </View>
-
-        {dialog && dialogType === 'rejection' ? (
-          <CustomModal
-            modalVisible={dialog}
-            dialogTitle={dialogTitle}
-            dialogMessage={dialogMessage}
-            okDialog={setRejectWeight}
-            closeDialog={closeDialog}
-          />
-        ) : (
-          false
-        )}
-
-        {dialog && dialogType === 'partial' ? (
-          <CustomModal
-            modalVisible={dialog}
-            dialogTitle={dialogTitle}
-            dialogMessage={dialogMessage}
-            okDialog={setBatchPartialWeight}
-            closeDialog={closeDialog}
-          />
-        ) : (
-          false
-        )}
-      </View>
-
-      {apiError && apiError.length ? (
-        <ErrorModal msg={apiError} okAction={errOKAction} />
       ) : (
         false
       )}
-    </ScrollView>
+
+      {/*---> end by Rakshith */}
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <View
+          style={{flexDirection: 'row', backgroundColor: 'white', padding: 10}}>
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              padding: 8,
+              borderRadius: tab === 'rejection' ? 15 : 0,
+              backgroundColor:
+                tab === 'rejection' ? appTheme.colors.cardTitle : 'white',
+            }}
+            onPress={e => tabChange('rejection')}>
+            <Text
+              style={[
+                styles.filterText,
+                {
+                  fontFamily:
+                    tab === 'rejection'
+                      ? appTheme.fonts.bold
+                      : appTheme.fonts.regular,
+                  color:
+                    tab === 'rejection' ? 'white' : appTheme.colors.cardTitle,
+                },
+              ]}>
+              Rejection
+            </Text>
+          </TouchableOpacity>
+          <Text style={{padding: 5}}> / </Text>
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              padding: 8,
+              borderRadius: tab === 'partial' ? 15 : 0,
+              backgroundColor:
+                tab === 'partial' ? appTheme.colors.cardTitle : 'white',
+            }}
+            onPress={e => tabChange('partial')}>
+            <Text
+              style={[
+                styles.filterText,
+                {
+                  fontFamily:
+                    tab === 'partial'
+                      ? appTheme.fonts.bold
+                      : appTheme.fonts.regular,
+                  color:
+                    tab === 'partial' ? 'white' : appTheme.colors.cardTitle,
+                },
+              ]}>
+              Partial Return
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.mainContainer}>
+          <View style={{flexDirection: 'row'}}>
+            {tab === 'rejection' ? (
+              <View
+                style={{
+                  flex: 2,
+                  backgroundColor: 'white',
+                  margin: 5,
+                  padding: 5,
+                }}>
+                <FormGen
+                  handleChange={handleChange}
+                  formData={formData}
+                  labelDataInRow={true}
+                />
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    marginTop: 20,
+                  }}>
+                  <TouchableOpacity
+                    style={[AppStyles.successBtn, {flexDirection: 'row'}]}
+                    onPress={e => validateForm(e, tab)}>
+                    <Text style={AppStyles.successText}>SAVE</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <View
+                style={{
+                  flex: 2,
+                  backgroundColor: 'white',
+                  margin: 5,
+                  padding: 5,
+                }}>
+                <View style={{display: 'flex', flexDirection: 'row'}}>
+                  {!listeningEvent ? (
+                    <TouchableOpacity
+                      style={[
+                        AppStyles.warnButtonContainer,
+                        {flexDirection: 'row'},
+                      ]}
+                      onPress={e => startListening(e)}>
+                      <Text style={AppStyles.warnButtonTxt}>ADD TO RACKS</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={{flexDirection: 'row', padding: 10}}>
+                      <Text
+                        style={{
+                          color: appTheme.colors.warnAction,
+                          marginRight: 10,
+                          fontFamily: appTheme.fonts.bold,
+                        }}>
+                        Listening to Rack Switch
+                      </Text>
+                      <MaterialCommunityIcons
+                        name="cast-connected"
+                        size={20}
+                        color={appTheme.colors.warnAction}
+                        style={{}}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    padding: 5,
+                    margin: 5,
+                  }}>
+                  <CustomHeader title="Rack" />
+                  {curFifo && curFifo.element_num ? (
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        color: 'green',
+                        paddingLeft: 10,
+                        fontFamily: appTheme.fonts.bold,
+                      }}>
+                      {curFifo.element_num}
+                    </Text>
+                  ) : (
+                    false
+                  )}
+                </View>
+                {rackErr && rackErr.length ? (
+                  <Text style={AppStyles.error}> {rackErr} </Text>
+                ) : (
+                  false
+                )}
+
+                <View
+                  style={{display: 'flex', flexDirection: 'row', padding: 10}}>
+                  <Text style={[AppStyles.filterLabel, {flex: 1, padding: 10}]}>
+                    Enter Weight
+                  </Text>
+                  <TextInput
+                    style={[AppStyles.filterText, {flex: 2, padding: 10}]}
+                    keyboardType="numeric"
+                    onChangeText={text => setPartialWeight(text)}>
+                    {partialWeight}
+                  </TextInput>
+                </View>
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: 10,
+                  }}>
+                  {partialErr && partialErr.length ? (
+                    <Text style={AppStyles.error}> {partialErr} </Text>
+                  ) : (
+                    false
+                  )}
+                </View>
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    padding: 10,
+                    justifyContent: 'center',
+                    marginTop: 10,
+                  }}>
+                  <TouchableOpacity
+                    style={[
+                      AppStyles.successBtn,
+                      {flexDirection: 'row', marginRight: 10},
+                    ]}
+                    onPress={e => validatePartialReturn(e, tab)}>
+                    <Text style={AppStyles.successText}>CONFIRM</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      AppStyles.canButtonContainer,
+                      {flexDirection: 'row'},
+                    ]}
+                    onPress={e => stopListening(e)}>
+                    <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+            <View style={{flex: 3, flexDirection: 'row'}}>
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: 'white',
+                  margin: 5,
+                  padding: 5,
+                }}>
+                <ProcessDetails
+                  title="Process Details"
+                  processEntity={appProcess}
+                />
+              </View>
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: 'white',
+                  margin: 5,
+                  padding: 5,
+                }}>
+                <WeightDetails
+                  title="Weight Details"
+                  processEntity={appProcess}
+                />
+              </View>
+            </View>
+          </View>
+
+          {dialog && dialogType === 'rejection' ? (
+            <CustomModal
+              modalVisible={dialog}
+              dialogTitle={dialogTitle}
+              dialogMessage={dialogMessage}
+              okDialog={setRejectWeight}
+              closeDialog={closeDialog}
+            />
+          ) : (
+            false
+          )}
+
+          {dialog && dialogType === 'partial' ? (
+            <CustomModal
+              modalVisible={dialog}
+              dialogTitle={dialogTitle}
+              dialogMessage={dialogMessage}
+              okDialog={setBatchPartialWeight}
+              closeDialog={closeDialog}
+            />
+          ) : (
+            false
+          )}
+        </View>
+
+        {apiError && apiError.length ? (
+          <ErrorModal msg={apiError} okAction={errOKAction} />
+        ) : (
+          false
+        )}
+      </ScrollView>
+    </>
   );
 }
 const styles = StyleSheet.create({

@@ -38,13 +38,16 @@ export const EmptyBin = React.memo(props => {
   const [currentStage, setCurrentStage] = useState({});
   const [nextStageName, setNextStageName] = useState('');
   const [nextStage, setNextStage] = useState({});
-  const {setUnReadEmptyBinData, appProcess} = React.useContext(EmptyBinContext);
+  const [req, setReq] = useState([]);
+  const {setUnReadEmptyBinData, appProcess, unReadEmptyBin} =
+    React.useContext(EmptyBinContext);
   useEffect(() => {
     if (isFocused) {
+      setUnReadEmptyBinData('0');
       loadData();
     }
     return () => {};
-  }, [isFocused, appProcess.process_name]);
+  }, [isFocused, appProcess.process_name, req]);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -53,8 +56,9 @@ export const EmptyBin = React.memo(props => {
 
   const loadData = async () => {
     let request = await AsyncStorage.getItem('emptyBinReq');
-
-    setNotifications(JSON.parse(request)); 
+    setRefreshing(false);
+    setReq(request);
+    setNotifications(JSON.parse(request));
 
     let stage = await AsyncStorage.getItem('stage');
     setStage(stage);
@@ -66,18 +70,19 @@ export const EmptyBin = React.memo(props => {
     setCurrentStage(currentStage);
     //hardcode
     // if(currentStage.stage_name.toLowerCase() === stageType.forging) currentStage.sub_stage = stageType.underheat
-    if(currentStage.order){
-      let nextStage = appProcess.process.find(item => item.order === currentStage.order + 1);
-      if(nextStage) {
-        setNextStageName(nextStage.stage_name)
-        setNextStage(nextStage)
+    if (currentStage.order) {
+      let nextStage = appProcess.process.find(
+        item => item.order === currentStage.order + 1,
+      );
+      if (nextStage) {
+        setNextStageName(nextStage.stage_name);
+        setNextStage(nextStage);
       }
     }
-    setTimeout(() => {
-      setUnReadEmptyBinData('0');
-    }, 3000);
+    // setTimeout(() => {
+    //   setUnReadEmptyBinData('0');
+    // }, 3000);
   };
-
   const closeDialog = () => {
     showDialog(false);
     setDialogTitle('');
@@ -117,10 +122,8 @@ export const EmptyBin = React.memo(props => {
         if (index !== undefined) {
           binReq.splice(index, 1);
 
-
           AsyncStorage.setItem('emptyBinReq', JSON.stringify(binReq));
 
-          
           setNotifications(binReq);
           closeDialog();
         }
@@ -138,10 +141,7 @@ export const EmptyBin = React.memo(props => {
       //hardcode
       if (currentStage.stage_name.toLowerCase() === stageType.visual)
         currentStage.output_stage = stageType.shotblasting;
-      console.log(currentStage.output_stage);
       apiData.stage_name = nextStage.stage_name;
-      console.log('apiData 1' + JSON.stringify(apiData));
-      console.log(nextStageName);
       if (nextStageName.length) apiData.stage_name = nextStageName;
       if (
         currentStage &&
@@ -151,8 +151,6 @@ export const EmptyBin = React.memo(props => {
       ) {
         apiData.stage_name = currentStage.output_stage;
       }
-
-      console.log('apiData here ' + JSON.stringify(apiData));
 
       setApiStatus(true);
       ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {

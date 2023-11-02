@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   StyleSheet,
   Text,
@@ -32,6 +33,7 @@ import Pdf from 'react-native-pdf';
 import RNFetchBlob from 'rn-fetch-blob';
 import {BinIndicator} from '../../svgs/BinIcon';
 import {SvgCss} from 'react-native-svg';
+import {green100} from 'react-native-paper/lib/typescript/styles/colors';
 
 export default function ApproveBatch({navigation}) {
   const userState = React.useContext(UserContext);
@@ -72,7 +74,6 @@ export default function ApproveBatch({navigation}) {
   });
   useEffect(() => {
     if (isFocused) {
-      setApiStatus(true);
       loadBatches();
       setAction('');
       loadReasons();
@@ -84,12 +85,9 @@ export default function ApproveBatch({navigation}) {
     let apiData = {
       op: 'list_raw_material_by_status',
       unit_num: userState.user.unit_number,
-
-      // "status": "NEW"
     };
     apiData.status = status.length ? status : 'NEW';
-    apiData.sort_by = 'updated_on';
-    apiData.sort_order = 'DSC';
+    (apiData.sort_by = 'created_on'), (apiData.sort_order = 'DSC');
     ApiService.getAPIRes(apiData, 'POST', 'list_raw_material_by_status').then(
       apiRes => {
         setApiStatus(false);
@@ -99,9 +97,7 @@ export default function ApproveBatch({navigation}) {
           if (apiRes.response.message && apiRes.response.message.length) {
             let bOptions = {...batchOptions};
 
-            bOptions.options = apiRes.response.message.sort((a, b) => {
-              return a.batch_num < b.batch_num;
-            });
+            bOptions.options = apiRes.response.message;
             setBatchOptions(bOptions);
             let index = -1;
             if (batchNum.length)
@@ -151,6 +147,7 @@ export default function ApproveBatch({navigation}) {
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     loadBatches();
+    loadReasons();
   });
 
   const handleStatusChange = value => {
@@ -257,6 +254,7 @@ export default function ApproveBatch({navigation}) {
     if (action === 'approved') {
       if (doc === null) {
         Alert.alert('Please upload pdf document');
+        showDialog(false);
         return;
       }
       let fileData = await RNFetchBlob.fs.readFile(doc, 'base64');
@@ -264,11 +262,12 @@ export default function ApproveBatch({navigation}) {
     }
 
     setApiStatus(true);
+    closeDialog();
     ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
       setApiStatus(false);
+      console.log('rej', apiRes.response.message);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
-          closeDialog();
           loadBatches();
           setAction('');
           setDoc(null);
@@ -600,7 +599,6 @@ export default function ApproveBatch({navigation}) {
               ) : (
                 false
               )}
-              {console.log(action)}
               {action === 'approved' ? (
                 doc == null ? (
                   <View style={styles.container}>
@@ -631,37 +629,52 @@ export default function ApproveBatch({navigation}) {
                 ) : (
                   <>
                     {docDetails ? (
-                      <Text
-                        onPress={async () => {
-                          try {
-                            const file = await DocumentPicker.pick({
-                              type: [DocumentPicker.types.pdf],
-                              copyTo: 'documentDirectory',
-                            });
-                            setDoc(
-                              decodeURI(
-                                file[0].fileCopyUri.replace('file://', ''),
-                              ),
-                            );
-                            setDocDetails(file[0]);
-                          } catch (error) {
-                            if (DocumentPicker.isCancel(error)) {
-                              // The user canceled the document picker.
-                            } else {
-                              throw error;
-                            }
-                          }
-                        }}
-                        title="Upload PDF Document"
+                      <View
                         style={{
-                          fontSize: 20,
-                          fontWeight: 'bold',
-                          color: appTheme.colors.cardTitle,
-                          fontFamily: appTheme.fonts.bold,
-                          backgroundColor: 'white',
+                          flexDirection: 'row',
+                          margin: 15,
                         }}>
-                        {docDetails.name}
-                      </Text>
+                        <Text
+                          onPress={async () => {
+                            try {
+                              const file = await DocumentPicker.pick({
+                                type: [DocumentPicker.types.pdf],
+                                copyTo: 'documentDirectory',
+                              });
+                              setDoc(
+                                decodeURI(
+                                  file[0].fileCopyUri.replace('file://', ''),
+                                ),
+                              );
+                              setDocDetails(file[0]);
+                            } catch (error) {
+                              if (DocumentPicker.isCancel(error)) {
+                                // The user canceled the document picker.
+                              } else {
+                                throw error;
+                              }
+                            }
+                          }}
+                          title="Upload PDF Document"
+                          style={{
+                            fontSize: 20,
+                            fontWeight: 'bold',
+                            color: appTheme.colors.cardTitle,
+                            fontFamily: appTheme.fonts.bold,
+                            backgroundColor: 'white',
+                            maxWidth: '95%',
+                          }}>
+                          {docDetails.name}
+                        </Text>
+                        <TouchableOpacity onPress={() => setDoc(null)}>
+                          <MaterialCommunityIcons
+                            name="close"
+                            size={30}
+                            color={appTheme.colors.cancelAction}
+                            style={{marginLeft: 10}}
+                          />
+                        </TouchableOpacity>
+                      </View>
                     ) : (
                       false
                     )}
@@ -720,7 +733,29 @@ export default function ApproveBatch({navigation}) {
             )}
           </View>
         ) : (
-          false
+          <View style={{flexDirection: 'row', margin: 1, padding: 1}}>
+            <View
+              style={{
+                flex: 1,
+                margin: 5,
+
+                flexDirection: 'column',
+                margin: 100,
+              }}>
+              <ActivityIndicator size={'large'}></ActivityIndicator>
+              <View style={{margin: 90, flex: 1, backgroundColor: 'white'}}>
+                <Text
+                  style={{
+                    margin: 10,
+                    padding: 40,
+                    textAlign: 'center',
+                    fontSize: 20,
+                  }}>
+                  No Batch Found
+                </Text>
+              </View>
+            </View>
+          </View>
         )}
         {apiError && apiError.length ? (
           <ErrorModal msg={apiError} okAction={errOKAction} />

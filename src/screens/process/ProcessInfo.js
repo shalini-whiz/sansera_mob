@@ -191,9 +191,11 @@ export default function ProcessInfo(props) {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+    loadForm();
   }, []);
 
   const loadForm = async () => {
+    setRefreshing(false);
     if (props && props.processEntity && props.processEntity.process) {
       let currentStage = await AsyncStorage.getItem('stage');
       let processSchema = [];
@@ -238,9 +240,12 @@ export default function ProcessInfo(props) {
 
         if (item.type === 'date') {
           //convert date here
-         // item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
-          item.value = dateUtil.fromToDateFormat(item.value, "DD/MM/YYYY, hh:mm:ss A", "DD MMM YYYY hh:mm A");
-
+          // item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
+          item.value = dateUtil.fromToDateFormat(
+            item.value,
+            'DD/MM/YYYY, hh:mm:ss A',
+            'DD MMM YYYY hh:mm A',
+          );
         }
         if (item.key === 'created_by') {
           item.value =
@@ -251,9 +256,15 @@ export default function ProcessInfo(props) {
         }
       });
       if (props.fields && props.fields.length) {
-        let rej_comp_index = processSchema.findIndex(item => item.key === "total_rejections")
-        let ok_comp_index = processSchema.findIndex(item => item.key === "ok_component")
-        let stage_ok_comp_index = props.processEntity.process.findIndex(item => item.stage_name === currentStage)
+        let rej_comp_index = processSchema.findIndex(
+          item => item.key === 'total_rejections',
+        );
+        let ok_comp_index = processSchema.findIndex(
+          item => item.key === 'ok_component',
+        );
+        let stage_ok_comp_index = props.processEntity.process.findIndex(
+          item => item.stage_name === currentStage,
+        );
 
         if (
           stage_ok_comp_index > -1 &&

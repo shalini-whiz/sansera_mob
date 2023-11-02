@@ -40,45 +40,50 @@ export default function LowBattery(props) {
     setApiError('')
   }
 
+// console.log("batdata",props.batteryData)
+
   const renderItem = ({ item, index }) => {
     return (
       <View style={{
         flexDirection: 'row', backgroundColor: 'white', margin: 5, padding: 5,
         flex: 1
-      }} key={item.createdOn}>
+      }} key={item.devID}>
+        <Text style={[AppStyles.titleWithBold, { backgroundColor: 'white', flex: 1, padding: 5, textAlign: 'left' }]}>{item.elemNum}</Text>
         <Text style={[AppStyles.titleWithBold, { backgroundColor: 'white', flex: 1, padding: 5, textAlign: 'left' }]}>{item.devID}</Text>
         <Text style={[AppStyles.titleWithBold, { backgroundColor: 'white', flex: 1, padding: 5, textAlign: 'left' }]}>{item.data}</Text>
-        <Text style={[AppStyles.titleWithBold, { backgroundColor: 'white', flex: 1, padding: 5, textAlign: 'left' }]}>{dateUtil.formatDate(item.createdOn, "DD MMM YYYY HH:MM:SS")}</Text>
+        <Text style={[AppStyles.titleWithBold, { backgroundColor: 'white', flex: 1, padding: 5, textAlign: 'left' }]}>{dateUtil.formatDate(item.createdOn, "DD MMM YYYY / hh:mm:ss")}</Text>
       </View>
     )
 
   };
   return (
-
     // <ScrollView
     //   contentContainerStyle={styles.scrollView}
 
     // >
     <View style={styles.container}>
-      {battery.length ? <FlatList
-        data={battery}
-        horizontal={false}
-        renderItem={renderItem}
-        keyExtractor={item => item.createdOn}
-        onRefresh={() => onRefresh()}
-        refreshing={refreshing}
-        numColumns={1}
-      />: false}
-
-      </View> 
-  )
+      {battery.length ? (
+        <FlatList
+          data={battery}
+          horizontal={false}
+          renderItem={renderItem}
+          keyExtractor={item => item.devID}
+          onRefresh={() => onRefresh()}
+          refreshing={refreshing}
+          numColumns={1}
+        />
+      ) : (
+        false
+      )}
+    </View>
+  );
 }
 const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    //backgroundColor: "#fff",
-    //justifyContent: "center",
+    backgroundColor: "#fff",
+    justifyContent: "center",
     margin: 5
   },
   processContainer: {

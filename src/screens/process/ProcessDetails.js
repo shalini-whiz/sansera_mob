@@ -71,18 +71,26 @@ let batchSchema = [
     valueName: 'value',
     lowerCase: false,
   },
-  // {
-  //   "key": "component_count", displayName: "Components Required (Count)", placeholder: "", value: "",
-  //   error: "", required: true, label: "components", type: "number",nonZero:true
-  // },
+  //
   {
-    key: 'component_weight',
-    displayName: 'Total Count',
+    key: 'component_count',
+    displayName: 'Components Required (Count)',
     placeholder: '',
     value: '',
     error: '',
     required: true,
-    label: 'component_weight',
+    label: 'component count',
+    type: 'number',
+    nonZero: true,
+  }, // by Rakshith
+  {
+    key: 'component_weight',
+    displayName: 'Component Weight',
+    placeholder: '',
+    value: '',
+    error: '',
+    required: true,
+    label: 'component weight',
     type: 'number',
     nonZero: true,
   },
@@ -129,13 +137,20 @@ let created_process_schema = [
     label: 'components',
     type: 'string',
   },
-  // {
-  //   "key": "component_count", displayName: "Required Components", placeholder: "", value: "",
-  //   error: "", required: true, label: "components", type: "number"
-  // },
+  //
+  {
+    key: 'component_count',
+    displayName: 'Required Components',
+    placeholder: '',
+    value: '',
+    error: '',
+    required: true,
+    label: 'components',
+    type: 'number',
+  }, // by Rakshith
   {
     key: 'component_weight',
-    displayName: 'Total Count',
+    displayName: 'Component Weight',
     placeholder: '',
     value: '',
     error: '',
@@ -230,7 +245,9 @@ export default function ProcessDetails(props) {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+    setApiStatus(true);
     loadData();
+    loadForm();
   }, []);
 
   const loadForm = () => {
@@ -292,7 +309,6 @@ export default function ProcessDetails(props) {
             let rej_comp_index = created_process_schema.findIndex(
               item => item.key === 'total_rejections',
             );
-            console.log('rej_comp_index 1111 ' + rej_comp_index);
             let ok_comp_index = created_process_schema.findIndex(
               item => item.key === 'ok_component',
             );
@@ -328,7 +344,11 @@ export default function ProcessDetails(props) {
         }
       });
     } else {
-      setBatchFormData([...batchSchema]);
+      //
+      let batchSchemadata = [...batchSchema];
+      batchSchemadata.map(item => (item['error'] = ''));
+      setBatchFormData([...batchSchemadata]); //  replaced  [...batchSchema] with [...batchSchemadata]
+      // by rakshith
     }
     setCount(previousCount => previousCount + 1);
   };
@@ -372,6 +392,8 @@ export default function ProcessDetails(props) {
       op: 'list_raw_material_by_status',
       status: ['APPROVED'],
       unit_num: userState.user.unit_number,
+      sort_by: 'created_on',
+      sort_order: 'DSC',
     };
 
     setRefreshing(false);
@@ -418,7 +440,10 @@ export default function ProcessDetails(props) {
     if (index != -1) {
       let updatedItem = formData[index];
       updatedItem['value'] = value;
-
+      //
+      updatedItem['error'] =
+        parseInt(updatedItem['value']) <= 0 ? updatedItem['error'] : '';
+      // by Rakshith
       let updatedBatchData = [
         ...formData.slice(0, index),
         updatedItem,
@@ -523,6 +548,8 @@ export default function ProcessDetails(props) {
           ];
           setBatchFormData([...updatedBatchData]);
         }
+      } else {
+        () => {};
       }
     }
   };
@@ -584,7 +611,7 @@ export default function ProcessDetails(props) {
                   }}>
                   {forgeM.map((forgeMItem, index) => {
                     return (
-                      <View style={{flexDirection: 'row', flex: 1}} key={index}>
+                      <View style={{flexDirection: 'row', flex: 1, alignItems:'center'  }} key={index}>
                         <RadioButton value={forgeMItem._id} />
                         <Text
                           style={[
@@ -605,8 +632,7 @@ export default function ProcessDetails(props) {
               {forgeErr && forgeErr.length ? (
                 <Text
                   style={{color: 'red', fontSize: 12, padding: 2, margin: 10}}>
-                  {' '}
-                  {forgeErr}{' '}
+                  {forgeErr}
                 </Text>
               ) : (
                 false

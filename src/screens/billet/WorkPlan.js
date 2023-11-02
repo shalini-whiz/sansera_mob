@@ -54,14 +54,16 @@ export default function WorkPlan(props) {
     }
     return () => { }
   }, [isFocused])
-
- 
-
+  
+  
+  
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+    loadForm();
   }, []);
-
+  
   const loadForm = () => {
+    setRefreshing(false);
     let schemaData = [...stageSchema];
     setFormData(schemaData);
     setCount(previousCount => previousCount + 1);
@@ -107,12 +109,19 @@ export default function WorkPlan(props) {
     });
 
 
+
+    setFormData(validFormData);
+    let isAllZero = validFormData.find(item => item.value != 0);
+    if (!isAllZero) {
+      Alert.alert('Please enter values');
+      return;
+    }
+
     let apiData = {} ;
     apiData.op = "update_process",
     apiData.process_name = appProcess.process_name
     apiData.stage_name = await AsyncStorage.getItem("stage")
     apiData.properties = await util.filterFormData([...formData])
-    setFormData(validFormData);
     if (!isError) {
       setApiStatus(true);
       ApiService.getAPIRes(apiData, "POST", "process").then(apiRes => {

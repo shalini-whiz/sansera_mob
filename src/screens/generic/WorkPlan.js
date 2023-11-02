@@ -63,12 +63,14 @@ export const WorkPlan = React.memo(props => {
     }
     return () => {};
   }, [isFocused, appProcess.process_name]);
-
+  
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+    loadForm();
   }, []);
-
+  
   const loadForm = () => {
+    setRefreshing(false);
     let schemaData = [...stageSchema];
     setFormData(schemaData);
     setCount(previousCount => previousCount + 1);

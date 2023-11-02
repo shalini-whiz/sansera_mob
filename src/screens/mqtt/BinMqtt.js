@@ -46,7 +46,6 @@ const BinMqtt = props => {
 
   useEffect(() => {
     if (isFocused) {
-      console.log('user effect binmqtt ');
       if (userState && userState.user) setUser(userState.user);
       if (
         userState &&
@@ -64,8 +63,8 @@ const BinMqtt = props => {
     setDialogTitle('');
     setDialogMessage('');
     setDialogType('');
+    setLowBatteryData([]);
     //clear low battery cache
-    console.log('clear low battery data ');
     await AsyncStorage.setItem('lowBattery', JSON.stringify([]));
   };
   const openDialog = (e, type) => {
@@ -94,10 +93,6 @@ const BinMqtt = props => {
   };
 
   const reconnectToBinMQTT = () => {
-    console.log(111);
-    console.log(userState.user);
-    console.log(roles.MO);
-    console.log(userState.user.role === roles.MO);
     if (
       userState &&
       userState.user &&
@@ -109,7 +104,6 @@ const BinMqtt = props => {
 
   const pubBatteryStatus = () => {
     try {
-      console.log('binClient here ' + binClient);
       if (binClient) {
         setLoadBatteryData(true);
 
@@ -117,9 +111,6 @@ const BinMqtt = props => {
           JSON.parse(devices).map((item, index, {length}) => {
             setTimeout(() => {
               let publishParams = {devID: item, data: 'GB'};
-              console.log(
-                'devices publishParams here ' + JSON.stringify(publishParams),
-              );
               binClient.publish(
                 'GET_BAT_STS',
                 JSON.stringify(publishParams),
@@ -141,7 +132,6 @@ const BinMqtt = props => {
   const connectBinMQTT = () => {
     let options = {...binMqttOptions};
     options.clientId = 'binclientId' + Date.now();
-    console.log(options);
     MQTT.createClient(options)
       .then(client => {
         setBinClient(client);
@@ -158,14 +148,7 @@ const BinMqtt = props => {
         });
 
         client.on('message', msg => {
-          console.log('mqtt.event.message bin mqtt', msg);
-          console.log('bin request : ' + JSON.stringify(msg));
           let dataJson = JSON.parse(msg.data);
-          console.log(dataJson);
-          console.log('++++++++');
-          console.log(msg.topic);
-          console.log('++++++++');
-
           if (msg.topic === 'SWITCH_PRESS') handleSwitchPress(dataJson, msg);
           if (msg.topic === 'BAT_STS') handleBatSts(dataJson);
         });
@@ -185,7 +168,6 @@ const BinMqtt = props => {
         setBinListeningEvent(false);
       });
   };
-
   const publishData = publishData => {
     binClient.on('connect', () => {
       console.log('publish data connected');
@@ -195,33 +177,58 @@ const BinMqtt = props => {
     setUnReadEmptyBinData(count.toString());
   };
 
-  const handleBatSts = dataJson => {
+  const handleBatSts = async dataJson => {
+    let apiData = {
+      op: 'get_device',
+      device_id: dataJson.devID,
+      unit_num: userState.user.unit_number,
+    };
+    let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'mqtt');
+    console.log('apiRes ++', JSON.stringify(apiRes));
     let batteryJson = {
+      elemNum: apiRes.response.message[0].element_num,
       devID: dataJson.devID,
       createdOn: new Date(),
       data: dataJson.data,
     };
+
     AsyncStorage.getItem('lowBattery').then(data => {
       if (data !== null) {
         // We have data!!
-        console.log('which data : ' + JSON.parse(data));
+
         let batteryData = JSON.parse(data);
-        batteryData.push(batteryJson);
-        setLowBatteryData(batteryData);
+        console.log('data ===', JSON.stringify(data));
+
+        //
+        // batteryData['devID'] !== batteryJson['devID']
+        //   ? batteryData.push(batteryJson)
+        //   : null;
+
+        console.log('BATjson', JSON.stringify(batteryJson));
+        console.log('BATdata', JSON.stringify(batteryData));
+
+        // by rakshith
+        setLowBatteryData(prev => {
+          console.log('prev', JSON.stringify(prev));
+          prev.push(batteryJson);
+          //  return !prev.includes(batteryJson.element_num)
+          //     ? [...prev, batteryJson]
+          //     : [...prev];
+          return [
+            ...new Map(
+              prev.map(device => [device.devID, device]), // by rakshith
+            ).values(),
+          ].sort((a, b) => a.elemNum > b.elemNum);
+        });
+        // setLowBatteryData(batteryData);
         AsyncStorage.setItem('lowBattery', JSON.stringify(batteryData));
       }
     });
   };
 
+  var reqDevices = [];
   //switch press event handled here
   const handleSwitchPress = (dataJson, msg) => {
-    //
-    // switch press event dataJson
-    console.log('switch press event dataJson ' + JSON.stringify(dataJson));
-
-    // switch press event msg
-    console.log('switch press event msg ' + JSON.stringify(msg));
-
     let deviceId = dataJson.devID;
     let apiData = {
       op: 'get_device',
@@ -243,66 +250,52 @@ const BinMqtt = props => {
             ? [curTop.element_num, ...prev]
             : [...prev],
         );
-
         // curTop
-        console.log('curTop ++++ ' + JSON.stringify(curTop));
-
         //here we are adding to async storage
-
-        getItem('emptyBinReq').then(binRequest => {
-          // AsyncStorage.getItem('emptyBinReq').then(binRequest => {
-
-          let request = [];
+        AsyncStorage.getItem('emptyBinReq').then(binRequest => {
+          let lRequest = [];
           let updateBinCount = false;
           if (!binRequest) {
-            request.push(curTop);
+            lRequest.push(curTop);
             updateBinCount = true;
           } else {
-            request = JSON.parse(binRequest);
-            let index = request.findIndex(
+            lRequest = JSON.parse(binRequest);
+            let index = lRequest.findIndex(
               item => item.element_id === curTop.element_id,
             );
-
-            // request index
-            console.log('request index ' + index);
-
             if (index > -1) {
-              // console.log(
-              //   'splice ++++++++\n+++++++++++++++',
-              //   JSON.stringify(request.splice(index, 1)),
-              // );
-              // console.log(
-              //   'splice ++++++++\n+++++++++++++++',
-              //   JSON.stringify(request.splice(0, 0, curTop)),
-              // );
-              request.splice(index, 1);
-              request.splice(0, 0, curTop);
+              lRequest.splice(index, 1);
+              lRequest.splice(0, 0, curTop);
               updateBinCount = true;
             } else {
-              request.push(curTop);
-
-              console.log(
-                '///////////////////////////// curTop ' +
-                  JSON.stringify(curTop),
-              );
-
+              lRequest.push(curTop);
               updateBinCount = true;
             }
           }
 
           // empty bin request
-          console.log('empty bin request : ' + JSON.stringify(request));
 
-          AsyncStorage.setItem('emptyBinReq', JSON.stringify(request));
+          reqDevices.push(...lRequest);
+
+          const uniqueDevices = [
+            ...new Map(
+              reqDevices.map(device => [device.element_id, device]),
+            ).values(),
+          ];
+
+          AsyncStorage.setItem('emptyBinReq', JSON.stringify(uniqueDevices));
 
           if (updateBinCount) {
             AsyncStorage.getItem('emptyBinCount').then(count => {
               let newEmptyBinCount = 1;
-              if (count && count.length) newEmptyBinCount = parseInt(count) + 1;
+              if (count && count.length) {
+                newEmptyBinCount = parseInt(count) + 1;
+              }
               setUnReadEmptyBin(newEmptyBinCount);
             });
           }
         });
+        reqDevices = [];
       }
     });
   };
@@ -508,7 +501,9 @@ const BinMqtt = props => {
           okTitle={'BATTERY STATUS'}
           container={
             <>
-              <Bar progress={0.3} width={loadBatteryData ? 1000 : 0} />
+              <View style={{alignItems: 'center'}}>
+                <Bar progress={0.3} width={loadBatteryData ? 1000 : 0} />
+              </View>
               <LowBattery
                 loadBatteryData={loadBatteryData}
                 batteryData={lowBatteryData}

@@ -43,6 +43,8 @@ export const  Rejection = React.memo((props) => {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+    loadData()
+    setApiStatus(true)
   }, []);
 
   const loadData = async () => {
@@ -62,8 +64,9 @@ export const  Rejection = React.memo((props) => {
       if (apiRes) {
         if (apiRes.status && apiRes.response.message && apiRes.response.message.rejections) {
           let rejections = apiRes.response.message.rejections
-          setRejections( )
-         // setRejections(rejections)
+          
+          // setRejections( )
+         setRejections(rejections) // by rakshith
           let stage_name = await AsyncStorage.getItem("stage");
           let curKey = Object.keys(rejections[0])[0]
           let menuKeys = await rejections[0][curKey].reduce((keys, obj) => (
@@ -71,7 +74,7 @@ export const  Rejection = React.memo((props) => {
               keys.indexOf(key) === -1))
             )
           ), [])
-
+        
           
               
           if(rejReason === ''){

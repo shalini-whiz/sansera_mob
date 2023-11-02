@@ -105,6 +105,7 @@ export default function WorkPlan(props) {
   const [count, setCount] = useState(0);
   const [rackData, setRackData] = useState({});
   const {appProcess} = React.useContext(EmptyBinContext);
+  const [indicator, setIndicator] = useState(false);
 
   useEffect(() => {
     if (isFocused) {
@@ -119,8 +120,8 @@ export default function WorkPlan(props) {
   }, [count]);
 
   const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
     loadData();
+    loadForm();
   }, []);
 
   const loadForm = () => {
@@ -131,6 +132,13 @@ export default function WorkPlan(props) {
 
   const loadData = () => {
     setRefreshing(false);
+  };
+
+  const setIndicatorDataTrue = () => {
+    setIndicator(true);
+  };
+  const setIndicatorDataFalse = () => {
+    setIndicator(false);
   };
 
   const handleChange = name => value => {
@@ -170,9 +178,7 @@ export default function WorkPlan(props) {
     try {
       let apiData = {op: 'get_next_raw_material_item'};
       apiData.batch_num = appProcess.batch_num;
-      console.log(JSON.stringify(apiData));
       ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
-        console.log('apiRes here ' + JSON.stringify(apiRes));
         if (
           apiRes &&
           apiRes.status &&
@@ -280,96 +286,128 @@ export default function WorkPlan(props) {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollView}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }>
-      <View style={styles.mainContainer}>
-        <View style={{flexDirection: 'row'}}>
-          <View
-            style={{flex: 2, backgroundColor: 'white', margin: 5, padding: 5}}>
-            <TouchableOpacity
-              style={[
-                AppStyles.warnButtonContainer,
-                {flexDirection: 'row', marginBottom: 10},
-              ]}
-              onPress={e => showRack(e)}>
-              <Text style={AppStyles.warnButtonTxt}>SHOW RACK</Text>
-            </TouchableOpacity>
-            <FormGen
-              handleChange={handleChange}
-              formData={batchFormData}
-              labelDataInRow={false}
-            />
+    <>
+      {/* start <--- */}
+
+      {indicator ? (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            width: '100%',
+            height: 2000,
+            position: 'absolute',
+            zIndex: 1,
+            alignItems: 'center',
+          }}>
+          <ActivityIndicator
+            size={50}
+            style={{marginTop: 200}}></ActivityIndicator>
+        </View>
+      ) : (
+        false
+      )}
+
+      {/*---> end by Rakshith */}
+
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <View style={styles.mainContainer}>
+          <View style={{flexDirection: 'row'}}>
             <View
               style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
+                flex: 2,
+                backgroundColor: 'white',
                 margin: 5,
-                marginTop: 10,
+                padding: 5,
               }}>
               <TouchableOpacity
-                style={[AppStyles.successBtn, {flexDirection: 'row'}]}
-                onPress={e => handleSubmit(e)}
-                disabled={apiStatus}>
-                <Text style={AppStyles.successText}>SAVE</Text>
+                style={[
+                  AppStyles.warnButtonContainer,
+                  {flexDirection: 'row', marginBottom: 10},
+                ]}
+                onPress={e => showRack(e)}>
+                <Text style={AppStyles.warnButtonTxt}>SHOW RACK</Text>
               </TouchableOpacity>
+              <FormGen
+                handleChange={handleChange}
+                formData={batchFormData}
+                labelDataInRow={false}
+              />
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  margin: 5,
+                  marginTop: 10,
+                }}>
+                <TouchableOpacity
+                  style={[AppStyles.successBtn, {flexDirection: 'row'}]}
+                  onPress={e => handleSubmit(e)}
+                  disabled={apiStatus}>
+                  <Text style={AppStyles.successText}>SAVE</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={{flex: 4, flexDirection: 'row'}}>
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: 'white',
+                  margin: 5,
+                  padding: 5,
+                }}>
+                <ProcessDetails
+                  title="PROCESS DETAILS"
+                  processEntity={appProcess}
+                />
+              </View>
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: 'white',
+                  margin: 5,
+                  padding: 5,
+                }}>
+                <WeightDetails
+                  title="WEIGHT DETAILS"
+                  processEntity={appProcess}
+                />
+              </View>
             </View>
           </View>
-          <View style={{flex: 4, flexDirection: 'row'}}>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: 'white',
-                margin: 5,
-                padding: 5,
-              }}>
-              <ProcessDetails
-                title="PROCESS DETAILS"
-                processEntity={appProcess}
-              />
-            </View>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: 'white',
-                margin: 5,
-                padding: 5,
-              }}>
-              <WeightDetails
-                title="WEIGHT DETAILS"
-                processEntity={appProcess}
-              />
-            </View>
-          </View>
-        </View>
-        {apiError && apiError.length ? (
-          <ErrorModal msg={apiError} okAction={errOKAction} />
-        ) : (
-          false
-        )}
+          {apiError && apiError.length ? (
+            <ErrorModal msg={apiError} okAction={errOKAction} />
+          ) : (
+            false
+          )}
 
-        {dialog ? (
-          <CustomModal
-            modalVisible={dialog}
-            dialogTitle={dialogTitle}
-            dialogMessage={dialogMessage}
-            container={
-              <ShowRack
-                rackData={rackData}
-                processEntity={appProcess}
-                reloadPage={reloadPage}
-                closeDialog={closeDialog}
-              />
-            }
-          />
-        ) : (
-          false
-        )}
-      </View>
-    </ScrollView>
+          {dialog ? (
+            <CustomModal
+              modalVisible={dialog}
+              dialogTitle={dialogTitle}
+              dialogMessage={dialogMessage}
+              container={
+                <ShowRack
+                  rackData={rackData}
+                  setIndicatorDataTrue={setIndicatorDataTrue}
+                  setIndicatorDataFalse={setIndicatorDataFalse}
+                  processEntity={appProcess}
+                  reloadPage={reloadPage}
+                  closeDialog={closeDialog}
+                />
+              }
+            />
+          ) : (
+            false
+          )}
+        </View>
+      </ScrollView>
+    </>
   );
 }
 const styles = StyleSheet.create({

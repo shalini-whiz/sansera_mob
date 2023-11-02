@@ -19,7 +19,6 @@ export default  TaskHome = React.memo((props) => {
   useEffect(() => {
     if (isFocused) {
     }
-    return () => { }
   }, [isFocused,appProcess])
 
    

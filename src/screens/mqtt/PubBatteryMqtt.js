@@ -9,7 +9,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const PubBatteryMqtt = (props) => {
   let options = { ...binMqttOptions }
   options.clientId = "pubclientId" + Date.now()
-  console.log(options)
   options.keepalive = 86400
   MQTT.createClient(options).then((client) => {
     client.connect();
@@ -31,7 +30,6 @@ const PubBatteryMqtt = (props) => {
         JSON.parse(devices).map((item, index, { length }) => {
           setTimeout(() => {
             let publishParams = { devID: item, data: "GB" }
-            console.log("devices publishParams here " + JSON.stringify(publishParams))
             client.publish("GET_BAT_STS", JSON.stringify(publishParams), 2, false)
             if (index + 1 === length) {
               client.disconnect()

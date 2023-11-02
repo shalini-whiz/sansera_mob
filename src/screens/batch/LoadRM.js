@@ -44,6 +44,7 @@ export default function LoadRM() {
   const [listeningEvent, setListeningEvent] = useState(false);
   const [client, setClient] = useState(undefined);
   const [newFifo, setNewFifo] = useState([]);
+  const [indicator, setIndicator] = useState(false);
   const userState = React.useContext(UserContext);
 
   const [batchOptions, setBatchOptions] = useState({
@@ -54,12 +55,11 @@ export default function LoadRM() {
   useEffect(() => {
     if (isFocused) {
       setApiStatus(true);
-      // setNewFifo([]); // by rakshith
-      // setDelRacks([]);
-      // setAddRacks([]);
-      // setEditRack(false);
-      if (newFifo.length || addRacks.length) setListeningEvent(true);
-      else setListeningEvent(false);
+      setNewFifo([]); // by rakshith
+      setDelRacks([]);
+      setAddRacks([]);
+      setEditRack(false);
+      setListeningEvent(false);
       showDialog(false);
       setDialogMessage('');
       setDialogType('');
@@ -75,24 +75,32 @@ export default function LoadRM() {
       op: 'list_raw_material_by_status',
       status: ['NEW'],
       unit_num: userState.user.unit_number,
+      sort_by: 'created_on',
+      sort_order: 'DSC',
     };
-    apiData.sort_by = 'updated_on';
-    apiData.sort_order = 'DSC';
-    setRefreshing(false);
+    // apiData.sort_by = 'updated_on';
+    // apiData.sort_order = 'DSC';
+
     ApiService.getAPIRes(apiData, 'POST', 'list_raw_material_by_status').then(
       apiRes => {
+        setRefreshing(false);
         setApiStatus(false);
         if (apiRes && apiRes.status) {
           if (apiRes.response.message && apiRes.response.message.length) {
             let bOptions = {...batchOptions};
-            bOptions.options = apiRes.response.message.sort(
-              (a, b) => a.batch_num < b.batch_num,
-            );
+            bOptions.options = apiRes.response.message;
             setBatchOptions(bOptions);
-            if (bOptions.options[0] && batchNum === '') {
+
+            if (bOptions.options[0]) {
+              // by rakshith
               setBatchNum(bOptions.options[0]._id);
               setBatchDet(bOptions.options[0]);
             }
+
+            // if (bOptions.options[0] && batchNum === '') {
+            //   setBatchNum(bOptions.options[0]._id);
+            //   setBatchDet(bOptions.options[0]);
+            // }
           }
         } else if (apiRes && apiRes.response.message)
           setApiError(apiRes.response.message);
@@ -109,9 +117,8 @@ export default function LoadRM() {
     setEditRack(false);
     setListeningEvent(false);
     // by Rakshith
+    setApiStatus(true);
     loadBatches();
-    console.log('#########');
-    console.log('#########');
   });
 
   const handleEditRack = () => {
@@ -193,7 +200,6 @@ export default function LoadRM() {
     }
     let options = {...mqttOptions};
     options.clientId = 'clientId' + Date.now();
-    console.log('otpions 123 ' + JSON.stringify(options));
     MQTT.createClient(options)
       .then(client => {
         setClient(client);
@@ -217,7 +223,6 @@ export default function LoadRM() {
 
           let batchDetails = {...batchDet};
           let rackDevices = Object.keys(batchDetails.device_map);
-          console.log(JSON.stringify(batchDetails));
           //let deviceId = msg.topic.split("/")[1];
           let deviceId = dataJson.devID;
           let apiData = {
@@ -226,13 +231,12 @@ export default function LoadRM() {
             unit_num: userState.user.unit_number,
           };
           ApiService.getAPIRes(apiData, 'POST', 'mqtt').then(apiRes => {
-            console.log('apiRes here load raw mqtt ' + JSON.stringify(apiRes));
             if (apiRes && apiRes.status) {
               let deviceList = apiRes.response.message;
-              console.log(deviceList[0].type);
+
               if (deviceList[0].type === 'bin') return;
               let deviceExists = rackDevices.indexOf(deviceId);
-              console.log(deviceExists);
+
               let fifoExists = batchDetails.fifo.findIndex(
                 item => item.element_id === deviceId,
               );
@@ -262,7 +266,6 @@ export default function LoadRM() {
         client.on('connect', () => {
           console.log('connected');
           setListeningEvent(true);
-          console.log(topics);
           // topics.map(item => {
           //   client.subscribe(item.topic_name, 2)
           // })
@@ -274,7 +277,7 @@ export default function LoadRM() {
         setClient(client);
       })
       .catch(err => {
-        console.log('load raw naterial ' + err);
+        console.log('load raw material ' + err);
       });
   };
   const stopLoading = () => {
@@ -321,15 +324,17 @@ export default function LoadRM() {
     }
     if (invokeApi) {
       setApiStatus(true);
+      setIndicator(true);
+      showDialog(false);
       ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
         setApiStatus(false);
+        setIndicator(false);
         if (apiRes && !apiRes.status) {
           Alert.alert(apiRes.response.message);
           setApiError(apiRes.response.message);
           setDelRacks([]);
           setAddRacks([]);
           setNewFifo([]);
-          showDialog(false);
           setDialogMessage('');
           setDialogType('');
           setDialogTitle('');
@@ -387,315 +392,344 @@ export default function LoadRM() {
     setApiError('');
   };
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollView}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }>
-      <View style={styles.container}>
-        <View style={[styles.sectionContainer, {flexDirection: 'row'}]}>
-          <View
-            style={{
-              flex: 2,
-              flexDirection: 'row',
-              alignItems: 'center',
-              margin: 1,
-            }}>
-            <Text style={[AppStyles.filterLabel, {flex: 1}]}>Select Batch</Text>
-            <Picker
-              selectedValue={batchNum}
-              onValueChange={handleChange('batchNum')}
-              mode="dialog"
-              style={{backgroundColor: '#ECF0FA', flex: 2, padding: 0}}
-              itemStyle={{padding: 0}}
-              dropdownIconColor={appTheme.colors.cardTitle}>
-              {batchOptions.options.map((pickerItem, pickerIndex) => {
-                let labelV =
-                  batchOptions.keyName && pickerItem[batchOptions.keyName]
-                    ? pickerItem[batchOptions.keyName]
-                    : pickerItem.key
-                    ? pickerItem.key
-                    : '';
-                let label =
-                  batchOptions.valueName && pickerItem[batchOptions.valueName]
-                    ? pickerItem[batchOptions.valueName]
-                    : pickerItem.value
-                    ? pickerItem.value
-                    : '';
-                return (
-                  <Picker.Item
-                    style={{backgroundColor: '#ECF0FA'}}
-                    label={label}
-                    value={labelV}
-                    key={pickerIndex}
-                  />
-                );
-              })}
-            </Picker>
-          </View>
-          <View style={{flex: 3}}></View>
+    <>
+      {/* rakshith */}
+      {indicator ? (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            width: '100%',
+            height: 2000,
+            position: 'absolute',
+            zIndex: 1,
+            alignItems: 'center',
+          }}>
+          {/* <ActivityIndicator
+            size={'large'}
+            style={{marginTop: 200}}></ActivityIndicator> */}
         </View>
-        {apiStatus ? (
-          <ActivityIndicator size="large" animating={apiStatus} />
-        ) : (
-          false
-        )}
-        {batchDet && batchDet._id ? (
-          <View style={{flexDirection: 'row', padding: 5}}>
-            <View style={[styles.sectionContainer, {flex: 2}]}>
-              <View
-                style={{
-                  flexDirection: 'column',
-                  margin: 10,
-                  marginTop: 20,
-                  borderColor: 'grey',
-                  borderWidth: 0.5,
-                  padding: 10,
-                  borderRadius: 10,
-                }}>
-                {listeningEvent ? (
-                  <View style={{flexDirection: 'row'}}>
-                    <Text
-                      style={{
-                        color: appTheme.colors.warnAction,
-                        marginRight: 10,
-                        fontFamily: appTheme.fonts.bold,
-                      }}>
-                      Listening to Rack Switch
-                    </Text>
-                    <MaterialCommunityIcons
-                      name="cast-connected"
-                      size={20}
-                      color={appTheme.colors.warnAction}
-                      style={{}}
+      ) : (
+        false
+      )}
+
+      {/* by rakshith */}
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <View style={styles.container}>
+          <View style={[styles.sectionContainer, {flexDirection: 'row'}]}>
+            <View
+              style={{
+                flex: 2,
+                flexDirection: 'row',
+                alignItems: 'center',
+                margin: 1,
+              }}>
+              <Text style={[AppStyles.filterLabel, {flex: 1}]}>
+                Select Batch
+              </Text>
+              <Picker
+                selectedValue={batchNum}
+                onValueChange={handleChange('batchNum')}
+                mode="dialog"
+                style={{backgroundColor: '#ECF0FA', flex: 2, padding: 0}}
+                itemStyle={{padding: 0}}
+                dropdownIconColor={appTheme.colors.cardTitle}>
+                {batchOptions.options.map((pickerItem, pickerIndex) => {
+                  let labelV =
+                    batchOptions.keyName && pickerItem[batchOptions.keyName]
+                      ? pickerItem[batchOptions.keyName]
+                      : pickerItem.key
+                      ? pickerItem.key
+                      : '';
+                  let label =
+                    batchOptions.valueName && pickerItem[batchOptions.valueName]
+                      ? pickerItem[batchOptions.valueName]
+                      : pickerItem.value
+                      ? pickerItem.value
+                      : '';
+                  return (
+                    <Picker.Item
+                      style={{backgroundColor: '#ECF0FA'}}
+                      label={label}
+                      value={labelV}
+                      key={pickerIndex}
                     />
+                  );
+                })}
+              </Picker>
+            </View>
+            <View style={{flex: 3}}></View>
+          </View>
+          {apiStatus ? (
+            <ActivityIndicator size="large" animating={apiStatus} />
+          ) : (
+            false
+          )}
+          {batchDet && batchDet._id ? (
+            <View style={{flexDirection: 'row', padding: 5}}>
+              <View style={[styles.sectionContainer, {flex: 2}]}>
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    margin: 10,
+                    marginTop: 20,
+                    borderColor: 'grey',
+                    borderWidth: 0.5,
+                    padding: 10,
+                    borderRadius: 10,
+                  }}>
+                  {listeningEvent ? (
+                    <View style={{flexDirection: 'row'}}>
+                      <Text
+                        style={{
+                          color: appTheme.colors.warnAction,
+                          marginRight: 10,
+                          fontFamily: appTheme.fonts.bold,
+                        }}>
+                        Listening to Rack Switch
+                      </Text>
+                      <MaterialCommunityIcons
+                        name="cast-connected"
+                        size={20}
+                        color={appTheme.colors.warnAction}
+                        style={{}}
+                      />
+                    </View>
+                  ) : (
+                    false
+                  )}
+
+                  <View
+                    style={{flexDirection: 'row', justifyContent: 'center'}}>
+                    <CustomHeader title={'Rack Numbers'} size={18} style={{}} />
+
+                    <TouchableOpacity
+                      style={{}}
+                      onPress={e => handleEditRack(e)}>
+                      <MaterialIcons
+                        name="edit"
+                        size={25}
+                        style={{marginLeft: 10}}
+                        color={editRack ? 'red' : 'green'}></MaterialIcons>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{flexDirection: 'row'}}>
+                    {batchDet.fifo.map((fifoItem, fifoIndex) => {
+                      let fifoRack =
+                        fifoIndex === 0
+                          ? fifoItem.element_num
+                          : '  |   ' + fifoItem.element_num;
+                      return (
+                        <TouchableOpacity
+                          style={{}}
+                          key={fifoIndex}
+                          onPress={e => addToDelRacks(e, fifoItem)}
+                          disabled={!editRack}>
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              color:
+                                delRacks.indexOf(fifoItem.element_num) > -1
+                                  ? 'red'
+                                  : 'black',
+                            }}
+                            key={fifoIndex}>
+                            {fifoRack}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                    {newFifo.map((fifoItem, fifoIndex) => {
+                      let fifoRack =
+                        fifoIndex === 0 && batchDet.fifo.length
+                          ? ' | ' + fifoItem.element_num
+                          : fifoIndex === 0
+                          ? fifoItem.element_num
+                          : '  |   ' + fifoItem.element_num;
+                      return (
+                        <TouchableOpacity
+                          style={{}}
+                          key={fifoIndex}
+                          onPress={e => addToDelRacks(e, fifoItem)}
+                          disabled={!editRack}>
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              color:
+                                delRacks.indexOf(fifoItem.element_num) > -1
+                                  ? 'red'
+                                  : 'green',
+                            }}
+                            key={fifoIndex}>
+                            {fifoRack}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                  <View style={{flexDirection: 'row'}}>
+                    {delRacks.length ? (
+                      <Text
+                        style={{color: 'red', fontSize: 14, paddingTop: 10}}>
+                        Racks to be deleted are red in color
+                      </Text>
+                    ) : (
+                      false
+                    )}
+                  </View>
+                  <View style={{flexDirection: 'row'}}>
+                    {addRacks.length ? (
+                      <Text
+                        style={{color: 'green', fontSize: 14, paddingTop: 10}}>
+                        Switched racks to be saved are green in color
+                      </Text>
+                    ) : (
+                      false
+                    )}
+                  </View>
+                </View>
+
+                {batchNum &&
+                batchNum.length &&
+                delRacks.length &&
+                listeningEvent ? (
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                    }}>
+                    <TouchableOpacity
+                      style={[AppStyles.successBtn, {flexDirection: 'row'}]}
+                      onPress={e => computeRacks(e)}>
+                      <Text style={AppStyles.successText}>SAVE</Text>
+                    </TouchableOpacity>
                   </View>
                 ) : (
                   false
                 )}
 
-                <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-                  <CustomHeader title={'Rack Numbers'} size={18} style={{}} />
+                {batchNum &&
+                batchNum.length &&
+                delRacks.length === 0 &&
+                listeningEvent ? (
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                    }}>
+                    <TouchableOpacity
+                      style={[AppStyles.successBtn, {flexDirection: 'row'}]}
+                      onPress={e => computeRacks(e)}>
+                      <Text style={AppStyles.successText}>SAVE</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  false
+                )}
 
-                  <TouchableOpacity style={{}} onPress={e => handleEditRack(e)}>
-                    <MaterialIcons
-                      name="edit"
-                      size={25}
-                      style={{marginLeft: 10}}
-                      color={editRack ? 'red' : 'green'}></MaterialIcons>
-                  </TouchableOpacity>
-                </View>
+                {batchNum &&
+                batchNum.length &&
+                delRacks.length === 0 &&
+                listeningEvent === false ? (
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                    }}>
+                    <TouchableOpacity
+                      style={[AppStyles.successBtn, {flexDirection: 'row'}]}
+                      onPress={e => startListening(e)}>
+                      <Text style={AppStyles.successText}>ADD TO RACK</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  false
+                )}
 
-                <View style={{flexDirection: 'row'}}>
-                  {batchDet.fifo.map((fifoItem, fifoIndex) => {
-                    let fifoRack =
-                      fifoIndex === 0
-                        ? fifoItem.element_num
-                        : '  |   ' + fifoItem.element_num;
-                    return (
-                      <TouchableOpacity
-                        style={{}}
-                        key={fifoIndex}
-                        onPress={e => addToDelRacks(e, fifoItem)}
-                        disabled={!editRack}>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            color:
-                              delRacks.indexOf(fifoItem.element_num) > -1
-                                ? 'red'
-                                : 'black',
-                          }}
-                          key={fifoIndex}>
-                          {fifoRack}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                  {newFifo.map((fifoItem, fifoIndex) => {
-                    let fifoRack =
-                      fifoIndex === 0 && batchDet.fifo.length
-                        ? ' | ' + fifoItem.element_num
-                        : fifoIndex === 0
-                        ? fifoItem.element_num
-                        : '  |   ' + fifoItem.element_num;
-                    return (
-                      <TouchableOpacity
-                        style={{}}
-                        key={fifoIndex}
-                        onPress={e => addToDelRacks(e, fifoItem)}
-                        disabled={!editRack}>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            color:
-                              delRacks.indexOf(fifoItem.element_num) > -1
-                                ? 'red'
-                                : 'green',
-                          }}
-                          key={fifoIndex}>
-                          {fifoRack}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-                <View style={{flexDirection: 'row'}}>
-                  {delRacks.length ? (
-                    <Text style={{color: 'red', fontSize: 14, paddingTop: 10}}>
-                      Racks to be deleted are red in color
-                    </Text>
-                  ) : (
-                    false
-                  )}
-                </View>
-                <View style={{flexDirection: 'row'}}>
-                  {addRacks.length ? (
-                    <Text
-                      style={{color: 'green', fontSize: 14, paddingTop: 10}}>
-                      Switched racks to be saved are green in color
-                    </Text>
-                  ) : (
-                    false
-                  )}
-                </View>
+                {batchNum &&
+                batchNum.length &&
+                delRacks.length &&
+                listeningEvent === false ? (
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                    }}>
+                    <TouchableOpacity
+                      style={[
+                        AppStyles.successBtn,
+                        {flexDirection: 'row', marginHorizontal: 10},
+                      ]}
+                      onPress={e => startListening(e)}>
+                      <Text style={AppStyles.successText}>ADD TO RACK</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        AppStyles.successBtn,
+                        {flexDirection: 'row', marginHorizontal: 10},
+                      ]}
+                      onPress={e => computeRacks(e)}>
+                      <Text style={AppStyles.successText}>SAVE</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  false
+                )}
               </View>
-
-              {batchNum &&
-              batchNum.length &&
-              delRacks.length &&
-              listeningEvent ? (
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                  }}>
-                  <TouchableOpacity
-                    style={[AppStyles.successBtn, {flexDirection: 'row'}]}
-                    onPress={e => computeRacks(e)}>
-                    <Text style={AppStyles.successText}>SAVE</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                false
-              )}
-
-              {batchNum &&
-              batchNum.length &&
-              delRacks.length === 0 &&
-              listeningEvent ? (
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                  }}>
-                  <TouchableOpacity
-                    style={[AppStyles.successBtn, {flexDirection: 'row'}]}
-                    onPress={e => computeRacks(e)}>
-                    <Text style={AppStyles.successText}>SAVE</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                false
-              )}
-
-              {batchNum &&
-              batchNum.length &&
-              delRacks.length === 0 &&
-              listeningEvent === false ? (
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                  }}>
-                  <TouchableOpacity
-                    style={[AppStyles.successBtn, {flexDirection: 'row'}]}
-                    onPress={e => startListening(e)}>
-                    <Text style={AppStyles.successText}>ADD TO RACK</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                false
-              )}
-
-              {batchNum &&
-              batchNum.length &&
-              delRacks.length &&
-              listeningEvent === false ? (
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                  }}>
-                  <TouchableOpacity
-                    style={[
-                      AppStyles.successBtn,
-                      {flexDirection: 'row', marginHorizontal: 10},
-                    ]}
-                    onPress={e => startListening(e)}>
-                    <Text style={AppStyles.successText}>ADD TO RACK</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      AppStyles.successBtn,
-                      {flexDirection: 'row', marginHorizontal: 10},
-                    ]}
-                    onPress={e => computeRacks(e)}>
-                    <Text style={AppStyles.successText}>SAVE</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                false
-              )}
+              <View style={[styles.sectionContainer, {flex: 2}]}>
+                <BatchDetails
+                  content={batchDet}
+                  editMode={false}
+                  _id={batchDet._id}
+                  title="BATCH DETAILS"
+                />
+              </View>
             </View>
-            <View style={[styles.sectionContainer, {flex: 2}]}>
-              <BatchDetails
-                content={batchDet}
-                editMode={false}
-                _id={batchDet._id}
-                title="BATCH DETAILS"
-              />
-            </View>
-          </View>
-        ) : (
-          false
-        )}
+          ) : (
+            false
+          )}
 
-        {dialog && dialogType === 'saveRacks' ? (
-          <CustomModal
-            modalVisible={dialog}
-            dialogTitle={dialogTitle}
-            dialogMessage={dialogMessage}
-            closeDialog={closeDialog}
-            okDialog={saveRacks}
-          />
-        ) : (
-          false
-        )}
+          {dialog && dialogType === 'saveRacks' ? (
+            <CustomModal
+              modalVisible={dialog}
+              dialogTitle={dialogTitle}
+              dialogMessage={dialogMessage}
+              closeDialog={closeDialog}
+              okDialog={saveRacks}
+            />
+          ) : (
+            false
+          )}
 
-        {dialog && dialogType === 'newRacks' ? (
-          <CustomModal
-            modalVisible={dialog}
-            dialogTitle={dialogTitle}
-            dialogMessage={dialogMessage}
-            closeDialog={closeDialog}
-            okDialog={clearNewRacks}
-          />
-        ) : (
-          false
-        )}
+          {dialog && dialogType === 'newRacks' ? (
+            <CustomModal
+              modalVisible={dialog}
+              dialogTitle={dialogTitle}
+              dialogMessage={dialogMessage}
+              closeDialog={closeDialog}
+              okDialog={clearNewRacks}
+            />
+          ) : (
+            false
+          )}
 
-        {apiError && apiError.length ? (
-          <ErrorModal msg={apiError} okAction={errOKAction} />
-        ) : (
-          false
-        )}
-      </View>
-    </ScrollView>
+          {apiError && apiError.length ? (
+            <ErrorModal msg={apiError} okAction={errOKAction} />
+          ) : (
+            false
+          )}
+        </View>
+      </ScrollView>
+    </>
   );
 }
 const styles = StyleSheet.create({

@@ -51,7 +51,7 @@ export const FifoBoard = React.memo(props => {
       op: 'get_process',
       unit_num: userState.user.unit_number,
     };
-    apiData.sort_by = 'updated_on';
+    apiData.sort_by = 'status';
     apiData.sort_order = 'DSC';
     setRefreshing(false);
     setProcess([]);
@@ -104,7 +104,6 @@ export const FifoBoard = React.memo(props => {
 
   const renderItem = ({item, index}) => (
     <View style={[styles.tableData, {flexDirection: 'row'}]} key={index}>
-      {console.log(item, index)}
       <View
         style={[
           styles.tableDataCell,
@@ -154,11 +153,11 @@ export const FifoBoard = React.memo(props => {
     //   refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }
     // >
     <View style={styles.container}>
-      {apiStatus ? (
+      {/* {apiStatus ? (
         <ActivityIndicator size="large" animating={apiStatus} />
       ) : (
         false
-      )}
+      )}         by Rakshith               */}
       {process.length ? (
         <View style={{backgroundColor: 'white', margin: 2, padding: 5}}>
           <FlatList
@@ -190,7 +189,7 @@ export const FifoBoard = React.memo(props => {
             }}></FlatList>
         </View>
       ) : (
-        false
+        <ActivityIndicator size="large" />
       )}
       {dialog && dialogType === 'processFifo' ? (
         <CustomModal

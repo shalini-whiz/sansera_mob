@@ -5,7 +5,6 @@ import { binMqttOptions } from "../../constants/urlConstants";
 const PubBatterySleep = (props) => {
   let options = { ...binMqttOptions }
   options.clientId = "pubclientId" + Date.now()
-  console.log(options)
   MQTT.createClient(options).then((client) => {
     client.connect();
 
@@ -27,7 +26,6 @@ const PubBatterySleep = (props) => {
         devID: props.topic,
         data: "SL"
       }
-      console.log("publishParams here " + JSON.stringify(publishParams))
       client.publish("GOTO_SLEEP", JSON.stringify(publishParams), 2, false)
       client.disconnect()
     });

@@ -20,7 +20,6 @@ const CustomModal = props => {
       animationType="slide"
       transparent={true}
       visible={modalVisible}
-      style={{backgroundColor: 'red'}}
       onRequestClose={() => {
         setModalVisible(!modalVisible);
       }}>

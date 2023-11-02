@@ -6,6 +6,7 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import {appTheme} from '../../lib/Themes';
 import UserContext from '../UserContext';
@@ -15,6 +16,7 @@ import {TextInput} from 'react-native-gesture-handler';
 import {ApiService} from '../../httpservice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PubBatterySleep from '../mqtt/PubBatterySleep';
+import {ActivityIndicator} from 'react-native';
 
 export default function ShowRack(props) {
   const [apiError, setApiError] = useState('');
@@ -22,7 +24,7 @@ export default function ShowRack(props) {
   const appState = React.useContext(UserContext);
   const [refreshing, setRefreshing] = useState(false);
   const isFocused = useIsFocused();
-  const [bundleWeight, setBundleWeight] = useState(0);
+  const [bundleWeight, setBundleWeight] = useState();
   const [bundleWeigtErr, setBundleWeightErr] = useState('');
   const userState = React.useContext(UserContext);
 
@@ -35,7 +37,6 @@ export default function ShowRack(props) {
   };
 
   const handleSubmit = () => {
-    console.log('handle');
     if (bundleWeight && bundleWeight > 0) {
       let apiData1 = {
         op: 'get_batch_details',
@@ -44,21 +45,29 @@ export default function ShowRack(props) {
       };
 
       ApiService.getAPIRes(apiData1, 'POST', 'batch').then(apiRes => {
+        console.log('apiRes--1', apiRes);
         setApiStatus(false);
         if (apiRes && apiRes.status) {
           let renderedBatch = apiRes.response.message;
-          if (renderedBatch.total_weight >= bundleWeight) {
+          if (renderedBatch.current_weight >= bundleWeight) {
             setApiStatus(true);
             let apiData = {};
             apiData.batch_num = props.processEntity.batch_num;
             apiData.bundle_weight = bundleWeight;
             apiData.op = 'pop_material';
-
+            props.setIndicatorDataTrue();
+            props.closeDialog();
             ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
               setApiStatus(false);
               if (apiRes && apiRes.status) {
-                props.closeDialog();
+                console.log('apiRes--', apiRes);
+
                 props.reloadPage();
+                Alert.alert(
+                  'Bundle Weight Updated for Rack ',
+                  props.rackData.element_num + ' : ' + bundleWeight + ' KG',
+                );
+                props.setIndicatorDataFalse();
                 AsyncStorage.getItem('deviceDet').then(async devices => {
                   let devicesDet = JSON.parse(devices);
                   let device = devicesDet.find(
@@ -71,11 +80,13 @@ export default function ShowRack(props) {
                 //here do goto_sleep
               } else {
                 setBundleWeightErr(apiRes.response.message);
+                Alert.alert('bundle weight Exceeded');
+                props.setIndicatorDataFalse();
               }
             });
           } else {
             setBundleWeightErr(
-              'bundle weight should be less than total weight',
+              'bundle weight should be less than current weight',
             );
           } //
         } //
@@ -122,7 +133,12 @@ export default function ShowRack(props) {
           false
         )}
         <View
-          style={{flexDirection: 'row', width: '60%', flex: 1, marginTop: 100}}>
+          style={{
+            flexDirection: 'row',
+            width: '60%',
+            flex: 1,
+            marginTop: 100,
+          }}>
           <TouchableOpacity
             style={[AppStyles.successBtn, {flex: 1}]}
             onPress={e => handleSubmit(e)}

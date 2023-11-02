@@ -66,10 +66,12 @@ export const WorkPlan = React.memo(props => {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+    loadForm();
   }, []);
 
   const loadForm = () => {
     let schemaData = [...stageSchema];
+    setRefreshing(false);
     setFormData(schemaData);
     setCount(previousCount => previousCount + 1);
   };
@@ -233,9 +235,9 @@ const styles = StyleSheet.create({
   mainContainer: {
     justifyContent: 'center',
     margin: 10,
-
   },
-  container: {    // flex: 1,
+  container: {
+    // flex: 1,
     backgroundColor: '#fff',
     justifyContent: 'center',
     margin: 10,

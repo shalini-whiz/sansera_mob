@@ -10,7 +10,8 @@
     "clean": "cd android/ && ./gradlew clean && cd ../",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "env": "$env:NODE_OPTIONS = '--openssl-legacy-provider'"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.13",
@@ -30,6 +31,7 @@
     "events": "^3.3.0",
     "luxon": "^2.1.1",
     "moment": "^2.29.1",
+    "mqtt": "^5.0.4",
     "path": "^0.12.7",
     "react": "17.0.2",
     "react-native": "0.65.1",
@@ -41,6 +43,8 @@
     "react-native-pdf": "^6.5.0",
     "react-native-progress": "^5.0.0",
     "react-native-push-notification": "^8.1.1",
+    "react-native-queue": "github:inkitt/react-native-queue-asyncstorage",
+    "react-native-queue-asyncstorage": "^1.2.1",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "^3.10.2",
     "react-native-splash-screen": "^3.2.0",
