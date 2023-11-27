@@ -13,6 +13,7 @@ import {
   RefreshControl,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import {appTheme} from '../../lib/Themes';
 import {ApiService} from '../../httpservice';
@@ -27,6 +28,7 @@ import * as Progress from 'react-native-progress';
 import {getItem, setItem} from '../../context/SyncStorage';
 import {FlatList} from 'react-native-gesture-handler';
 import AppStyles from '../../styles/AppStyles';
+import RequestDevice from './RequestDevice';
 
 const {Bar} = require('react-native-progress');
 const BinMqtt = props => {
@@ -67,6 +69,14 @@ const BinMqtt = props => {
     //clear low battery cache
     await AsyncStorage.setItem('lowBattery', JSON.stringify([]));
   };
+
+  const openChooseBat = (e, type) => {
+    showDialog(true);
+    let dialogTitle = 'Choose Devices';
+    setDialogType(type);
+    setDialogTitle(dialogTitle);
+  };
+
   const openDialog = (e, type) => {
     showDialog(true);
     let dialogTitle = 'Battery Status';
@@ -76,7 +86,7 @@ const BinMqtt = props => {
     setDialogMessage(dialogMessage);
     //PubBatteryMqtt();
     //call publishBatteryMqtt
-    pubBatteryStatus();
+    e && e.length ? pubStatus(e) : pubBatteryStatus();
   };
 
   const closeClearModel = () => {
@@ -87,6 +97,7 @@ const BinMqtt = props => {
   };
 
   const openClearModel = type => {
+    setDialogType(type);
     showDialog(true);
     setDialogTitle('Clear Bin Request');
     setDialogMessage('Are you sure you wish to clear all bin request ');
@@ -121,7 +132,7 @@ const BinMqtt = props => {
                 setLoadBatteryData(false);
                 //client.disconnect()
               }
-            }, 1000 * index);
+            }, 6000 * index);
           });
         });
       }
@@ -129,6 +140,23 @@ const BinMqtt = props => {
       console.log(e);
     }
   };
+
+  const pubStatus = item => {
+    try {
+      if (binClient) {
+        let publishParams = {devID: item, data: 'GB'};
+        binClient.publish(
+          'GET_BAT_STS',
+          JSON.stringify(publishParams),
+          2,
+          false,
+        );
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const connectBinMQTT = () => {
     let options = {...binMqttOptions};
     options.clientId = 'binclientId' + Date.now();
@@ -346,7 +374,7 @@ const BinMqtt = props => {
                 </View>
 
                 <TouchableOpacity
-                  onPress={e => openDialog(e, 'batteryStatus')}
+                  onPress={e => openChooseBat(e, 'chooseDevices')}
                   style={{
                     flexDirection: 'row',
                     justifyContent: 'flex-end',
@@ -358,11 +386,15 @@ const BinMqtt = props => {
                       color: 'black',
                       fontFamily: appTheme.fonts.bold,
                     }}></Text>
-                  <MaterialCommunityIcons
+                  {/* <MaterialCommunityIcons
                     name="battery"
                     size={30}
                     color={'black'}
                     style={{}}
+                  /> */}
+                  <Image
+                    source={require('../../images/battery.png')}
+                    style={{height: 30, width: 50}}
                   />
                 </TouchableOpacity>
               </>
@@ -450,7 +482,7 @@ const BinMqtt = props => {
               flex: 1,
             }}>
             <TouchableOpacity
-              onPress={openClearModel}
+              onPress={e => openClearModel(e, 'openClearModel')}
               style={{
                 height: 80,
                 width: 80,
@@ -475,7 +507,7 @@ const BinMqtt = props => {
         </View>
       ) : null}
 
-      {dialog ? (
+      {dialog && dialogType === 'openClearModel' ? (
         <CustomModal
           modalVisible={dialog}
           dialogTitle={dialogTitle}
@@ -509,6 +541,20 @@ const BinMqtt = props => {
                 batteryData={lowBatteryData}
               />
             </>
+          }
+        />
+      ) : (
+        false
+      )}
+
+      {dialog && dialogType === 'chooseDevices' ? (
+        <CustomModal
+          modalVisible={dialog}
+          dialogTitle={dialogTitle}
+          height={'50%'}
+          okTitle={'BATTERY STATUS'}
+          container={
+            <RequestDevice closeDialog={closeDialog} openDialog={openDialog} />
           }
         />
       ) : (

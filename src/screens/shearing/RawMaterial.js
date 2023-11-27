@@ -182,7 +182,7 @@ export default function RawMaterial(props) {
     apiData.partial_return_weight = partialWeight;
     apiData.batch_num = appProcess.batch_num;
     let curFifoArr = [curFifo];
-    apiData.fifo = [...curFifoArr, ...batchDetails.fifo];
+    apiData.fifo = [...batchDetails.fifo, ...curFifoArr];
     setApiStatus(true);
     setIndicator(true);
     closeDialog();

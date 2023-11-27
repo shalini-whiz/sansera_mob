@@ -21,18 +21,17 @@ const SP = [
 
   //Bins
 
-  {devID: 'EB1222053ED1', data: 'SW'}, // 1
+  {devID: '1AD6DC256EC7', data: 'GB'}, // 20
+  {devID: 'C7DBD84177E6', data: 'GB'}, // 19
+  // {devID: '7945C90853E0', data: 'GB'}, // 18
+  // {devID: '07469E766FE1', data: 'GB'}, // 17
+  {devID: '13EF600C68FC', data: 'GB'}, // 16
 
-  {devID: 'D2E9053B2BD8', data: 'SW'}, // 2
-  
-  {devID: 'D2E9053B2BD8', data: 'SW'}, // 3
-  {devID: 'E87928D368C4', data: 'SW'}, // 4
-  {devID: '875D47DCCAE9', data: 'SW'}, // 5
   // {devID: '48-06-AE-01i', data: 'SW'}, // 6
   // {devID: '48-06-AE-01o', data: 'SW'}, // 7
   // {devID: '48-06-AE-01p', data: 'SW'}, // 8
   // {devID: '48-06-AE-01s', data: 'SW'}, // 9
-  {devID: 'A4E9C09240E0', data: 'SW'}, // 10
+  // {devID: 'A4E9C09240E0', data: 'SW'}, // 10
 
   //Racks
   // {devID: '2450378D19', data: 'SW'}, //    A1
@@ -53,6 +52,10 @@ client.on('connect', function () {
   console.log('Connected to MQTT broker');
 
   client.subscribe('SWITCH_PRESS');
+  client.subscribe('LED_GLOW');
+  client.subscribe('GO_TO_SLEEP');
+  client.subscribe('GET_BAT_STS');
+  client.subscribe('BAT_STS');
 
   publishMessages();
 });
@@ -63,9 +66,9 @@ async function publishMessages() {
   for (let i = 0; i < SP.length; i++) {
     console.log(i + ': ' + JSON.stringify(SP[i]));
 
-    client.publish('SWITCH_PRESS', JSON.stringify(SP[i]));
+    client.publish('GO_TO_SLEEP', JSON.stringify(SP[i]));
 
-    // await new Promise(r => setTimeout(r, 2000)); //gives 3sec delay
+    await new Promise(r => setTimeout(r, 3000)); //gives 3sec delay
   }
 
   client.end();

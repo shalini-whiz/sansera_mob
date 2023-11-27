@@ -298,14 +298,6 @@ export default function Login() {
             );
           })}
 
-          {apiError && apiError.length ? (
-            <Text style={{color: 'red', fontSize: 12, padding: 2, margin: 10}}>
-              {' '}
-              {apiError}{' '}
-            </Text>
-          ) : (
-            false
-          )}
           <View
             style={{
               display: 'flex',
@@ -324,6 +316,13 @@ export default function Login() {
               />
             </TouchableOpacity>
           </View>
+          {apiError && apiError.length ? (
+            <Text style={{color: 'red', fontSize: 12, padding: 2, margin: 10}}>
+              {apiError}
+            </Text>
+          ) : (
+            false
+          )}
         </View>
       )}
     </>

@@ -713,6 +713,7 @@ export default function ApproveBatch({navigation}) {
             </View>
             <View style={[styles.sectionContainer, {flex: 1}]}>
               <BatchDetails
+                pdf={true}
                 content={batchDet}
                 editMode={false}
                 _id={batchDet._id}

@@ -5,6 +5,7 @@ import {
   View,
   ActivityIndicator,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import {appTheme} from '../../lib/Themes';
 import {ApiService} from '../../httpservice';
@@ -119,7 +120,11 @@ function ProcessFilter(props, ref) {
           backgroundColor: 'white',
         }}>
         <Text style={[AppStyles.filterLabel, {margin: 1}]}>Process</Text>
-        <ScrollView horizontal={true}>
+        <ScrollView
+          horizontal={true}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
           <RadioButton.Group
             onValueChange={handleChange('process')}
             value={processName}

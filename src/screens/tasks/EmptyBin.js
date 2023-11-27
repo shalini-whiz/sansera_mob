@@ -192,42 +192,47 @@ export const EmptyBin = React.memo(props => {
       }>
       <View style={styles.mainContainer}>
         {notifications && notifications.length
-          ? notifications.map((item, index) => {
-              return (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    padding: 5,
-                    backgroundColor: 'white',
-                    margin: 5,
-                  }}
-                  key={index}>
-                  <Text
-                    style={[
-                      AppStyles.subtitle,
-                      {
-                        flex: 3,
-                        justifyContent: 'flex-start',
-                        textAlign: 'left',
-                        color: 'black',
-                        padding: 5,
-                      },
-                    ]}>
-                    {'Confirm Bin request ' + item.element_num}
-                  </Text>
-                  <TouchableOpacity
-                    style={[AppStyles.successBtn, {flex: 1, margin: 5}]}
-                    onPress={e => openDialog(e, 'accept', item)}>
-                    <Text style={AppStyles.successText}>CONFIRM</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[AppStyles.canButtonContainer, {flex: 1, margin: 5}]}
-                    onPress={e => openDialog(e, 'cancel', item)}>
-                    <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            })
+          ? notifications
+              .sort((a, b) => a.element_num > b.element_num)
+              .map((item, index) => {
+                return (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      padding: 5,
+                      backgroundColor: 'white',
+                      margin: 5,
+                    }}
+                    key={index}>
+                    <Text
+                      style={[
+                        AppStyles.subtitle,
+                        {
+                          flex: 3,
+                          justifyContent: 'flex-start',
+                          textAlign: 'left',
+                          color: 'black',
+                          padding: 5,
+                        },
+                      ]}>
+                      {'Confirm Bin request ' + item.element_num}
+                    </Text>
+                    <TouchableOpacity
+                      style={[AppStyles.successBtn, {flex: 1, margin: 5}]}
+                      onPress={e => openDialog(e, 'accept', item)}>
+                      <Text style={AppStyles.successText}>CONFIRM</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        AppStyles.canButtonContainer,
+                        {flex: 1, margin: 5},
+                      ]}
+                      onPress={e => openDialog(e, 'cancel', item)}>
+                      <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })
           : false}
         {dialog ? (
           <CustomModal

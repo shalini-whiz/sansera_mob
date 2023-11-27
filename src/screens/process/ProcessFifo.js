@@ -240,41 +240,6 @@ export const ProcessFifo = React.memo(props => {
                   height: 50,
                 }}>
                   
-                {/* FlatList */}
-                {/* {stage && stage.fifo ? (
-                    <FlatList
-                      horizontal
-                      data={stage.fifo}
-                      keyExtractor={item => item.element_num}
-                      renderItem={item => (
-                        <TouchableOpacity
-                          style={{}}
-                          key={item.index}
-                          disabled={
-                            userState.user && userState.user.role === roles.PL
-                              ? false
-                              : true
-                          }
-                          onPress={e => addToDelBin(e, item.item, 'stage')}>
-                          <Text
-                            style={[
-                              {
-                                padding: 5,
-                                fontSize: 18,
-                                color:
-                                  delBin.indexOf(item.item.element_num) > -1
-                                    ? 'red'
-                                    : 'black',
-                              },
-                            ]}>
-                            {item.item.element_num}
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                    />
-                  ) : (
-                    false
-                  )} FlatList */}
 
                 {stage &&
                   stage.fifo &&

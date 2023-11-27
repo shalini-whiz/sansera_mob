@@ -611,7 +611,13 @@ export default function ProcessDetails(props) {
                   }}>
                   {forgeM.map((forgeMItem, index) => {
                     return (
-                      <View style={{flexDirection: 'row', flex: 1, alignItems:'center'  }} key={index}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          flex: 1,
+                          alignItems: 'center',
+                        }}
+                        key={index}>
                         <RadioButton value={forgeMItem._id} />
                         <Text
                           style={[
@@ -663,6 +669,7 @@ export default function ProcessDetails(props) {
               <View style={{marginTop: 40}}></View>
               {batchDet && batchDet._id ? (
                 <BatchDetails
+                  pdf={true}
                   content={batchDet}
                   editMode={false}
                   _id={batchDet._id}
