@@ -24,7 +24,7 @@ export default class FormGrid extends Component {
             {groupItem.map((item, index) => {
               return (
                 <View key={index} style={{ backgroundColor: 'white', flex: 1, margin: 5 }}>
-                  <View style={[this.props.labelDataInRow ? styles.formDataItemRow : styles.formItem],{padding:5}} >
+                  <View style={[this.props.labelDataInRow ? styles.formDataItemRow : styles.formItem,{padding:5}]} >
                     {item.displayName && item.displayName.length ? <Text style={styles.formLabel}>
                       {item.displayName}
                     </Text> : false}

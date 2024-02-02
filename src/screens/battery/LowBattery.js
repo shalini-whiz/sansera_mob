@@ -40,8 +40,6 @@ export default function LowBattery(props) {
     setApiError('')
   }
 
-// console.log("batdata",props.batteryData)
-
   const renderItem = ({ item, index }) => {
     return (
       <View style={{
@@ -57,10 +55,7 @@ export default function LowBattery(props) {
 
   };
   return (
-    // <ScrollView
-    //   contentContainerStyle={styles.scrollView}
 
-    // >
     <View style={styles.container}>
       {battery.length ? (
         <FlatList

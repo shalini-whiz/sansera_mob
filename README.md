@@ -65,3 +65,5 @@ Contributions are very welcome. Please check out the [contributing document](CON
 ## :bookmark: License
 
 This project is [MIT](LICENSE) licensed.
+
+<!-- Total count in PL login deignrd statically based on Oiling Index -->

@@ -27,8 +27,6 @@ const PublishMqtt = (props) => {
 
     client.on('connect', () => {
       console.log('pub connected' + props.topic);
-      // let topic = pub_topic_format(props.topic)
-      //console.log("publish topic here "+topic);
       let publishParams = {
         devID: props.topic,
         data: "LG 1, 3"

@@ -85,8 +85,8 @@ export default function Login() {
   const loadForm = async () => {
     let loginSchemaData = [...loginSchema];
     let loginForm = await util.formatForm(loginSchemaData);
-    loginForm[0].value = 'emp';
-    loginForm[1].value = 'password';
+    // loginForm[0].value = 'emp';
+    // loginForm[1].value = 'password';
     setLoginData(loginForm);
   };
 

@@ -208,7 +208,8 @@ export default class FormGen extends Component {
                     placeholderTextColor="#fafafa"
                     onChangeText={this.props.handleChange(item.key)}
                     keyboardType={
-                      item.type && item.type === 'number'
+                      (item.type && item.type === 'number') ||
+                      item.type === 'decimal'
                         ? 'numeric'
                         : 'default'
                     }

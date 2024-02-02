@@ -28,6 +28,7 @@ import MQTT from 'sp-react-native-mqtt';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from '../../components/ErrorModal';
 import {EmptyBinContext} from '../../context/EmptyBinContext';
+import {Picker} from '@react-native-picker/picker';
 
 let rejection_schema = [
   {
@@ -38,7 +39,7 @@ let rejection_schema = [
     error: '',
     required: true,
     label: 'reject_weight',
-    type: 'number',
+    type: 'decimal',
     nonZero: true,
   },
   // {
@@ -71,6 +72,9 @@ export default function RawMaterial(props) {
   const [client, setClient] = useState(undefined);
   const {appProcess} = React.useContext(EmptyBinContext);
   const [indicator, setIndicator] = useState(false);
+  const [rejReasons, setRejReasons] = useState([]);
+  const [rejReason, setRejReason] = useState([]);
+  const [rejIndex, setRejIndex] = useState([]);
 
   useEffect(() => {
     if (isFocused) {
@@ -84,8 +88,30 @@ export default function RawMaterial(props) {
     loadForm();
   }, []);
 
-  const loadForm = () => {
+  const loadForm = async () => {
     setFormData(rejection_schema);
+    let apiData = {
+      op: 'get_rejections',
+      process_name: appProcess.process_name,
+      unit_num: appProcess.unit_num,
+      stage_name: 'Shearing',
+    };
+    ApiService.getAPIRes(apiData, 'POST', 'rejection').then(apiRes => {
+      // console.log(apiRes.response.message.rejections[0].Shearing);
+      const rejections = apiRes.response.message.rejections;
+      console.log('rejections   =>', JSON.stringify(rejections));
+      let curKey = Object.keys(rejections[0])[0];
+      console.log('curKey       =>', curKey);
+      let menuKeys = rejections[0][curKey].reduce(
+        (keys, obj) =>
+          keys.concat(Object.keys(obj).filter(key => keys.indexOf(key) === -1)),
+        [],
+      );
+      console.log('menuKeys     =>', menuKeys);
+      console.log('');
+      setRejReasons(menuKeys);
+    });
+
     setRefreshing(false);
   };
   const tabChange = value => {
@@ -107,6 +133,12 @@ export default function RawMaterial(props) {
       ];
       setFormData([...updatedBatchData]);
     }
+  };
+
+  const handlePickerValue = (value, index) => {
+    console.log(value, index);
+    setRejReason(value);
+    setRejIndex(index);
   };
 
   const closeDialog = () => {
@@ -190,7 +222,6 @@ export default function RawMaterial(props) {
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         Alert.alert('Weight updated');
-        console.log('apiRes', JSON.stringify(apiRes));
         setIndicator(false);
 
         if (apiRes.response.message) {
@@ -204,24 +235,20 @@ export default function RawMaterial(props) {
   };
 
   const setRejectWeight = async () => {
-    let apiData1 = {
-      op: 'get_rejections',
-      process_name: appProcess.process_name,
-      unit_num: appProcess.unit_num,
-      stage_name: 'Shearing',
-    };
-
-    const res = await ApiService.getAPIRes(apiData1, 'POST', 'rejection');
-    const reasons = res.response.message.rejections[0].Shearing[0];
     let rejWeight = await util.filterFormData([...formData]);
+
     let apiData = {op: 'update_rejection'};
     apiData.process_name = appProcess.process_name;
     apiData.stage_name = await AsyncStorage.getItem('stage');
 
+    console.log('rejReasons==>', rejReasons);
+
     let rejReasonObj = {};
-    rejReasonObj[Object.keys(reasons)[0]] = parseInt(rejWeight.reject_weight);
+    rejReasonObj[rejReasons[rejIndex]] = rejWeight.reject_weight; // parseInt(rejWeight.reject_weight);
+    console.log('rejReasonObj==>', rejReasonObj);
     let rejObj = {};
     rejObj['Shearing'] = rejReasonObj;
+    console.log('rejObj==>', rejObj);
     apiData.rejections = rejObj;
 
     setApiStatus(true);
@@ -354,7 +381,7 @@ export default function RawMaterial(props) {
         setClient(client);
       })
       .catch(err => {
-        console.log('raw naterial ' + err);
+        console.log('raw material ' + err);
         setListeningEvent(false);
       });
   };
@@ -455,11 +482,39 @@ export default function RawMaterial(props) {
                   margin: 5,
                   padding: 5,
                 }}>
-                <FormGen
-                  handleChange={handleChange}
-                  formData={formData}
-                  labelDataInRow={true}
-                />
+                <View style={{flexDirection: 'row', margin: 5}}>
+                  <Text
+                    style={[AppStyles.filterLabel, {flex: 1, fontSize: 14}]}>
+                    Rejection Reason <Text style={{color: 'red'}}>* </Text>
+                  </Text>
+                  <Picker
+                    onValueChange={handlePickerValue}
+                    selectedValue={rejReason}
+                    mode="dialog"
+                    style={[AppStyles.pickerStyle, {flex: 2}]}
+                    itemStyle={{}}
+                    dropdownIconColor={appTheme.colors.cardTitle}>
+                    {rejReasons
+                      ? rejReasons.map((pickerItem, pickerIndex) => {
+                          return (
+                            <Picker.Item
+                              style={{backgroundColor: '#ECF0FA'}}
+                              label={pickerItem}
+                              value={pickerItem}
+                              key={pickerIndex}
+                            />
+                          );
+                        })
+                      : false}
+                  </Picker>
+                </View>
+                <View style={{marginLeft: 9, marginRight: 5}}>
+                  <FormGen
+                    handleChange={handleChange}
+                    formData={formData}
+                    labelDataInRow={true}
+                  />
+                </View>
                 <View
                   style={{
                     display: 'flex',

@@ -91,7 +91,7 @@ let batchSchema = [
     error: '',
     required: true,
     label: 'component weight',
-    type: 'number',
+    type: 'decimal',
     nonZero: true,
   },
 ];
@@ -156,7 +156,7 @@ let created_process_schema = [
     error: '',
     required: true,
     label: 'component_weight',
-    type: 'number',
+    type: 'decimal',
     nonZero: true,
   },
   {
@@ -503,6 +503,11 @@ export default function ProcessDetails(props) {
     setForgeErr('');
     let apiData = await util.filterFormData([...batchFormData]);
     (apiData.op = 'add_process'), setBatchFormData(validFormData);
+    console.log('apiData', apiData.component_count, apiData.component_id);
+
+     let supplier = await ApiService.getAPIRes({op:"get_suppliers"}, 'POST', 'get_supplier');
+ console.log(JSON.stringify('supplier', supplier));
+
     if (!forgeId.length) setForgeErr('Forge Machine required');
 
     if (!isError && forgeId.length) {
@@ -510,6 +515,7 @@ export default function ProcessDetails(props) {
       setForgeErr('');
       setApiStatus(true);
       let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'process');
+      console.log(JSON.stringify(apiRes));
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {

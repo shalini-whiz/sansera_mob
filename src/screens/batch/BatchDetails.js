@@ -97,7 +97,7 @@ let batchSchema = [
     error: '',
     required: true,
     label: 'quantity',
-    type: 'number',
+    type: 'decimal',
     nonZero: true,
   },
 ];
@@ -158,7 +158,7 @@ let createdBatch = [
     error: '',
     required: true,
     label: 'quantity',
-    type: 'number',
+    type: 'decimal',
   },
   {
     key: 'created_by',
@@ -198,14 +198,14 @@ export default function BatchDetails(props) {
   const isFocused = useIsFocused();
   const [materials, setMaterials] = useState([]);
   const [count, setCount] = useState(0);
-    const [certif, setCertif] = useState('');
+  const [certif, setCertif] = useState('');
 
   useEffect(() => {
     if (isFocused) {
       loadForm();
     }
     return () => {};
-  }, [isFocused, props.content && props.content._id,props]);
+  }, [isFocused, props.content && props.content._id, props]);
 
   useEffect(() => {
     if (!props._id) {
@@ -250,8 +250,8 @@ export default function BatchDetails(props) {
     } else {
       batchSchemaData = [...batchSchema];
       //let formData = await util.formatForm(batchSchemaData);
-      batchSchemaData.map(item => (item['error'] = ''));   // by Rakshith
-      batchSchemaData.map(item => (item['value'] = ''));   // by Rakshith
+      batchSchemaData.map(item => (item['error'] = '')); // by Rakshith
+      batchSchemaData.map(item => (item['value'] = '')); // by Rakshith
       setBatchFormData(batchSchemaData);
     }
     setCount(previousCount => previousCount + 1);
@@ -360,83 +360,83 @@ export default function BatchDetails(props) {
     }
   };
 
-    const downloadPdf = async () => {
-      setApiStatus(true);
-      let apiData = {
-        op: 'get_certificate',
-        batch_num: props.content.batch_num,
-        status: 'APPROVED',
-        unit_num: props.content.unit_num,
-      };
-      let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'batch');
+  const downloadPdf = async () => {
+    setApiStatus(true);
+    let apiData = {
+      op: 'get_certificate',
+      batch_num: props.content.batch_num,
+      status: 'APPROVED',
+      unit_num: props.content.unit_num,
+    };
+    let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'batch');
 
-      console.log(props.content.batch_num);
-      console.log(apiRes);
-      setCertif(apiRes.response.message.appr_certificate);
-      const base64String = apiRes.response.message.appr_certificate?.replace(
-        'data:application/pdf;base64,',
-        '',
+    // setCertif(apiRes.response.message.appr_certificate);
+    const base64String = apiRes.response.message.appr_certificate?.replace(
+      'data:application/pdf;base64,',
+      '',
+    );
+    const fileName = `${props.content.batch_num}.pdf`;
+
+    convertBase64ToPDF(base64String, fileName);
+  };
+
+  const convertBase64ToPDF = async (base64String, fileName) => {
+    try {
+      const date = dateUtil.toDateFormat(Date.now(), 'DD-MMM-YYYY');
+      const granted = await requestStoragePermission();
+      if (!granted) {
+        // console.warn('Storage permission denied. Cannot download the file.');
+        Alert.alert('Storage permission denied. Cannot download the file.');
+        return;
+      }
+      const {fs, config} = RNFetchBlob;
+      const pdfLocation = `${fs.dirs.DownloadDir}//${date}/${fileName}`;
+
+      try {
+        if (base64String) {
+          await fs
+            .writeFile(pdfLocation, base64String, 'base64')
+            .then(() => {
+              ToastAndroid.show(
+                `${fileName} File Downloaded `,
+                ToastAndroid.SHORT,
+              );
+              console.log(`${fileName} File Downloaded `);
+            })
+            .then(
+              Alert.alert(fileName, 'Downloaded Successfully'),
+              setApiStatus(false),
+            )
+            .catch(err => Alert.alert(err));
+        } else {
+          Alert.alert('Certificate Not Found');
+          setApiStatus(false);
+        }
+      } catch (err) {
+        console.log('error -> ', err);
+        setApiStatus(false);
+      }
+    } catch (err) {
+      console.error('Failed to convert and download the file:', err);
+      setApiStatus(false);
+    }
+  };
+
+  const requestStoragePermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission',
+          message: 'App needs access to your device storage to download files.',
+        },
       );
-      const fileName = `${props.content.batch_num}.pdf`;
-      console.log(base64String, fileName);
-
-      convertBase64ToPDF(base64String, fileName);
-    };
-
-    const convertBase64ToPDF = async (base64String, fileName) => {
-      try {
-        const granted = await requestStoragePermission();
-        if (!granted) {
-          console.warn('Storage permission denied. Cannot download the file.');
-          return;
-        }
-        const {fs, config} = RNFetchBlob;
-        const pdfLocation = `${fs.dirs.DownloadDir}/${fileName}`;
-
-        try {
-          if (base64String) {
-            await fs
-              .writeFile(pdfLocation, base64String, 'base64')
-              .then(() => {
-                ToastAndroid.show(
-                  `${fileName} File Downloaded `,
-                  ToastAndroid.LONG,
-                );
-              })
-              .then(
-                Alert.alert(fileName, 'Downloaded Successfully'),
-                setApiStatus(false),
-              )
-              .catch(err => Alert.alert(err));
-          } else {
-            Alert.alert('Certificate Not Found');
-            setApiStatus(false);
-          }
-        } catch (err) {
-          console.log('error -> ', err);
-        }
-      } catch (err) {
-        console.error('Failed to convert and download the file:', err);
-      }
-    };
-
-    const requestStoragePermission = async () => {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission',
-            message:
-              'App needs access to your device storage to download files.',
-          },
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.error('Failed to request storage permission:', err);
-        return false;
-      }
-    };
-
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.error('Failed to request storage permission:', err);
+      return false;
+    }
+  };
 
   const openDialog = batchDetails => {
     showDialog(true);
@@ -518,7 +518,7 @@ export default function BatchDetails(props) {
         ) : (
           false
         )}
-        
+
         {apiError && apiError.length ? (
           <ErrorModal msg={apiError} okAction={errOKAction} />
         ) : (
@@ -558,8 +558,6 @@ export default function BatchDetails(props) {
                 justifyContent: 'center',
                 alignItems: 'center',
                 alignSelf: 'center',
-                // marginLeft: 15,
-                // padding: 5,
               }}
             />
           </View>

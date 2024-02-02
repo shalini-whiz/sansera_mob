@@ -45,7 +45,6 @@ export default function ShowRack(props) {
       };
 
       ApiService.getAPIRes(apiData1, 'POST', 'batch').then(apiRes => {
-        console.log('apiRes--1', apiRes);
         setApiStatus(false);
         if (apiRes && apiRes.status) {
           let renderedBatch = apiRes.response.message;
@@ -60,7 +59,6 @@ export default function ShowRack(props) {
             ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
               setApiStatus(false);
               if (apiRes && apiRes.status) {
-                console.log('apiRes--', apiRes);
 
                 props.reloadPage();
                 Alert.alert(

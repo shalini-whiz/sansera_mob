@@ -45,7 +45,6 @@ export const Rejection = React.memo(props => {
 
   let rejectionMenu = [];
 
-  
   useEffect(() => {
     if (isFocused) {
       loadData();

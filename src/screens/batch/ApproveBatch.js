@@ -220,26 +220,7 @@ export default function ApproveBatch({navigation}) {
       setApiError('Racks are empty');
     }
   };
-  // const validatePDF = async(file) => {
-  //   console.log(file)
-  //   try {
-  //     const file = await DocumentPicker.pick({
-  //       type: [DocumentPicker.types.pdf],
-  //       copyTo: 'documentDirectory',
-  //     });
-  //     setDoc(decodeURI(
-  //       file.fileCopyUri.replace('file://', ''),
-  //     ))
 
-  //   } catch (error) {
-  //     if (DocumentPicker.isCancel(error)) {
-  //       // The user canceled the document picker.
-  //     } else {
-  //       console.log(error)
-  //       throw error;
-  //     }
-  //   }
-  // }
   const updateBatch = async () => {
     let apiData = {};
     if (action === 'rejected') apiData.material_reject_reason = reasonId;
@@ -790,20 +771,3 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height,
   },
 });
-
-// <Pdf source={{ uri: "file:/data/user/0/com.sansera/files/60c41287-e7ff-4eef-89a7-c87dd946c1fa/U13BSC.pdf"}}
-
-//   onLoadComplete={(numberOfPages, filePath) => {
-//     console.log(`Number of pages: ${numberOfPages}`);
-//   }}
-//   onPageChanged={(page, numberOfPages) => {
-//     console.log(`Current page: ${page}`);
-//   }}
-//   onError={(error) => {
-//     console.log(error);
-//   }}
-//   onPressLink={(uri) => {
-//     console.log(`Link pressed: ${uri}`);
-//   }}
-//   style={styles.pdf}
-//   />

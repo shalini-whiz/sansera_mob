@@ -40,7 +40,7 @@ dateUtil.toFormat = (input, dateFormat) => {
 };
 dateUtil.toTimeFormat = (input, dateFormat) => {
   if (!input) return "";
-  if (!dateFormat) dateFormat = "HH:MM";
+  if (!dateFormat) dateFormat = 'hh:mm:ss';
   return moment(new Date(input)).format(dateFormat);
 };
 export default dateUtil;

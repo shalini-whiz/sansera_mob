@@ -50,7 +50,9 @@ export const StageHome = React.memo((props) => {
           children={() => <WorkPlan updateProcess={updateProcess} />}
           listeners={{ tabPress: (e) => { setRoute('Work Plan') } }}
         />
-        {(processStage.toLowerCase() !== "oiling" && processStage.toLowerCase() != "mpi" && processStage.toLowerCase() != "dispatch") ?
+        {(processStage.toLowerCase() !== "oiling" && 
+        // processStage.toLowerCase() != "mpi" &&  // 
+        processStage.toLowerCase() != "dispatch") ?
           <Tab.Screen name="Rejection"
             children={() => <Rejection updateProcess={updateProcess} />}
             listeners={{ tabPress: (e) => { setRoute('Rejection') }, }}

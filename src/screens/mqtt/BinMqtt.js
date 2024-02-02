@@ -14,6 +14,7 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  ProgressBarAndroid
 } from 'react-native';
 import {appTheme} from '../../lib/Themes';
 import {ApiService} from '../../httpservice';
@@ -29,8 +30,8 @@ import {getItem, setItem} from '../../context/SyncStorage';
 import {FlatList} from 'react-native-gesture-handler';
 import AppStyles from '../../styles/AppStyles';
 import RequestDevice from './RequestDevice';
+// import {ProgressBarAndroid} from '@react-native-community/progress-bar-android';
 
-const {Bar} = require('react-native-progress');
 const BinMqtt = props => {
   const userState = React.useContext(UserContext);
   const isFocused = useIsFocused();
@@ -96,7 +97,8 @@ const BinMqtt = props => {
     setDevices([]);
   };
 
-  const openClearModel = type => {
+  const openClearModel = (e,type) => {
+    console.log("clearmodel")
     setDialogType(type);
     showDialog(true);
     setDialogTitle('Clear Bin Request');
@@ -132,7 +134,7 @@ const BinMqtt = props => {
                 setLoadBatteryData(false);
                 //client.disconnect()
               }
-            }, 6000 * index);
+            }, 1000 * index);
           });
         });
       }
@@ -212,7 +214,7 @@ const BinMqtt = props => {
       unit_num: userState.user.unit_number,
     };
     let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'mqtt');
-    console.log('apiRes ++', JSON.stringify(apiRes));
+    // console.log('apiRes ++', JSON.stringify(apiRes));
     let batteryJson = {
       elemNum: apiRes.response.message[0].element_num,
       devID: dataJson.devID,
@@ -225,23 +227,10 @@ const BinMqtt = props => {
         // We have data!!
 
         let batteryData = JSON.parse(data);
-        console.log('data ===', JSON.stringify(data));
-
-        //
-        // batteryData['devID'] !== batteryJson['devID']
-        //   ? batteryData.push(batteryJson)
-        //   : null;
-
-        console.log('BATjson', JSON.stringify(batteryJson));
-        console.log('BATdata', JSON.stringify(batteryData));
 
         // by rakshith
         setLowBatteryData(prev => {
-          console.log('prev', JSON.stringify(prev));
           prev.push(batteryJson);
-          //  return !prev.includes(batteryJson.element_num)
-          //     ? [...prev, batteryJson]
-          //     : [...prev];
           return [
             ...new Map(
               prev.map(device => [device.devID, device]), // by rakshith
@@ -374,7 +363,8 @@ const BinMqtt = props => {
                 </View>
 
                 <TouchableOpacity
-                  onPress={e => openChooseBat(e, 'chooseDevices')}
+                  // onPress={e => openChooseBat(e, 'chooseDevices')}
+                  onPress={e => openDialog(e, 'batteryStatus')}
                   style={{
                     flexDirection: 'row',
                     justifyContent: 'flex-end',
@@ -534,7 +524,25 @@ const BinMqtt = props => {
           container={
             <>
               <View style={{alignItems: 'center'}}>
-                <Bar progress={0.3} width={loadBatteryData ? 1000 : 0} />
+                {loadBatteryData ? (
+                  <View
+                    style={{
+                      // backgroundColor: 'green',
+                      // paddingHorizontal: 5,
+                      height: 5,
+                      justifyContent: 'center',
+                      borderColor: '#2196F3',
+                      borderWidth: 1,
+                      borderRadius: 50,
+                    }}>
+                    <ProgressBarAndroid
+                      styleAttr="Horizontal"
+                      color="#2196F3"
+                      width={1000}
+                      height={20}
+                    />
+                  </View>
+                ) : null}
               </View>
               <LowBattery
                 loadBatteryData={loadBatteryData}

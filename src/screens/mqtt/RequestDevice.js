@@ -42,12 +42,10 @@ export default function RequestDevice(props) {
   const handleChange = name => async (value, index) => {
     if (name === 'device') {
       setDevice(value);
-      console.log(value);
     }
   };
 
   const handleRequestType = name => value => {
-    console.log('Radio value', value);
     setRequestType(value);
     if (value === 'bin' || value === 'rack') {
       let apiData = {
@@ -59,7 +57,6 @@ export default function RequestDevice(props) {
         if (apiRes && apiRes.status) {
           if (apiRes.response.message && apiRes.response.message.length) {
             setAllDevice(apiRes.response.message);
-            console.log(apiRes.response.message[0]);
           }
         } else if (apiRes.response.message)
           setApiError(apiRes.response.message);

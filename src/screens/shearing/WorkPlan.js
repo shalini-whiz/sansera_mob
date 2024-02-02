@@ -49,7 +49,7 @@ let stageWeightSchema = [
     error: '',
     required: false,
     label: 'Billet Weight',
-    type: 'number',
+    type: 'decimal',
     defaultValue: 0,
   },
   {
@@ -60,29 +60,29 @@ let stageWeightSchema = [
     error: '',
     required: false,
     label: 'Hold Material Weight',
-    type: 'number',
+    type: 'decimal',
     defaultValue: 0,
   },
   {
     key: 'ok_bits_count',
-    displayName: 'Count of OK Bits',
+    displayName: 'Count of OK End Billets',
     placeholder: '',
     value: 0,
     error: '',
     required: false,
-    label: 'Count of OK Bits',
+    label: 'Count of OK End Billets',
     type: 'number',
     defaultValue: 0,
   },
   {
     key: 'ok_bits_weight',
-    displayName: 'OK Bits Weight (kg)',
+    displayName: 'OK End Billets Weight (kg)',
     placeholder: '',
     value: 0,
     error: '',
     required: false,
-    label: 'OK Bits Weight',
-    type: 'number',
+    label: 'OK End Billets Weight',
+    type: 'decimal',
     defaultValue: 0,
   },
   // {
@@ -215,9 +215,10 @@ export default function WorkPlan(props) {
 
       if (ok_bits_count_obj.value > 0 && ok_bits_weight_obj.value == 0) {
         validFormData[ok_bits_weight_index].error =
-          'Weight of OK Bits required';
+          'Weight of OK End Billets required';
       } else if (ok_bits_weight_obj.value > 0 && ok_bits_count_obj.value == 0)
-        validFormData[ok_bits_count_index].error = 'Count of OK Bits required';
+        validFormData[ok_bits_count_index].error =
+          'Count of OK End Billets required';
 
       let ok_component_index = validFormData.findIndex(
         item => item.key === 'ok_component',

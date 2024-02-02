@@ -104,7 +104,8 @@ export default function ConsumptionFilters() {
             })}
           </Picker>
         </View>
-        <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+        {/* Temporarly disabled stage Picker // rakshith */}
+        {/* <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}> 
           <Text style={AppStyles.filterLabel}>Select Stage</Text>
           <Picker
             selectedValue={stageName}
@@ -124,7 +125,7 @@ export default function ConsumptionFilters() {
               );
             })}
           </Picker>
-        </View>
+        </View> */}
       </View>
       {apiError && apiError.length ? (
         <ErrorModal msg={apiError} okAction={errOKAction} />

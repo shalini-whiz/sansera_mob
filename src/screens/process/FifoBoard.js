@@ -139,7 +139,11 @@ export const FifoBoard = React.memo(props => {
       <Text style={[styles.tableDataCell, {}]}>{item.heat_num}</Text>
       <Text style={[styles.tableDataCell, {}]}>{item.supplier}</Text>
       <Text style={[styles.tableDataCell, {}]}>{item.process_name}</Text>
-      <Text style={[styles.tableDataCell, {}]}>{item.component_weight}</Text>
+      <Text style={[styles.tableDataCell, {}]}>{item.component_count}</Text>
+      <Text style={[styles.tableDataCell, {}]}>
+        {item.process[6].ok_component}
+      </Text>
+      {/* Target count and Finished Count */}
       <Text style={[styles.tableDataCell, {}]}>
         {dateUtil.toFormat(item.created_on, 'DD MMM YYYY')}
       </Text>
@@ -177,9 +181,11 @@ export const FifoBoard = React.memo(props => {
                   <Text style={[styles.tableHeaderCell, {}]}>Heat Number</Text>
                   <Text style={[styles.tableHeaderCell, {}]}>Supplier</Text>
                   <Text style={[styles.tableHeaderCell, {}]}>Process</Text>
+                  <Text style={[styles.tableHeaderCell, {}]}>Target Count</Text>
                   <Text style={[styles.tableHeaderCell, {}]}>
-                    Total Quantity
+                    Finished Count
                   </Text>
+                  {/* Target count and Finished Count */}
                   <Text style={[styles.tableHeaderCell, {}]}>
                     Received Date
                   </Text>
