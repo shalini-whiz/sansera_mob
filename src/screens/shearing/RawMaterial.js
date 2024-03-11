@@ -484,7 +484,10 @@ export default function RawMaterial(props) {
                 }}>
                 <View style={{flexDirection: 'row', margin: 5}}>
                   <Text
-                    style={[AppStyles.filterLabel, {flex: 1, fontSize: 14}]}>
+                    style={[
+                      AppStyles.filterLabel, // //UI_Enhancement issue 11
+                      {flex: 1, fontSize: 14, alignSelf: 'center'},
+                    ]}>
                     Rejection Reason <Text style={{color: 'red'}}>* </Text>
                   </Text>
                   <Picker
@@ -498,7 +501,7 @@ export default function RawMaterial(props) {
                       ? rejReasons.map((pickerItem, pickerIndex) => {
                           return (
                             <Picker.Item
-                              style={{backgroundColor: '#ECF0FA'}}
+                              style={{backgroundColor: '#ECF0FA', fontSize: 16}}
                               label={pickerItem}
                               value={pickerItem}
                               key={pickerIndex}
@@ -597,11 +600,18 @@ export default function RawMaterial(props) {
 
                 <View
                   style={{display: 'flex', flexDirection: 'row', padding: 10}}>
-                  <Text style={[AppStyles.filterLabel, {flex: 1, padding: 10}]}>
+                  <Text
+                    style={[
+                      AppStyles.filterLabel,
+                      {flex: 1, padding: 10, fontSize: 16},
+                    ]}>
                     Enter Weight
                   </Text>
                   <TextInput
-                    style={[AppStyles.filterText, {flex: 2, padding: 10}]}
+                    style={[
+                      AppStyles.filterText,
+                      {flex: 2, padding: 8, fontSize: 16},
+                    ]}
                     keyboardType="numeric"
                     onChangeText={text => setPartialWeight(text)}>
                     {partialWeight}

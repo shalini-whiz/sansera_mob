@@ -117,6 +117,7 @@ export const RackData = React.memo(props => {
             margin: 5,
             padding: 5,
             flex: 1,
+            alignItems: 'center', //UI_Enhancement issue 4
           }}
           onPress={e => openDialog(e, item, item.element_name)}
           key={index}>
@@ -188,7 +189,7 @@ export const RackData = React.memo(props => {
           numColumns={columns}
         />
       ) : (
-        false
+        <ActivityIndicator size={'large'} /> ////UI_Enhancement issue 20
       )}
       {dialog ? (
         <CustomModal

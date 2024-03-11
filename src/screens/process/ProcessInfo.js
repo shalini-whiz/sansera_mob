@@ -58,10 +58,17 @@ let created_process_schema = [
     label: 'components',
     type: 'string',
   },
-  // {
-  //   "key": "component_count", displayName: "Required Components", placeholder: "", value: "",
-  //   error: "", required: true, label: "components", type: "number"
-  // },
+  ////UI_Enhancement issue 13
+  {
+    key: 'component_count',
+    displayName: 'Target Components (count)',
+    placeholder: '',
+    value: '',
+    error: '',
+    required: true,
+    label: 'components',
+    type: 'number',
+  },
   {
     key: 'component_weight',
     displayName: 'Total Quantity (kg)',
@@ -221,8 +228,7 @@ export default function ProcessInfo(props) {
         (currentStage.toLowerCase() === stageType.shotblasting ||
           currentStage.toLowerCase() === stageType.visual ||
           currentStage.toLowerCase() === stageType.mpi ||
-          currentStage.toLowerCase() === stageType.shotpeening ||
-          currentStage.toLowerCase() === stageType.oiling)
+          currentStage.toLowerCase() === stageType.shotpeening)
       ) {
         processSchema = [...created_process_schema];
         processSchema.push(ok_component_schema);
@@ -233,6 +239,13 @@ export default function ProcessInfo(props) {
         processSchema = [...created_process_schema];
         processSchema.push(total_count_schema);
       }
+
+      // Font&AlignmentChanges 4
+      if (currentStage && currentStage.toLowerCase() === stageType.oiling) {
+        processSchema = [...created_process_schema];
+        processSchema.push(total_count_schema);
+      }
+
       processSchema.map(item => {
         item['value'] = props.processEntity[item.key]
           ? props.processEntity[item.key] + ''

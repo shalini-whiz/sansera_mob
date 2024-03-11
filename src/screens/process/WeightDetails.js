@@ -20,7 +20,7 @@ import {json} from 'stream/consumers';
 let created_process_schema = [
   {
     key: 'hold_materials_weight',
-    displayName: 'Hold Weight',
+    displayName: 'Hold Materials Weight', //UI_Enhancement issue 14
     placeholder: '',
     value: '',
     error: '',
@@ -58,23 +58,23 @@ let created_process_schema = [
   },
   {
     key: 'ok_bits_count',
-    displayName: 'OK End Billets (count)',
+    displayName: 'End Billets (count)', //UI_Enhancement issue 14
     placeholder: '',
     value: 0,
     error: '',
     required: false,
-    label: 'Count of OK End Billets',
+    label: 'End Billets Count',
     type: 'number',
     defaultValue: 0,
   },
   {
     key: 'ok_bits_weight',
-    displayName: 'OK End Billets Weight (kg)',
+    displayName: 'End Billets Weight (kg)', //UI_Enhancement issue 14
     placeholder: '',
     value: 0,
     error: '',
     required: false,
-    label: 'OK End Billets Weight',
+    label: 'End Billets Weight',
     type: 'number',
     defaultValue: 0,
   },

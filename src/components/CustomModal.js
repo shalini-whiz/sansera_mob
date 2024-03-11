@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     padding: 20,
-    fontSize: 28,
+    fontSize: 26,
     textAlign: 'center',
     color: appTheme.colors.cardTitle,
     fontFamily: appTheme.fonts.bold,

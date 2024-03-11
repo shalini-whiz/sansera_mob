@@ -227,7 +227,7 @@ export const Rejection = React.memo(props => {
     }
     if (valid) {
       showDialog(true);
-      setDialogTitle('Save Rejections');
+      setDialogTitle('Confirm Rejection Details');
     }
   };
   const closeDialog = () => {
@@ -295,8 +295,10 @@ export const Rejection = React.memo(props => {
                   <Text
                     key={index}
                     style={[
+                      // Font&AlignmentChanges 7
                       AppStyles.sideMenu,
                       {
+                        fontSize: 16, 
                         borderRadius: 5,
                         margin: 5,
                         padding: 10,
@@ -363,7 +365,11 @@ export const Rejection = React.memo(props => {
                   </Text>
                   <TextInput
                     keyboardType="numeric"
-                    style={[AppStyles.filterText, {flex: 2}]}
+                    style={[
+                      AppStyles.filterText,
+                      {flex: 2, padding: 13, marginLeft: 15, fontSize: 16},
+                      // Font & AlignmentChanges 8
+                    ]}
                     onChangeText={value => setRejCount(value)}
                     value={rejCount}></TextInput>
                 </View>
@@ -485,6 +491,28 @@ export const Rejection = React.memo(props => {
             dialogMessage={dialogMessage}
             closeDialog={closeDialog}
             okDialog={updateRejections}
+            container={
+              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <Text style={{fontSize: 18, color: 'black'}}>
+                  Entered Rejected component{' '}
+                  <Text
+                    style={{
+                      color: appTheme.colors.cardTitle,
+                      fontWeight: 'bold',
+                    }}>
+                    {rejCount}
+                  </Text>{' '}
+                  are adding to process{'  '}
+                  <Text
+                    style={{
+                      color: appTheme.colors.cardTitle,
+                      fontWeight: 'bold',
+                    }}>
+                    {appProcess.process_name}
+                  </Text>
+                </Text>
+              </View>
+            }
           />
         ) : (
           false

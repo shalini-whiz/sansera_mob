@@ -100,11 +100,13 @@ util.validateFormData = async obj => {
         typeof item['value'] == 'string' ? item['value'].trim() : item['value'];
     }
     let value = item['value'];
-    if (
-      (item.type === 'number' ) &&
-      item.value.toString().length > 0
-    ) {
+    if (item.type === 'number' && item.value.toString().length > 0) {
       item.value = parseInt(value);
+    }
+    
+    //UI_Enhancement issue 29
+    if (item.type === 'decimal' && item.value.toString().length > 0) {
+      item.value = Number(value).toFixed(3);
     }
     if (
       (item.type === 'number' || item.type === 'decimal') &&

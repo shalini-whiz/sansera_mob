@@ -1,10 +1,10 @@
-
 import React, {Component, useState} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import {BatchBoard} from './BatchBoard';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {FifoBoard} from '../process/FifoBoard';
 import {appTheme} from '../../lib/Themes';
+import ClearInventory from './ClearInventory'; //UI_Enhancement issue 2
 
 const FifoHome = () => {
   const [Fifo, setFifo] = useState('Batch');
@@ -63,12 +63,11 @@ const FifoHome = () => {
           </Text>
         </TouchableOpacity>
       </View>
-
-      {Fifo && Fifo === 'Batch' ? <BatchBoard /> : <FifoBoard />}
+      {Fifo && Fifo === 'Batch' ? <ClearInventory /> : <FifoBoard />}
+      {/* //UI_Enhancement issue 2 */}
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {

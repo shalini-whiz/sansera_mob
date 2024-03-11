@@ -1,8 +1,11 @@
 // var liveAddress = 'http://10.11.2.32:8086/';
-// var mqttAddress = 'mqtt://10.11.2.32:1883';
+// var mqttAddress = 'mqtt://10.11.2.32:1883';  // Sansera VM
 
-var liveAddress = 'http://203.129.243.94:8086/';
-var mqttAddress = 'mqtt://203.129.243.94:1883';
+var liveAddress = 'http://103.162.246.109:8086/';
+var mqttAddress = 'mqtt://103.162.246.109:1883';  // old mysore VM
+
+// var liveAddress = 'http://203.129.243.94:8086/';
+// var mqttAddress = 'mqtt://203.129.243.94:1883';  // new Mysore VM
 
 let oldmqttOptions = {
   uri: 'mqtt://mqtt.meti.in:1884',

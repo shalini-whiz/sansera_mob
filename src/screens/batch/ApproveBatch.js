@@ -41,6 +41,8 @@ export default function ApproveBatch({navigation}) {
 
   const [apiError, setApiError] = useState('');
   const [apiStatus, setApiStatus] = useState(false);
+  const [apiIndicator, setApiIndicator] = useState(true);
+  //Font&AlignmentChanges 2
   const [batchNum, setBatchNum] = useState('');
   const [status, setStatus] = useState('NEW');
   const [reason, setReason] = useState('');
@@ -80,6 +82,13 @@ export default function ApproveBatch({navigation}) {
     }
     return () => {};
   }, [navigation, isFocused, status, batchDet]);
+
+  //Font&AlignmentChanges 2
+  useEffect(() => {
+    setTimeout(() => {
+      setApiIndicator(false);
+    }, 5000);
+  }, [status]);
 
   const loadBatches = () => {
     let apiData = {
@@ -152,6 +161,8 @@ export default function ApproveBatch({navigation}) {
 
   const handleStatusChange = value => {
     setBatchNum('');
+    setApiIndicator(true);
+    //Font&AlignmentChanges 2
     setBatchDet({});
     setStatus(value);
     setDoc(null);
@@ -470,10 +481,12 @@ export default function ApproveBatch({navigation}) {
                           <RadioButton value="new" />
                           <Text
                             style={[
+                              //UI_Enhancement issue 22
                               styles.radioText,
                               {
-                                color: appTheme.colors.warnAction,
-                                marginLeft: 15,
+                                color: '#ff7b00',
+                                marginRight: 20,
+                                marginTop: 1,
                                 fontFamily:
                                   action === 'new'
                                     ? appTheme.fonts.bold
@@ -492,10 +505,12 @@ export default function ApproveBatch({navigation}) {
                           <RadioButton value="approved" />
                           <Text
                             style={[
+                              //UI_Enhancement issue 22
                               styles.radioText,
                               {
-                                color: appTheme.colors.successAction,
-                                marginLeft: 15,
+                                color: 'green',
+                                marginRight: 20,
+                                marginTop: 1,
                                 fontFamily:
                                   action === 'approved'
                                     ? appTheme.fonts.bold
@@ -514,10 +529,12 @@ export default function ApproveBatch({navigation}) {
                           <RadioButton value="rejected" />
                           <Text
                             style={[
+                              //UI_Enhancement issue 22
                               styles.radioText,
                               {
-                                color: appTheme.colors.cancelAction,
-                                marginLeft: 15,
+                                color: 'red',
+                                marginRight: 20,
+                                marginTop: 1,
                                 fontFamily:
                                   action === 'rejected'
                                     ? appTheme.fonts.bold
@@ -724,7 +741,12 @@ export default function ApproveBatch({navigation}) {
                 flexDirection: 'column',
                 margin: 100,
               }}>
-              <ActivityIndicator size={'large'}></ActivityIndicator>
+              {/* Font&AlignmentChanges 2 */}
+              {apiIndicator ? (
+                <ActivityIndicator size="large" animating={apiIndicator} />
+              ) : (
+                false
+              )}
               <View style={{margin: 90, flex: 1, backgroundColor: 'white'}}>
                 <Text
                   style={{

@@ -67,20 +67,41 @@ export const BatchBoard = React.memo(props => {
     setApiError('');
   };
 
-  const renderItem = ({item, index}) => (
-    <View style={[styles.tableData, {flexDirection: 'row'}]} key={index}>
-      <Text style={[styles.tableDataCell, {borderLeftWidth: 0.5}]}>
-        {item.batch_num}
-      </Text>
-      <Text style={[styles.tableDataCell, {}]}>{item.heat_num}</Text>
-      <Text style={[styles.tableDataCell, {}]}>{item.supplier}</Text>
-      <Text style={[styles.tableDataCell, {}]}>{item.total_weight}</Text>
-      <Text style={[styles.tableDataCell, {}]}>
-        {dateUtil.toFormat(item.created_on, 'DD MMM YYYY')}
-      </Text>
-      <Text style={[styles.tableDataCell, {}]}>{item.status}</Text>
-    </View>
-  );
+  const renderItem = ({item, index}) => {
+    {/* //UI_Enhancement issue 3 */}
+
+    let color;
+    if (item.status === 'NEW') {
+      color = '#ce8807';
+    } else if (item.status === 'APPROVED') {
+      color = 'green';
+    } else color = 'red';
+
+    {/* //UI_Enhancement issue 3 */}
+    return (
+      <View style={[styles.tableData, {flexDirection: 'row'}]} key={index}>
+        <Text style={[styles.tableDataCell, {borderLeftWidth: 0.5}]}>
+          {item.batch_num}
+        </Text>
+        <Text style={[styles.tableDataCell, {}]}>{item.heat_num}</Text>
+        <Text style={[styles.tableDataCell, {}]}>{item.supplier}</Text>
+        <Text style={[styles.tableDataCell, {}]}>{item.total_weight}</Text>
+        <Text style={[styles.tableDataCell, {}]}>
+          {dateUtil.toFormat(item.created_on, 'DD MMM YYYY')}
+        </Text>
+        <Text
+          style={[
+            styles.tableDataCell,
+            {
+              color: color,
+            },
+          ]}>
+          {item.status && item.status === 'NEW' ? 'HOLD' : item.status}
+          {/* //UI_Enhancement issue 3 */}
+        </Text>
+      </View>
+    );
+  };
 
   let minIndex = 0;
   let maxIndex = process.length - 1;

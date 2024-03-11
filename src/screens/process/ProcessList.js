@@ -24,6 +24,8 @@ import ErrorModal from '../../components/ErrorModal';
 import {ProcessFifo} from './ProcessFifo';
 import PublishMqtt from '../mqtt/PublishMqtt';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import {SvgCss} from 'react-native-svg';
+import {BinOutIcon} from '../../svgs/BinIcon';
 
 export default function ProcessList() {
   const flatlistRef = useRef();
@@ -69,7 +71,7 @@ export default function ProcessList() {
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length) {
           setProcess(apiRes.response.message);
-          process && msg ? Alert.alert(`${msg}`, `Process ${process}`) : null;
+          process && msg ? Alert.alert(`${msg}`, `Process : ${process}`) : null;
         }
       } else if (apiRes && apiRes.response.message) {
         setApiError(apiRes.response.message);
@@ -110,11 +112,11 @@ export default function ProcessList() {
     let dialogType = '';
     dialogType = type;
     if (type === 'rejection') {
-      dialogTitle = 'Process Component';
+      dialogTitle = ''; // no title
     } else if (type === 'consumption') {
       dialogTitle = 'Consumption Data';
     } else if (type === 'processFifo') {
-      dialogTitle = 'Update Process ' + item.process_name;
+      dialogTitle = 'Process : ' + item.process_name;
     } else if (type === 'startProcess') {
       dialogTitle = 'Start Process ' + item.process_name;
     } else if (type === 'stopProcess') {
@@ -243,7 +245,10 @@ export default function ProcessList() {
                               style={{
                                 textAlign: 'right',
                                 fontSize: 20,
-                                color: 'green',
+                                color:
+                                  item.status.toLowerCase() === 'hold'
+                                    ? '#eb8500'
+                                    : 'green', ////UI_Enhancement issue 8
                                 fontFamily: appTheme.fonts.bold,
                               }}>
                               START
@@ -342,21 +347,33 @@ export default function ProcessList() {
                       </Text>
                     </View>
                     <View style={{flexDirection: 'row'}}>
-                      <Text
-                        style={[
-                          styles.tableContent,
-                          {textAlign: 'center', flex: 1},
-                        ]}>
-                        {item.batch_num}
-                        <TouchableOpacity
-                          style={[{alignSelf: 'center'}]}
-                          onPress={e => openDialog('processFifo', item)}>
-                          <MaterialIcons
+                      <TouchableOpacity
+                        style={[{alignSelf: 'auto'}]}
+                        onPress={e => openDialog('processFifo', item)}>
+                        <SvgCss
+                          // xml={BinInIcon(appTheme.colors.cardTitle)}
+
+                          xml={BinOutIcon('green')} //UI_Enhancement issue 9, //UI_Enhancement issue 21
+                          width={50}
+                          height={20}
+                        />
+                        {/* <MaterialIcons
                             name="edit"
                             size={22}
                             style={{marginLeft: 10}}
-                            color="green"></MaterialIcons>
-                        </TouchableOpacity>
+                            color="green"></MaterialIcons> */}
+                      </TouchableOpacity>
+                      <Text
+                        style={[
+                          styles.tableContent,
+                          {
+                            textAlign: 'left',
+                            flex: 1,
+                            maxWidth: 125,
+                            paddingLeft: 10,
+                          },
+                        ]}>
+                        {item.batch_num}
                       </Text>
                       <Text
                         style={[

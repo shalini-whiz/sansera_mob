@@ -59,7 +59,6 @@ export default function ShowRack(props) {
             ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
               setApiStatus(false);
               if (apiRes && apiRes.status) {
-
                 props.reloadPage();
                 Alert.alert(
                   'Bundle Weight Updated for Rack ',
@@ -105,6 +104,24 @@ export default function ShowRack(props) {
           styles.container,
           {alignItems: 'center', flexDirection: 'column'},
         ]}>
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: 'bold',
+            marginBottom: 25,
+            color: 'black',
+          }}>
+          RACK{'  :  '}
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              marginBottom: 25,
+              color: 'green',
+            }}>
+            {props.dialogMessage}
+          </Text>
+        </Text>
         <View style={{flexDirection: 'row', width: '60%', flex: 2}}>
           <Text style={[AppStyles.filterLabel, {flex: 1}]}>
             Bundle Weight (Kg)

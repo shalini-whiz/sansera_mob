@@ -26,6 +26,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RequestBin from './RequestBin';
 import ProcessInfo from '../process/ProcessInfo';
 import {EmptyBinContext} from '../../context/EmptyBinContext';
+import {ThemeColors} from 'react-navigation';
+import {stageColors} from '../../constants/appConstants';
 
 let stageSchema = [
   {
@@ -49,6 +51,7 @@ export const WorkPlan = React.memo(props => {
   const userState = React.useContext(UserContext);
   const [dialog, showDialog] = useState(false);
   const [dialogTitle, setDialogTitle] = useState('');
+  const [dialogType, setDialogType] = useState('');
   const [dialogMessage, setDialogMessage] = useState('');
   const [batchDet, setBatchDet] = useState({});
   const [refreshing, setRefreshing] = useState(false);
@@ -63,12 +66,13 @@ export const WorkPlan = React.memo(props => {
     }
     return () => {};
   }, [isFocused, appProcess.process_name]);
-  
+
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+    props.updateProcess();
     loadForm();
   }, []);
-  
+
   const loadForm = () => {
     setRefreshing(false);
     let schemaData = [...stageSchema];
@@ -100,46 +104,51 @@ export const WorkPlan = React.memo(props => {
     setRackData({});
   };
 
-  const openDialog = batchDetails => {
+  //UI_Enhancement issue 7
+  const openDialog = e => {
     showDialog(true);
-    let dialogTitle = 'Confirm Batch Creation';
-    let dialogMessage =
-      batchDetails.process_name +
-      ' is the new process generated. Please click ok to confirm';
+    let dialogTitle = 'Confirm Component Details'; //UI_Enhancement issue 31
+    let dialogMessage = '';
+    setDialogType('update');
     setDialogTitle(dialogTitle);
     setDialogMessage(dialogMessage);
   };
-
-  const handleSubmit = async () => {
+  
+  //UI_Enhancement issue 7
+  const Validatation = async () => {
     let loginFormData = [...formData];
     let validFormData = await util.validateFormData(loginFormData);
     let isError = validFormData.find(item => {
       if (item.error.length) return item;
     });
+    setFormData(validFormData);
 
+    if (!isError) {
+      openDialog();
+    }
+  };
+
+  const handleSubmit = async () => {
     let apiData = await util.filterFormData([...formData]);
     (apiData.op = 'update_process'),
       (apiData.process_name = appProcess.process_name);
     apiData.stage_name = await AsyncStorage.getItem('stage');
 
-    setFormData(validFormData);
-    if (!isError) {
-      setApiStatus(true);
-      ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
-        setApiStatus(false);
-        if (apiRes && apiRes.status) {
-          if (apiRes.response.message) {
-            Alert.alert('Process updated');
-            // props.setProcessEntity(apiRes.response.message)
-            props.updateProcess();
+    setApiStatus(true);
+    ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
+      setApiStatus(false);
+      if (apiRes && apiRes.status) {
+        if (apiRes.response.message) {
+          Alert.alert('Process updated');
+          // props.setProcessEntity(apiRes.response.message)
+          props.updateProcess();
 
-            // setBatchDet(apiRes.response.message);
-            //openDialog(apiRes.response.message);
-            util.resetForm(formData);
-          }
+          // setBatchDet(apiRes.response.message);
+          //openDialog(apiRes.response.message);
+          util.resetForm(formData);
         }
-      });
-    }
+      }
+    });
   };
 
   const reloadPage = response => {
@@ -148,6 +157,7 @@ export const WorkPlan = React.memo(props => {
 
   const showReqBin = e => {
     setDialogTitle('REQUEST TO');
+    setDialogType('request'); //UI_Enhancement issue 7
     setDialogMessage('');
     showDialog(true);
   };
@@ -190,7 +200,7 @@ export const WorkPlan = React.memo(props => {
               }}>
               <TouchableOpacity
                 style={[AppStyles.successBtn, {flexDirection: 'row'}]}
-                onPress={e => handleSubmit(e)}
+                onPress={e => Validatation(e)} //UI_Enhancement issue 7
                 disabled={apiStatus}>
                 <Text style={AppStyles.successText}>SAVE</Text>
               </TouchableOpacity>
@@ -212,7 +222,7 @@ export const WorkPlan = React.memo(props => {
             </View>
           </View>
         </View>
-        {dialog ? (
+        {dialog && dialogType === 'request' ? ( //UI_Enhancement issue 7
           <CustomModal
             modalVisible={dialog}
             dialogTitle={dialogTitle}
@@ -223,6 +233,46 @@ export const WorkPlan = React.memo(props => {
                 //reloadPage={reloadPage}
                 closeDialog={closeDialog}
               />
+            }
+          />
+        ) : (
+          false
+        )}
+        {dialog && dialogType === 'update' ? ( //UI_Enhancement issue 7
+          <CustomModal
+            modalVisible={dialog}
+            dialogTitle={dialogTitle}
+            // dialogMessage={dialogMessage}
+            closeDialog={closeDialog}
+            okDialog={handleSubmit}
+            container={
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                }}>
+                <Text style={{color: 'black', fontSize: 20}}>
+                  {/* //UI_Enhancement issue 31 */}
+                   Entered ok component{' '}
+                  <Text
+                    style={{
+                      color: appTheme.colors.cardTitle,
+                      fontWeight: 'bold',
+                    }}>
+                    {' '}
+                    {formData[0].value}{' '}
+                  </Text>{' '}
+                  are adding to process{' '}
+                  <Text
+                    style={{
+                      color: appTheme.colors.cardTitle,
+                      fontWeight: 'bold',
+                    }}>
+                    {' '}
+                    {appProcess.process_name}{' '}
+                  </Text>
+                </Text>
+              </View>
             }
           />
         ) : (

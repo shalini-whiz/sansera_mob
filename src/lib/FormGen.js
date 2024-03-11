@@ -208,8 +208,8 @@ export default class FormGen extends Component {
                     placeholderTextColor="#fafafa"
                     onChangeText={this.props.handleChange(item.key)}
                     keyboardType={
-                      (item.type && item.type === 'number') ||
-                      item.type === 'decimal'
+                      item.type &&
+                      (item.type === 'number' || item.type === 'decimal')
                         ? 'numeric'
                         : 'default'
                     }
@@ -248,11 +248,12 @@ const styles = StyleSheet.create({
   textInputInRow: {
     // height: 50,
     textAlign: 'left',
-    fontSize: 14,
+    fontSize: 16,
     color: 'black',
     fontFamily: appTheme.fonts.regular,
     // backgroundColor: "#ECF0FA",
     flex: 2,
+    padding: 15,
   },
   TextInput: {
     // height: 50,

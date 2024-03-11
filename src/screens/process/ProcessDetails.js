@@ -107,17 +107,7 @@ let created_process_schema = [
     lowerCase: true,
     label: 'batch',
   },
-  {
-    key: 'created_on',
-    displayName: 'Batch Created On',
-    placeholder: '',
-    value: '',
-    error: '',
-    required: true,
-    lowerCase: true,
-    label: 'batch created on',
-    type: 'date',
-  },
+
   {
     key: 'supplier',
     displayName: 'Supplier',
@@ -137,7 +127,7 @@ let created_process_schema = [
     label: 'components',
     type: 'string',
   },
-  //
+  // //UI_Enhancement issue 13
   {
     key: 'component_count',
     displayName: 'Required Components',
@@ -178,6 +168,17 @@ let created_process_schema = [
     required: true,
     label: 'created by',
     type: 'string',
+  },
+  {
+    key: 'created_on',
+    displayName: 'Batch Created  On',
+    placeholder: '',
+    value: '',
+    error: '',
+    required: true,
+    lowerCase: true,
+    label: 'batch created on',
+    type: 'date',
   },
   // {
   //   "key": "ok_component", displayName: "OK Component", placeholder: "", value: "",defaultValue:0,
@@ -505,8 +506,12 @@ export default function ProcessDetails(props) {
     (apiData.op = 'add_process'), setBatchFormData(validFormData);
     console.log('apiData', apiData.component_count, apiData.component_id);
 
-     let supplier = await ApiService.getAPIRes({op:"get_suppliers"}, 'POST', 'get_supplier');
- console.log(JSON.stringify('supplier', supplier));
+    let supplier = await ApiService.getAPIRes(
+      {op: 'get_suppliers'},
+      'POST',
+      'get_supplier',
+    );
+    console.log(JSON.stringify('supplier', supplier));
 
     if (!forgeId.length) setForgeErr('Forge Machine required');
 

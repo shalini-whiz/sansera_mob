@@ -109,8 +109,7 @@ export const BinTask = React.memo(props => {
 
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length)
-
-        setBinTask(apiRes.response.message);
+          setBinTask(apiRes.response.message);
       } else if (apiRes.response.message) {
         setBinTask([]);
         setApiError(apiRes.response.message);
@@ -222,53 +221,35 @@ export const BinTask = React.memo(props => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }>
       <View style={styles.mainContainer}>
-        {binTask && binTask.length
-          ? binTask.map((item, index) => {
-              return (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    padding: 5,
-                    backgroundColor: 'white',
-                    margin: 5,
-                  }}
-                  key={index}>
-                  <View style={{flexDirection: 'column', flex: 3, padding: 5}}>
-                    {item.task_state.toLowerCase() === 'requested' ? (
-                      userState.user.role === roles.MO ? (
-                        <Text
-                          style={[
-                            AppStyles.subtitle,
-                            {
-                              justifyContent: 'flex-start',
-                              color: 'black',
-                              padding: 1,
-                            },
-                          ]}>
-                          {item.requester_id === item.resolver_id
-                            ? item.stage + ' - Requested Filled Bin'
-                            : 'Requested forklift ' +
-                              item.resolver_emp_name +
-                              ' to pick Filled Bin'}
-                        </Text>
-                      ) : (
-                        <Text
-                          style={[
-                            AppStyles.subtitle,
-                            {
-                              justifyContent: 'flex-start',
-                              color: 'black',
-                              padding: 1,
-                            },
-                          ]}>
-                          {'Supply to ' +
-                            item.stage +
-                            ' ' +
-                            (item.stage.toLowerCase() === stageType.forging
-                              ? ' ( ' + item.forge_machine_id + ' ) '
-                              : '')}
-                        </Text>
-                      )
+        {binTask && binTask.length ? (
+          binTask.map((item, index) => {
+            return (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  padding: 5,
+                  backgroundColor: 'white',
+                  margin: 5,
+                }}
+                key={index}>
+                <View style={{flexDirection: 'column', flex: 3, padding: 5}}>
+                  {item.task_state.toLowerCase() === 'requested' ? (
+                    userState.user.role === roles.MO ? (
+                      <Text
+                        style={[
+                          AppStyles.subtitle,
+                          {
+                            justifyContent: 'flex-start',
+                            color: 'black',
+                            padding: 1,
+                          },
+                        ]}>
+                        {item.requester_id === item.resolver_id
+                          ? item.stage + ' - Requested Filled Bin'
+                          : 'Requested forklift ' +
+                            item.resolver_emp_name +
+                            ' to pick Filled Bin'}
+                      </Text>
                     ) : (
                       <Text
                         style={[
@@ -279,109 +260,154 @@ export const BinTask = React.memo(props => {
                             padding: 1,
                           },
                         ]}>
-                        {'Forklift ' +
-                          item.resolver_emp_name +
-                          ' delivered filled bin'}
-                      </Text>
-                    )}
-
-                    {userState.user.role === roles.MO ? (
-                      <Text
-                        style={[
-                          AppStyles.info,
-                          {
-                            justifyContent: 'flex-start',
-                            color: 'black',
-                            padding: 1,
-                          },
-                        ]}>
-                        {item.updated_on}
-                      </Text>
-                    ) : (
-                      <Text
-                        style={[
-                          AppStyles.info,
-                          {
-                            justifyContent: 'flex-start',
-                            color: 'black',
-                            padding: 1,
-                          },
-                        ]}>
-                        {'Requested By ' +
-                          item.requester_emp_name +
+                        {'Supply to ' +
+                          item.stage +
                           ' ' +
-                          item.updated_on}
+                          (item.stage.toLowerCase() === stageType.forging
+                            ? ' ( ' + item.forge_machine_id + ' ) '
+                            : '')}
                       </Text>
-                    )}
-                  </View>
-                  {item.task_state.toLowerCase() === 'requested' &&
-                  item.requester_id === item.resolver_id &&
-                  userState.user.role === roles.MO ? (
-                    <TouchableOpacity
-                      style={[
-                        AppStyles.warnButtonContainer,
-                        {flex: 1, margin: 10},
-                      ]}
-                      onPress={e => showBin(e, 'fulfilled', item)}>
-                      <Text style={AppStyles.warnButtonTxt}>SHOW BIN</Text>
-                    </TouchableOpacity>
+                    )
                   ) : (
-                    false
-                  )}
-                  {item.task_state.toLowerCase() === 'delivered' &&
-                  userState.user.role === roles.MO ? (
-                    <TouchableOpacity
+                    <Text
                       style={[
-                        AppStyles.warnButtonContainer,
-                        {flex: 1, margin: 10},
-                      ]}
-                      onPress={e => showBin(e, 'fulfilled', item)}>
-                      <Text style={AppStyles.warnButtonTxt}>SHOW BIN</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    false
+                        AppStyles.subtitle,
+                        {
+                          justifyContent: 'flex-start',
+                          color: 'black',
+                          padding: 1,
+                        },
+                      ]}>
+                      {'Forklift ' +
+                        item.resolver_emp_name +
+                        ' delivered filled bin'}
+                    </Text>
                   )}
 
-                  {item.task_state.toLowerCase() === 'requested' &&
-                  item.requester_id != item.resolver_id &&
-                  userState.user.role === roles.FO ? (
-                    <TouchableOpacity
+                  {userState.user.role === roles.MO ? (
+                    <Text
                       style={[
-                        AppStyles.warnButtonContainer,
-                        {flex: 1, margin: 10},
-                      ]}
-                      onPress={e => showBin(e, 'delivered', item)}>
-                      <Text style={AppStyles.warnButtonTxt}>SHOW BIN</Text>
-                    </TouchableOpacity>
+                        AppStyles.info,
+                        {
+                          justifyContent: 'flex-start',
+                          color: 'black',
+                          padding: 1,
+                        },
+                      ]}>
+                      {item.updated_on}
+                    </Text>
                   ) : (
-                    false
-                  )}
-
-                  {(item.task_state.toLowerCase() === 'requested' ||
-                    item.task_state.toLowerCase() === 'delivered') &&
-                  item.requester_id != item.resolver_id ? (
-                    <TouchableOpacity
-                      style={[{flex: 1, margin: 10}]}></TouchableOpacity>
-                  ) : (
-                    false
-                  )}
-                  {item.task_state.toLowerCase() === 'requested' &&
-                  userState.user.role === roles.MO ? (
-                    <TouchableOpacity
+                    <Text
                       style={[
-                        AppStyles.canButtonContainer,
-                        {flex: 1, margin: 10},
-                      ]}
-                      onPress={e => openDialog(e, 'cancel', item)}>
-                      <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    false
+                        AppStyles.info,
+                        {
+                          justifyContent: 'flex-start',
+                          color: 'black',
+                          padding: 1,
+                        },
+                      ]}>
+                      {'Requested By ' +
+                        item.requester_emp_name +
+                        ' ' +
+                        item.updated_on}
+                    </Text>
                   )}
                 </View>
-              );
-            })
-          : false}
+                {item.task_state.toLowerCase() === 'requested' &&
+                item.requester_id === item.resolver_id &&
+                userState.user.role === roles.MO ? (
+                  <TouchableOpacity
+                    style={[
+                      AppStyles.warnButtonContainer,
+                      {flex: 1, margin: 10},
+                    ]}
+                    onPress={e => showBin(e, 'fulfilled', item)}>
+                    <Text style={AppStyles.warnButtonTxt}>SHOW BIN</Text>
+                  </TouchableOpacity>
+                ) : (
+                  false
+                )}
+                {item.task_state.toLowerCase() === 'delivered' &&
+                userState.user.role === roles.MO ? (
+                  <TouchableOpacity
+                    style={[
+                      AppStyles.warnButtonContainer,
+                      {flex: 1, margin: 10},
+                    ]}
+                    onPress={e => showBin(e, 'fulfilled', item)}>
+                    <Text style={AppStyles.warnButtonTxt}>SHOW BIN</Text>
+                  </TouchableOpacity>
+                ) : (
+                  false
+                )}
+
+                {item.task_state.toLowerCase() === 'requested' &&
+                item.requester_id != item.resolver_id &&
+                userState.user.role === roles.FO ? (
+                  <TouchableOpacity
+                    style={[
+                      AppStyles.warnButtonContainer,
+                      {flex: 1, margin: 10},
+                    ]}
+                    onPress={e => showBin(e, 'delivered', item)}>
+                    <Text style={AppStyles.warnButtonTxt}>SHOW BIN</Text>
+                  </TouchableOpacity>
+                ) : (
+                  false
+                )}
+
+                {(item.task_state.toLowerCase() === 'requested' ||
+                  item.task_state.toLowerCase() === 'delivered') &&
+                item.requester_id != item.resolver_id ? (
+                  <TouchableOpacity
+                    style={[{flex: 1, margin: 10}]}></TouchableOpacity>
+                ) : (
+                  false
+                )}
+                {item.task_state.toLowerCase() === 'requested' &&
+                userState.user.role === roles.MO ? (
+                  <TouchableOpacity
+                    style={[
+                      AppStyles.canButtonContainer,
+                      {flex: 1, margin: 10},
+                    ]}
+                    onPress={e => openDialog(e, 'cancel', item)}>
+                    <Text style={AppStyles.canButtonTxt}>CANCEL</Text>
+                  </TouchableOpacity>
+                ) : (
+                  false
+                )}
+              </View>
+            );
+          })
+        ) : (
+          // //UI_Enhancement issue 10
+          <View style={{flexDirection: 'row', margin: 1, padding: 1}}>
+            <View
+              style={{
+                flex: 1,
+                flexDirection: 'column',
+                margin: 100,
+              }}>
+              <View
+                style={{
+                  marginHorizontal: 90,
+                  flex: 1,
+                  backgroundColor: 'white',
+                }}>
+                <Text
+                  style={{
+                    margin: 10,
+                    padding: 40,
+                    textAlign: 'center',
+                    fontSize: 20,
+                  }}>
+                  No Request Found
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
         {dialog &&
         (dialogType === 'fulfilled' || dialogType === 'delivered') ? (
           <CustomModal

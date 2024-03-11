@@ -85,7 +85,7 @@ export const FifoBoard = React.memo(props => {
     let dialogType = '';
     dialogType = type;
     if (type === 'processFifo') {
-      dialogTitle = 'Update Process ' + item.process_name;
+      dialogTitle = 'Process : ' + item.process_name; ////UI_Enhancement issue 19
     }
 
     setDialogTitle(dialogTitle);
@@ -107,19 +107,19 @@ export const FifoBoard = React.memo(props => {
       <View
         style={[
           styles.tableDataCell,
-          {borderLeftWidth: 0.5, flexDirection: 'row'},
+          {borderLeftWidth: 0.5, flexDirection: 'row', minWidth: 50},
         ]}>
         <Text
           style={[
+            //UI_Enhancement issue 16
             {
               flex: 1,
-
-              padding: 5,
-              textAlign: 'center',
+              textAlign: 'left',
               fontSize: 16,
               fontFamily: appTheme.fonts.regular,
               color: appTheme.colors.filterText,
               color: 'black',
+              marginLeft: 20,
             },
           ]}>
           {item.batch_num}
@@ -128,7 +128,8 @@ export const FifoBoard = React.memo(props => {
           style={[{marginHorizontal: 15}]}
           onPress={e => openDialog('processFifo', item)}>
           <SvgCss
-            xml={BinInIcon(appTheme.colors.cardTitle)}
+            xml={BinInIcon('green')} //UI_Enhancement issue 9 , //UI_Enhancement issue 21
+            // xml={BinInIcon(appTheme.colors.cardTitle)}
             width={30}
             height={30}
           />
@@ -138,13 +139,23 @@ export const FifoBoard = React.memo(props => {
       </View>
       <Text style={[styles.tableDataCell, {}]}>{item.heat_num}</Text>
       <Text style={[styles.tableDataCell, {}]}>{item.supplier}</Text>
-      <Text style={[styles.tableDataCell, {}]}>{item.process_name}</Text>
+      <Text
+        style={[
+          styles.tableDataCell,
+          {fontWeight: 'bold', color: appTheme.colors.cardTitle}, //UI_Enhancement issue 6
+        ]}>
+        {item.process_name}
+      </Text>
       <Text style={[styles.tableDataCell, {}]}>{item.component_count}</Text>
       <Text style={[styles.tableDataCell, {}]}>
         {item.process[6].ok_component}
       </Text>
       {/* Target count and Finished Count */}
-      <Text style={[styles.tableDataCell, {}]}>
+      <Text
+        style={[
+          styles.tableDataCell,
+          {minWidth: 80}, //UI_Enhancement issue 17
+        ]}>
         {dateUtil.toFormat(item.created_on, 'DD MMM YYYY')}
       </Text>
       <Text style={[styles.tableDataCell, {}]}>{item.status}</Text>
@@ -175,7 +186,10 @@ export const FifoBoard = React.memo(props => {
               return (
                 <View style={styles.tableHeader}>
                   <Text
-                    style={[styles.tableHeaderCell, {borderLeftWidth: 0.5}]}>
+                    style={[
+                      styles.tableHeaderCell,
+                      {borderLeftWidth: 0.5, minWidth: 50}, //UI_Enhancement issue 16
+                    ]}>
                     Batch
                   </Text>
                   <Text style={[styles.tableHeaderCell, {}]}>Heat Number</Text>
@@ -186,7 +200,7 @@ export const FifoBoard = React.memo(props => {
                     Finished Count
                   </Text>
                   {/* Target count and Finished Count */}
-                  <Text style={[styles.tableHeaderCell, {}]}>
+                  <Text style={[styles.tableHeaderCell, {minWidth: 80}]}>
                     Received Date
                   </Text>
                   <Text style={[styles.tableHeaderCell, {}]}>Status</Text>
@@ -303,10 +317,10 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRightWidth: 0.5,
     padding: 5,
-    textAlign: 'center',
+    // textAlign: 'center',
     fontSize: 16,
     fontFamily: appTheme.fonts.regular,
-    color: appTheme.colors.filterText,
+    // color: appTheme.colors.filterText,
     borderColor: 'grey',
     color: 'black',
   },

@@ -32,7 +32,7 @@ import {EmptyBinContext} from '../../context/EmptyBinContext';
 let stageWeightSchema = [
   {
     key: 'ok_component',
-    displayName: 'Count of OK Billets',
+    displayName: 'OK Billets Count', //UI_Enhancement issue 12
     placeholder: '',
     value: 0,
     error: '',
@@ -43,7 +43,7 @@ let stageWeightSchema = [
   },
   {
     key: 'ok_end_billets_weight',
-    displayName: 'Weight of OK Billets (kg)',
+    displayName: 'OK Billets Weight (kg)', //UI_Enhancement issue 12
     placeholder: '',
     value: 0,
     error: '',
@@ -65,23 +65,23 @@ let stageWeightSchema = [
   },
   {
     key: 'ok_bits_count',
-    displayName: 'Count of OK End Billets',
+    displayName: 'End Billets Count', //UI_Enhancement issue 12
     placeholder: '',
     value: 0,
     error: '',
     required: false,
-    label: 'Count of OK End Billets',
+    label: 'End Billets Count',
     type: 'number',
     defaultValue: 0,
   },
   {
     key: 'ok_bits_weight',
-    displayName: 'OK End Billets Weight (kg)',
+    displayName: 'End Billets Weight (kg)', //UI_Enhancement issue 12
     placeholder: '',
     value: 0,
     error: '',
     required: false,
-    label: 'OK End Billets Weight',
+    label: 'End Billets Weight',
     type: 'decimal',
     defaultValue: 0,
   },
@@ -98,6 +98,7 @@ export default function WorkPlan(props) {
   const userState = React.useContext(UserContext);
   const [dialog, showDialog] = useState(false);
   const [dialogTitle, setDialogTitle] = useState('');
+  const [dialogType, setDialogType] = useState('');
   const [dialogMessage, setDialogMessage] = useState('');
   const [batchDet, setBatchDet] = useState({});
   const [refreshing, setRefreshing] = useState(false);
@@ -159,20 +160,32 @@ export default function WorkPlan(props) {
   const closeDialog = () => {
     showDialog(false);
     setDialogTitle('');
+    setDialogType('');
     setDialogMessage('');
     setBatchDet({});
     setRackData({});
   };
 
-  const openDialog = batchDetails => {
+  //UI_Enhancement issue 7
+  const openDialog = e => {
+    console.log('BatchFormData', batchFormData);
     showDialog(true);
-    let dialogTitle = 'Confirm Batch Creation';
-    let dialogMessage =
-      batchDetails.process_name +
-      ' is the new process generated. Please click ok to confirm';
+    let dialogTitle = 'Confirm Billet Details'; //UI_Enhancement issue 30
+    let dialogMessage = 'Entred Billet Data are adding To';
     setDialogTitle(dialogTitle);
     setDialogMessage(dialogMessage);
+    setDialogType('handleSubmit');
   };
+
+  // const openDialog = batchDetails => {
+  //   showDialog(true);
+  //   let dialogTitle = 'Confirm Batch Creation';
+  //   let dialogMessage =
+  //     batchDetails.process_name +
+  //     ' is the new process generated. Please click ok to confirm';
+  //   setDialogTitle(dialogTitle);
+  //   setDialogMessage(dialogMessage);
+  // };
 
   const showRack = e => {
     try {
@@ -188,7 +201,8 @@ export default function WorkPlan(props) {
           PublishMqtt({topic: apiRes.response.message.element_id});
           setRackData(apiRes.response.message);
           setDialogTitle('SHOW RACK');
-          setDialogMessage('Rack : ' + apiRes.response.message.element_num);
+          setDialogType('Rack');
+          setDialogMessage(apiRes.response.message.element_num);
           showDialog(true);
         } else if (apiRes && apiRes.response.message)
           setApiError(apiRes.response.message);
@@ -197,7 +211,9 @@ export default function WorkPlan(props) {
       console.log(e);
     }
   };
-  const handleSubmit = async () => {
+
+  //UI_Enhancement issue 7
+  const validateForm = async () => {
     let loginFormData = [...batchFormData];
     let validFormData = await util.validateFormData(loginFormData);
     let isError = validFormData.find(item => {
@@ -215,10 +231,10 @@ export default function WorkPlan(props) {
 
       if (ok_bits_count_obj.value > 0 && ok_bits_weight_obj.value == 0) {
         validFormData[ok_bits_weight_index].error =
-          'Weight of OK End Billets required';
+          'Weight of End Billets required';
       } else if (ok_bits_weight_obj.value > 0 && ok_bits_count_obj.value == 0)
         validFormData[ok_bits_count_index].error =
-          'Count of OK End Billets required';
+          'Count of End Billets required';
 
       let ok_component_index = validFormData.findIndex(
         item => item.key === 'ok_component',
@@ -249,33 +265,38 @@ export default function WorkPlan(props) {
 
     let isAllZero = validFormData.find(item => item.value != 0);
     if (!isAllZero) {
-      Alert.alert('Please enter values');
+      Alert.alert('Please enter valid data');
       return;
     }
+
+    if (!isError) {
+      openDialog('handleSubmit');
+    }
+  };
+
+  const handleSubmit = async () => {
     let apiData = await util.filterFormData([...batchFormData]);
     (apiData.op = 'update_process'),
       (apiData.process_name = appProcess.process_name);
     apiData.stage_name = await AsyncStorage.getItem('stage');
 
-    if (!isError) {
-      setApiStatus(true);
+    setApiStatus(true);
 
-      ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
-        setApiStatus(false);
-        if (apiRes && apiRes.status) {
-          if (apiRes.response.message) {
-            Alert.alert('Work plan updated');
-            // props.setProcessEntity(apiRes.response.message)
-            props.updateProcess();
+    ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
+      setApiStatus(false);
+      if (apiRes && apiRes.status) {
+        if (apiRes.response.message) {
+          Alert.alert('Work plan updated');
+          // props.setProcessEntity(apiRes.response.message)
+          props.updateProcess();
 
-            // setBatchDet(apiRes.response.message);
-            //openDialog(apiRes.response.message);
-            util.resetForm(batchFormData);
-          }
-        } else if (apiRes && apiRes.response.message)
-          setApiError(apiRes.response.message);
-      });
-    }
+          // setBatchDet(apiRes.response.message);
+          //openDialog(apiRes.response.message);
+          util.resetForm(batchFormData);
+        }
+      } else if (apiRes && apiRes.response.message)
+        setApiError(apiRes.response.message);
+    });
   };
 
   const reloadPage = response => {
@@ -348,7 +369,7 @@ export default function WorkPlan(props) {
                 }}>
                 <TouchableOpacity
                   style={[AppStyles.successBtn, {flexDirection: 'row'}]}
-                  onPress={e => handleSubmit(e)}
+                  onPress={e => validateForm(e)} //UI_Enhancement issue 7
                   disabled={apiStatus}>
                   <Text style={AppStyles.successText}>SAVE</Text>
                 </TouchableOpacity>
@@ -386,14 +407,75 @@ export default function WorkPlan(props) {
           ) : (
             false
           )}
-
-          {dialog ? (
+          {/* //UI_Enhancement issue 7 */}
+          {dialog && dialogType === 'handleSubmit' ? (
             <CustomModal
               modalVisible={dialog}
               dialogTitle={dialogTitle}
-              dialogMessage={dialogMessage}
+              // dialogMessage={dialogMessage}
+              okDialog={handleSubmit}
+              closeDialog={closeDialog}
+              container={
+                <View
+                  style={{
+                    flex: 1,
+                    // height: 100,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    alignSelf: 'center',
+                    // backgroundColor: 'green',
+                  }}>
+                  {/* //UI_Enhancement issue 30 */}
+                  <Text
+                    style={{color: 'black', fontSize: 20, marginBottom: 20}}>
+                    Confirm entred billet data are adding To{' '}
+                    <Text
+                      style={{
+                        color: appTheme.colors.cardTitle,
+                        fontWeight: 'bold',
+                      }}>
+                      {' '}
+                      {appProcess.process_name}{' '}
+                    </Text>
+                  </Text>
+                  {batchFormData.map((item, index) => {
+                    return (
+                      <View
+                        style={{
+                          // flex: 1,
+                          width: '25%',
+                          flexDirection: 'row',
+                          justifyContent: 'space-evenly',
+                          alignItems: 'center',
+                          alignContent: 'center',
+                        }}>
+                        <View style={{flex: 2, marginBottom: 10}}>
+                          <Text style={{color: 'black', fontSize: 16}}>
+                            {item.displayName}
+                          </Text>
+                        </View>
+                        <View style={{marginBottom: 10}}>
+                          <Text style={{color: 'black', fontSize: 16}}>
+                            {item.value}
+                          </Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              }
+            />
+          ) : (
+            false
+          )}
+          {dialog && dialogType === 'Rack' ? (
+            <CustomModal
+              modalVisible={dialog}
+              dialogTitle={dialogTitle}
+              // dialogMessage={dialogMessage}
               container={
                 <ShowRack
+                  dialogMessage={dialogMessage}
                   rackData={rackData}
                   setIndicatorDataTrue={setIndicatorDataTrue}
                   setIndicatorDataFalse={setIndicatorDataFalse}

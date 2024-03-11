@@ -95,6 +95,19 @@ export default function RejectionData(props) {
       <View style={[styles.container]}>
         {/* <ActivityIndicator size="large" animating={apiStatus} /> */}
         <View style={[styles.dataContainer, {}]}>
+          <Text
+            style={[
+              styles.title,
+              {
+                textAlign: 'left',
+                marginBottom: 0,
+                textDecorationLine: 'underline',
+              },
+            ]}>
+            {props.processEntity.process_name} :
+          </Text>
+          <Text style={styles.title}> Process Component</Text>
+
           {processData && processData.length ? (
             <View
               style={{
@@ -155,7 +168,7 @@ export default function RejectionData(props) {
               width: '100%',
               flex: 1,
               justifyContent: 'center',
-              marginTop: 80,
+              marginTop: 50,
             }}>
             <Text style={styles.title}>Rejection Data</Text>
 
@@ -218,7 +231,7 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    fontSize: 30,
+    fontSize: 28,
     color: appTheme.colors.cardTitle,
     fontFamily: appTheme.fonts.bold,
     marginBottom: 20,

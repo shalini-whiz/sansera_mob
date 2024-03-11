@@ -47,8 +47,8 @@ export const ProcessFifo = React.memo(props => {
   const loadRejectionData = () => {
     setRefreshing(false);
     setProStageData(props.processDet.process);
-    setStage(props.processDet.process[0]);
-    setNextStage(props.processDet.process[1]);
+    setStage(props.processDet.process[1]); //UI_Enhancement issue 5
+    setNextStage(props.processDet.process[2]); //UI_Enhancement issue 5
   };
 
   const onRefresh = React.useCallback(() => {
@@ -176,7 +176,9 @@ export const ProcessFifo = React.memo(props => {
             }}>
             <View style={{flexDirection: 'row'}}>
               {proStageData.map((item, index) => {
-                return (
+                return item.stage_name && item.stage_name === 'Shearing' ? ( //remove shearing from fifo
+                  false
+                ) : (
                   <TouchableOpacity
                     style={{}}
                     key={Number(index) + 90}
@@ -239,8 +241,6 @@ export const ProcessFifo = React.memo(props => {
                   minWidth: '30%',
                   height: 50,
                 }}>
-                  
-
                 {stage &&
                   stage.fifo &&
                   stage.fifo.map((fifoItem, fifoIndex) => {
@@ -348,7 +348,9 @@ export const ProcessFifo = React.memo(props => {
             }}>
             <View style={{flexDirection: 'row'}}>
               {proStageData.map((item, index) => {
-                return (
+                return item.stage_name && item.stage_name === 'Shearing' ? ( //remove shearing from Fifo
+                  false
+                ) : (
                   <View style={{flexDirection: 'column'}} key={index}>
                     <Text
                       key={index}

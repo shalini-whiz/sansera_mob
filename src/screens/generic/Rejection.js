@@ -232,7 +232,7 @@ export const Rejection = React.memo(props => {
                   {curRejCount})
                 </Text>
                 <TextInput
-                  style={[AppStyles.filterText, {flex: 2, padding: 5}]}
+                  style={[AppStyles.filterText, {flex: 2, paddingLeft: 5,fontSize:16,paddingVertical:5,}]}
                   keyboardType="numeric"
                   onChangeText={value => setRejCount(value)}
                   value={rejCount}></TextInput>
