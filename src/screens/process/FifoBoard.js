@@ -102,65 +102,73 @@ export const FifoBoard = React.memo(props => {
     setApiError('');
   };
 
-  const renderItem = ({item, index}) => (
-    <View style={[styles.tableData, {flexDirection: 'row'}]} key={index}>
-      <View
-        style={[
-          styles.tableDataCell,
-          {borderLeftWidth: 0.5, flexDirection: 'row', minWidth: 50},
-        ]}>
+  const renderItem = ({item, index}) => {
+    let color;
+    if (item.status === 'CREATED') color = '#2b96d4';
+    if (item.status === 'HOLD') color = '#ce8807';
+    if (item.status === 'RUNNING') color = 'green';
+    if (item.status === 'FINISHED') color = 'red';
+
+    return (
+      <View style={[styles.tableData, {flexDirection: 'row'}]} key={index}>
+        <View
+          style={[
+            styles.tableDataCell,
+            {borderLeftWidth: 0.5, flexDirection: 'row', minWidth: 50},
+          ]}>
+          <Text
+            style={[
+              //UI_Enhancement issue 16
+              {
+                flex: 1,
+                textAlign: 'left',
+                fontSize: 16,
+                fontFamily: appTheme.fonts.regular,
+                color: appTheme.colors.filterText,
+                color: 'black',
+                marginLeft: 20,
+              },
+            ]}>
+            {item.batch_num}
+          </Text>
+          <TouchableOpacity
+            style={[{marginHorizontal: 15}]}
+            onPress={e => openDialog('processFifo', item)}>
+            <SvgCss
+              xml={BinInIcon('green')} //UI_Enhancement issue 9 , //UI_Enhancement issue 21
+              // xml={BinInIcon(appTheme.colors.cardTitle)}
+              width={30}
+              height={30}
+            />
+
+            {/* <MaterialIcons name="edit" size={22} style={{ marginLeft: 10 }} color="green" ></MaterialIcons> */}
+          </TouchableOpacity>
+        </View>
+        <Text style={[styles.tableDataCell, {}]}>{item.heat_num}</Text>
+        <Text style={[styles.tableDataCell, {}]}>{item.supplier}</Text>
         <Text
           style={[
-            //UI_Enhancement issue 16
-            {
-              flex: 1,
-              textAlign: 'left',
-              fontSize: 16,
-              fontFamily: appTheme.fonts.regular,
-              color: appTheme.colors.filterText,
-              color: 'black',
-              marginLeft: 20,
-            },
+            styles.tableDataCell,
+            {fontWeight: 'bold', color: appTheme.colors.cardTitle}, //UI_Enhancement issue 6
           ]}>
-          {item.batch_num}
+          {item.process_name}
         </Text>
-        <TouchableOpacity
-          style={[{marginHorizontal: 15}]}
-          onPress={e => openDialog('processFifo', item)}>
-          <SvgCss
-            xml={BinInIcon('green')} //UI_Enhancement issue 9 , //UI_Enhancement issue 21
-            // xml={BinInIcon(appTheme.colors.cardTitle)}
-            width={30}
-            height={30}
-          />
-
-          {/* <MaterialIcons name="edit" size={22} style={{ marginLeft: 10 }} color="green" ></MaterialIcons> */}
-        </TouchableOpacity>
+        <Text style={[styles.tableDataCell, {}]}>{item.component_count}</Text>
+        <Text style={[styles.tableDataCell, {}]}>
+          {item.process[6].ok_component}
+        </Text>
+        {/* Target count and Finished Count */}
+        <Text
+          style={[
+            styles.tableDataCell,
+            {minWidth: 80}, //UI_Enhancement issue 17
+          ]}>
+          {dateUtil.toFormat(item.created_on, 'DD MMM YYYY')}
+        </Text>
+        <Text style={[styles.tableDataCell, {color:color}]}>{item.status}</Text>
       </View>
-      <Text style={[styles.tableDataCell, {}]}>{item.heat_num}</Text>
-      <Text style={[styles.tableDataCell, {}]}>{item.supplier}</Text>
-      <Text
-        style={[
-          styles.tableDataCell,
-          {fontWeight: 'bold', color: appTheme.colors.cardTitle}, //UI_Enhancement issue 6
-        ]}>
-        {item.process_name}
-      </Text>
-      <Text style={[styles.tableDataCell, {}]}>{item.component_count}</Text>
-      <Text style={[styles.tableDataCell, {}]}>
-        {item.process[6].ok_component}
-      </Text>
-      {/* Target count and Finished Count */}
-      <Text
-        style={[
-          styles.tableDataCell,
-          {minWidth: 80}, //UI_Enhancement issue 17
-        ]}>
-        {dateUtil.toFormat(item.created_on, 'DD MMM YYYY')}
-      </Text>
-      <Text style={[styles.tableDataCell, {}]}>{item.status}</Text>
-    </View>
-  );
+    );
+  };
 
   return (
     // <ScrollView

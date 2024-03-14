@@ -296,7 +296,12 @@ export default function ProcessList() {
                       <Text
                         style={[
                           styles.subtitle,
-                          {textAlign: 'center', flex: 1},
+                          {textAlign: 'center', flex: 1, maxWidth: '8%'},
+                        ]}></Text>
+                      <Text
+                        style={[
+                          styles.subtitle,
+                          {textAlign: 'left', flex: 1, maxWidth: '8%'},
                         ]}>
                         Batch
                       </Text>
@@ -348,7 +353,14 @@ export default function ProcessList() {
                     </View>
                     <View style={{flexDirection: 'row'}}>
                       <TouchableOpacity
-                        style={[{alignSelf: 'auto'}]}
+                        style={[
+                          {
+                            alignSelf: 'flex-start',
+                            flex: 1,
+                            maxWidth: '8%',
+                            alignItems: 'center',
+                          },
+                        ]} // UI_Enhancement 28
                         onPress={e => openDialog('processFifo', item)}>
                         <SvgCss
                           // xml={BinInIcon(appTheme.colors.cardTitle)}
@@ -369,8 +381,7 @@ export default function ProcessList() {
                           {
                             textAlign: 'left',
                             flex: 1,
-                            maxWidth: 125,
-                            paddingLeft: 10,
+                            maxWidth: '8%'
                           },
                         ]}>
                         {item.batch_num}

@@ -57,9 +57,14 @@ export const ConsumptionData = React.memo(props => {
     let curStage = props.stageName
       ? props.stageName
       : await AsyncStorage.getItem('stage');
-    let curProcess = appProcess.process_name
-      ? appProcess.process_name
-      : props.processName;
+
+    // let curProcess = appProcess.process_name
+    //   ? appProcess.process_name
+    //   : props.processName;  // consumptiondata filter isssue
+
+    let curProcess = props.processName
+      ? props.processName
+      : appProcess.process_name;
     setTableSchema([]);
     setConData([]);
     setApiMsg('');

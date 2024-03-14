@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   textInputInRow: {
     // height: 50,
     textAlign: 'left',
-    fontSize: 16,
+    fontSize: 14,
     color: 'black',
     fontFamily: appTheme.fonts.regular,
     // backgroundColor: "#ECF0FA",

@@ -161,12 +161,8 @@ export default function RawMaterial(props) {
       let bundleInput = formDataInput.find(
         item => item.key === 'reject_weight',
       );
-      dialogTitle = 'Reject Weight';
-      dialogMessage =
-        'Are you sure you wish to Reject Weight ' +
-        bundleInput.value +
-        ' (kg) of ' +
-        appProcess.process_name;
+      dialogTitle = 'CONFIRM REJECTION DETAILS'; //UI_Enhancement 33
+      dialogMessage = bundleInput.value;
     }
     if (type === 'partial') {
       dialogTitle = 'Partial Return';
@@ -599,18 +595,18 @@ export default function RawMaterial(props) {
                 )}
 
                 <View
-                  style={{display: 'flex', flexDirection: 'row', padding: 10}}>
+                  style={{display: 'flex', flexDirection: 'row', padding: 10,maxHeight:"18%",flex:1}}>
                   <Text
                     style={[
                       AppStyles.filterLabel,
-                      {flex: 1, padding: 10, fontSize: 16},
+                      {flex: 1, padding: 10, fontSize: 14,alignSelf:"center"},
                     ]}>
-                    Enter Weight
+                    Enter Weight (kg)
                   </Text>
                   <TextInput
                     style={[
                       AppStyles.filterText,
-                      {flex: 2, padding: 8, fontSize: 16},
+                      {flex: 2, padding: 8, fontSize: 14},
                     ]}
                     keyboardType="numeric"
                     onChangeText={text => setPartialWeight(text)}>
@@ -688,9 +684,30 @@ export default function RawMaterial(props) {
             <CustomModal
               modalVisible={dialog}
               dialogTitle={dialogTitle}
-              dialogMessage={dialogMessage}
               okDialog={setRejectWeight}
-              closeDialog={closeDialog}
+              closeDialog={closeDialog} // UI_Enhancement 33
+              container={
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                  <Text style={{fontSize: 18, color: 'black'}}>
+                    Entered Rejected material weight{' '}
+                    <Text
+                      style={{
+                        color: appTheme.colors.cardTitle,
+                        fontWeight: 'bold',
+                      }}>
+                      {dialogMessage}
+                    </Text>{' '}
+                    (kg) are adding to process{'  '}
+                    <Text
+                      style={{
+                        color: appTheme.colors.cardTitle,
+                        fontWeight: 'bold',
+                      }}>
+                      {appProcess.process_name}
+                    </Text>
+                  </Text>
+                </View>
+              }
             />
           ) : (
             false

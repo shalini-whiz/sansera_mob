@@ -254,12 +254,18 @@ export default function ApproveBatch({navigation}) {
     }
 
     setApiStatus(true);
-    closeDialog();
+
     ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
+      let msg;
+      if (action === 'new') msg = 'HOLDED';
+      if (action === 'approved') msg = 'APPROVED';
+      if (action === 'rejected') msg = 'REJECTED';
+
       setApiStatus(false);
-      console.log('rej', apiRes.response.message);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
+          Alert.alert('BATCH ' + msg); 
+          closeDialog();
           loadBatches();
           setAction('');
           setDoc(null);

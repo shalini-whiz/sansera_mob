@@ -87,7 +87,8 @@ let batchSchema = [
     error: '',
     required: true,
     label: 'heat number',
-    type: 'string',
+    // type: 'string',
+    type: 'regex',
   },
   {
     key: 'total_weight',
@@ -148,7 +149,8 @@ let createdBatch = [
     error: '',
     required: true,
     label: 'heat number',
-    type: 'string',
+    // type: 'string',
+    type: 'regex',
   },
   {
     key: 'total_weight',

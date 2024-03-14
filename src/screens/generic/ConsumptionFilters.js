@@ -48,7 +48,6 @@ export default function ConsumptionFilters() {
     apiData.sort_order = 'DSC';
     setRefreshing(false);
     ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
-
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message.length) {

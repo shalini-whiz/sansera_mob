@@ -103,11 +103,20 @@ util.validateFormData = async obj => {
     if (item.type === 'number' && item.value.toString().length > 0) {
       item.value = parseInt(value);
     }
-    
+
     //UI_Enhancement issue 29
     if (item.type === 'decimal' && item.value.toString().length > 0) {
-      item.value = Number(value).toFixed(3);
+      item.value = Number(value).toFixed(3); //UI_Enhancement issue 34
     }
+
+    if (item.type === 'regex' && item.value.toString().length > 0) {
+      const regex = /^[0-9a-zA-Z-_]$/i;
+      item.value = value
+        .split('')
+        .filter(char => regex.test(char))
+        .join(''); //UI_Enhancement issue 34
+    }
+
     if (
       (item.type === 'number' || item.type === 'decimal') &&
       item.value.toString().length == 0
@@ -128,7 +137,7 @@ util.validateFormData = async obj => {
     }
     if (
       item.nonZero &&
-      item.value === 0 &&
+      Number(item.value) === 0 &&
       (item.type === 'number' || item.type === 'decimal')
     )
       item.error = 'Please enter valid ' + item.label + '';

@@ -317,7 +317,7 @@ export default function ClearInventory() {
               <View
                 style={[
                   styles.sectionContainer,
-                  {flex: 2, flexDirection: 'column'},
+                  {flex: 2},
                 ]}>
                 <View
                   style={{
@@ -327,12 +327,13 @@ export default function ClearInventory() {
                     borderRadius: 10,
                     padding: 10,
                     margin: 10,
+                    marginTop: 20,
                   }}>
                   <View
                     style={{
                       flexDirection: 'row',
                       justifyContent: 'center',
-                      padding: 10,
+
                     }}>
                     <CustomHeader title={'Rack Numbers'} size={18} style={{}} />
                     {batchDet.status.toLowerCase() != 'rejected' ? (
@@ -354,8 +355,8 @@ export default function ClearInventory() {
                     style={{
                       flexDirection: 'row',
                       flex: 1,
-                      padding: 10,
-                      margin: 10,
+                      // padding: 10,
+                      // margin: 10,
                     }}>
                     <View style={{flexDirection: 'column', flex: 2}}>
                       <View style={{flexDirection: 'row'}}>

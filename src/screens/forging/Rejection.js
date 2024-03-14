@@ -227,7 +227,7 @@ export const Rejection = React.memo(props => {
     }
     if (valid) {
       showDialog(true);
-      setDialogTitle('Confirm Rejection Details');
+      setDialogTitle('Confirm Rejection Details'); //UI_Enhancement 34
     }
   };
   const closeDialog = () => {
@@ -491,10 +491,11 @@ export const Rejection = React.memo(props => {
             dialogMessage={dialogMessage}
             closeDialog={closeDialog}
             okDialog={updateRejections}
+            //UI_Enhancement 34
             container={
               <View style={{justifyContent: 'center', alignItems: 'center'}}>
                 <Text style={{fontSize: 18, color: 'black'}}>
-                  Entered Rejected component{' '}
+                  Entered Rejected component count{' '}
                   <Text
                     style={{
                       color: appTheme.colors.cardTitle,

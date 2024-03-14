@@ -155,7 +155,7 @@ export const Rejection = React.memo(props => {
 
     if (valid) {
       showDialog(true);
-      setDialogTitle('Save Rejections');
+      setDialogTitle('Confirm Rejection Details'); //UI_Enhancement 34
     }
   };
 
@@ -232,7 +232,11 @@ export const Rejection = React.memo(props => {
                   {curRejCount})
                 </Text>
                 <TextInput
-                  style={[AppStyles.filterText, {flex: 2, paddingLeft: 5,fontSize:16,paddingVertical:5,}]}
+                  // UI_Enhancement 23,24,25,26,27
+                  style={[
+                    AppStyles.filterText,
+                    {flex: 2, fontSize: 16, marginVertical: 4},
+                  ]}
                   keyboardType="numeric"
                   onChangeText={value => setRejCount(value)}
                   value={rejCount}></TextInput>
@@ -283,6 +287,29 @@ export const Rejection = React.memo(props => {
             dialogMessage={dialogMessage}
             closeDialog={closeDialog}
             okDialog={updateRejections}
+            // UI_Enhancement 34
+            container={
+              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <Text style={{fontSize: 18, color: 'black'}}>
+                  Entered Rejected component count{' '}
+                  <Text
+                    style={{
+                      color: appTheme.colors.cardTitle,
+                      fontWeight: 'bold',
+                    }}>
+                    {rejCount}
+                  </Text>{' '}
+                  are adding to process{'  '}
+                  <Text
+                    style={{
+                      color: appTheme.colors.cardTitle,
+                      fontWeight: 'bold',
+                    }}>
+                    {appProcess.process_name}
+                  </Text>
+                </Text>
+              </View>
+            }
           />
         ) : (
           false
