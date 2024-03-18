@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,20 +12,20 @@ import {
   Touchable,
   Pressable,
 } from 'react-native';
-import {appTheme} from '../../lib/Themes';
-import {ApiService} from '../../httpservice';
+import { appTheme } from '../../lib/Themes';
+import { ApiService } from '../../httpservice';
 import CustomModal from '../../components/CustomModal';
 import UserContext from '../UserContext';
-import {useIsFocused} from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RejectionData from './RejectionData';
 import ErrorModal from '../../components/ErrorModal';
-import {ProcessFifo} from './ProcessFifo';
+import { ProcessFifo } from './ProcessFifo';
 import PublishMqtt from '../mqtt/PublishMqtt';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import {SvgCss} from 'react-native-svg';
-import {BinOutIcon} from '../../svgs/BinIcon';
+import { SvgCss } from 'react-native-svg';
+import { BinOutIcon } from '../../svgs/BinIcon';
 
 export default function ProcessList() {
   const flatlistRef = useRef();
@@ -44,13 +44,16 @@ export default function ProcessList() {
   const [refreshing, setRefreshing] = useState(false);
   const [process, setProcess] = useState([]);
   const [processDet, setProcessDet] = useState({});
+  const [finishCount, setFinishCount] = useState(0)
+
+
 
   useEffect(() => {
     if (isFocused) {
       setApiStatus(true);
       loadProcess();
     }
-    return () => {};
+    return () => { };
   }, [isFocused]);
 
   const loadProcess = (process, msg) => {
@@ -92,7 +95,7 @@ export default function ProcessList() {
       processDet.process.map(stageItem => {
         if (stageItem.fifo && stageItem.fifo.length) {
           stageItem.fifo.map(fifoItem => {
-            PublishMqtt({topic: fifoItem.element_id});
+            PublishMqtt({ topic: fifoItem.element_id });
           });
         }
       });
@@ -128,33 +131,42 @@ export default function ProcessList() {
     setDialogMessage(dialogMessage);
     setDialogType(dialogType);
     setProcessDet(item);
+    setFinishCount(item.process[6].ok_component)
+
   };
 
+  const validateFinishCount = (value) => {
+   // if (value < processDet.process[6].ok_component || value > processDet.component_count) return;
+    setFinishCount(value)
+  }
+
   const updateProcess = () => {
-    let apiData = {op: 'update_process'};
+    let apiData = { op: 'update_process' };
     apiData.process_name = processDet.process_name;
 
     apiData.status =
       dialogType === 'startProcess'
         ? 'RUNNING'
         : dialogType === 'stopProcess'
-        ? 'HOLD'
-        : dialogType === 'finishProcess'
-        ? 'FINISHED'
-        : '';
+          ? 'HOLD'
+          : dialogType === 'finishProcess'
+            ? 'FINISHED'
+            : '';
 
     if (apiData.status === 'FINISHED') {
       apiData.component_count = processDet.component_count;
-      apiData.finished_component = processDet.component_count;
+      if (finishCount < processDet.process[6].ok_component || finishCount > processDet.component_count) return;
+      apiData.finished_component = finishCount;
     }
+    console.log("apiData here "+JSON.stringify(apiData))
     let msg =
       dialogType === 'startProcess'
         ? 'RUNNING'
         : dialogType === 'stopProcess'
-        ? 'STOPPED'
-        : dialogType === 'finishProcess'
-        ? 'FINISHED'
-        : '';
+          ? 'STOPPED'
+          : dialogType === 'finishProcess'
+            ? 'FINISHED'
+            : '';
     setApiStatus(true);
     setIndicator(true);
     closeDialog();
@@ -187,7 +199,7 @@ export default function ProcessList() {
     });
   };
   const onPressFunctionDown = () => {
-    flatlistRef.current?.scrollToEnd({animated: true});
+    flatlistRef.current?.scrollToEnd({ animated: true });
   };
   return (
     <>
@@ -226,8 +238,8 @@ export default function ProcessList() {
 
                 return (
                   <View style={styles.processContainer} key={index}>
-                    <View style={{flexDirection: 'row'}} key={index}>
-                      <Text style={[styles.title, {textAlign: 'left'}]}>
+                    <View style={{ flexDirection: 'row' }} key={index}>
+                      <Text style={[styles.title, { textAlign: 'left' }]}>
                         {item.process_name}
                       </Text>
                       <View
@@ -237,9 +249,9 @@ export default function ProcessList() {
                           justifyContent: 'flex-end',
                         }}>
                         {item.status.toLowerCase() === 'created' ||
-                        item.status.toLowerCase() === 'hold' ? (
+                          item.status.toLowerCase() === 'hold' ? (
                           <TouchableOpacity
-                            style={[{alignSelf: 'center'}]}
+                            style={[{ alignSelf: 'center' }]}
                             onPress={e => openDialog('startProcess', item)}>
                             <Text
                               style={{
@@ -261,7 +273,7 @@ export default function ProcessList() {
                         {item.status.toLowerCase() === 'running' ? (
                           <>
                             <TouchableOpacity
-                              style={[{alignSelf: 'center'}]}
+                              style={[{ alignSelf: 'center' }]}
                               onPress={e => openDialog('stopProcess', item)}>
                               <Text
                                 style={{
@@ -274,7 +286,7 @@ export default function ProcessList() {
                               </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                              style={[{alignSelf: 'center', paddingLeft: 20}]}
+                              style={[{ alignSelf: 'center', paddingLeft: 20 }]}
                               onPress={e => openDialog('finishProcess', item)}>
                               <Text
                                 style={{
@@ -292,30 +304,30 @@ export default function ProcessList() {
                         )}
                       </View>
                     </View>
-                    <View style={{flexDirection: 'row'}}>
+                    <View style={{ flexDirection: 'row' }}>
                       <Text
                         style={[
                           styles.subtitle,
-                          {textAlign: 'center', flex: 1, maxWidth: '8%'},
+                          { textAlign: 'center', flex: 1, maxWidth: '8%' },
                         ]}></Text>
                       <Text
                         style={[
                           styles.subtitle,
-                          {textAlign: 'left', flex: 1, maxWidth: '8%'},
+                          { textAlign: 'left', flex: 1, maxWidth: '8%' },
                         ]}>
                         Batch
                       </Text>
                       <Text
                         style={[
                           styles.subtitle,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         Heat Number
                       </Text>
                       <Text
                         style={[
                           styles.subtitle,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         Supplier
                       </Text>
@@ -324,14 +336,14 @@ export default function ProcessList() {
                       <Text
                         style={[
                           styles.subtitle,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         Target Count
                       </Text>
                       <Text
                         style={[
                           styles.subtitle,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         Finished Count
                       </Text>
@@ -339,19 +351,19 @@ export default function ProcessList() {
                       <Text
                         style={[
                           styles.subtitle,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         Status
                       </Text>
                       <Text
                         style={[
                           styles.subtitle,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         Process Data
                       </Text>
                     </View>
-                    <View style={{flexDirection: 'row'}}>
+                    <View style={{ flexDirection: 'row' }}>
                       <TouchableOpacity
                         style={[
                           {
@@ -389,14 +401,14 @@ export default function ProcessList() {
                       <Text
                         style={[
                           styles.tableContent,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         {item.heat_num}
                       </Text>
                       <Text
                         style={[
                           styles.tableContent,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         {item.supplier}
                       </Text>
@@ -404,7 +416,7 @@ export default function ProcessList() {
                       <Text
                         style={[
                           styles.tableContent,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         {item.component_count}
                       </Text>
@@ -412,7 +424,7 @@ export default function ProcessList() {
                       <Text
                         style={[
                           styles.tableContent,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         {item.process[6].ok_component}
                       </Text>
@@ -420,13 +432,13 @@ export default function ProcessList() {
                       <Text
                         style={[
                           styles.tableContent,
-                          {textAlign: 'center', flex: 1},
+                          { textAlign: 'center', flex: 1 },
                         ]}>
                         {item.status}
                       </Text>
 
                       <TouchableOpacity
-                        style={[{flex: 1, alignItems: 'center'}]}
+                        style={[{ flex: 1, alignItems: 'center' }]}
                         onPress={e => openDialog('rejection', item)}>
                         <FontAwesome
                           name="eye"
@@ -475,9 +487,8 @@ export default function ProcessList() {
             )}
 
             {dialog &&
-            (dialogType === 'startProcess' ||
-              dialogType === 'stopProcess' ||
-              dialogType === 'finishProcess') ? (
+              (dialogType === 'startProcess' ||
+                dialogType === 'stopProcess') ? (
               <CustomModal
                 modalVisible={dialog}
                 dialogTitle={dialogTitle}
@@ -488,6 +499,45 @@ export default function ProcessList() {
             ) : (
               false
             )}
+
+            {dialog && dialogType === 'finishProcess' ? (
+              <CustomModal
+                modalVisible={dialog}
+                dialogTitle={dialogTitle}
+                dialogMessage={dialogMessage}
+                closeDialog={closeDialog}
+                okDialog={updateProcess}
+                height={'70%'}
+                container={
+                  <View>
+                <View style={{ flexDirection: 'row', margin: 10, padding: 10 }}>
+                  <Text style={{ fontSize: 14, fontFamily: appTheme.fonts.regular, textAlign: 'left', flex: 0.5 }}>{"Finished Count"}</Text>
+                  <TextInput
+                    style={{
+                      opacity: finishCount && finishCount.length ? 1 : 0.6, flex: 0.5,
+                      backgroundColor:
+                        '#ECF0FA', textAlign: 'left',
+                      fontSize: 14,
+                      color: 'black',
+                      fontFamily: appTheme.fonts.regular,
+                    }}
+                    placeholder={""}
+                    placeholderTextColor="#fafafa"
+                    keyboardType={'numeric'}
+                    value={finishCount + ''}
+                    //onChangeText={this.props.handleChange(item.key)}
+                    onChangeText={value => validateFinishCount(value)}
+                  />
+
+                </View>
+                    {finishCount < processDet.process[6].ok_component || finishCount > processDet.component_count ?
+                    <Text style={{fontSize:12,color:'red'}}>Invalid count</Text> : false}
+                  </View>}
+              />
+            ) : (
+              false
+            )}
+
             {apiError && apiError.length ? (
               <ErrorModal msg={apiError} okAction={errOKAction} />
             ) : (
@@ -503,7 +553,7 @@ export default function ProcessList() {
             />
           </Pressable>
           <Pressable
-            style={[styles.button, {bottom: 0, top: -10}]}
+            style={[styles.button, { bottom: 0, top: -10 }]}
             onPress={onPressFunctionTop}>
             <Icon
               name="angle-up"
