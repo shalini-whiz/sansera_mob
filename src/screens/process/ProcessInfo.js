@@ -18,6 +18,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import FormGrid from '../../lib/FormGrid';
 import {stageType} from '../../constants/appConstants';
 
+// diameter
+import {ApiService} from '../../httpservice';
+import {EmptyBinContext} from '../../context/EmptyBinContext';
+
 let created_process_schema = [
   {
     key: 'batch_num',
@@ -57,6 +61,18 @@ let created_process_schema = [
     required: true,
     label: 'components',
     type: 'string',
+  },
+
+  //schema for diameter
+  {
+    key: 'diameter',
+    displayName: 'Diameter',
+    placeholder: '',
+    value: '',
+    error: '',
+    required: true,
+    label: 'diameter',
+    type: 'number',
   },
   ////UI_Enhancement issue 13
   {
@@ -187,6 +203,7 @@ let billet_schema = [];
 export default function ProcessInfo(props) {
   const [batchFormData, setBatchFormData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const {appProcess} = React.useContext(EmptyBinContext); // to get batch_num and unit_num
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -202,6 +219,17 @@ export default function ProcessInfo(props) {
   }, []);
 
   const loadForm = async () => {
+    // api call for batchdetails
+    // added diameter
+
+    let apiData = {
+      op: 'get_batch_details',
+      batch_num: appProcess.batch_num,
+      unit_num: appProcess.unit_num,
+    };
+
+    let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'batch');
+    const diameter = apiRes.response.message.diameter;
     setRefreshing(false);
     if (props && props.processEntity && props.processEntity.process) {
       let currentStage = await AsyncStorage.getItem('stage');
@@ -259,6 +287,12 @@ export default function ProcessInfo(props) {
             'DD/MM/YYYY, hh:mm:ss A',
             'DD MMM YYYY hh:mm A',
           );
+        }
+
+        // added Diameter
+
+        if (item.key === 'diameter') {
+          item.value = diameter + '';
         }
         if (item.key === 'created_by') {
           item.value =

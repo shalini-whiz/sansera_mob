@@ -39,7 +39,7 @@ let rejection_schema = [
     error: '',
     required: true,
     label: 'reject_weight',
-    type: 'decimal',
+    type: 'decimal', // by Rakshith
     nonZero: true,
   },
   // {
@@ -97,18 +97,13 @@ export default function RawMaterial(props) {
       stage_name: 'Shearing',
     };
     ApiService.getAPIRes(apiData, 'POST', 'rejection').then(apiRes => {
-      // console.log(apiRes.response.message.rejections[0].Shearing);
       const rejections = apiRes.response.message.rejections;
-      console.log('rejections   =>', JSON.stringify(rejections));
       let curKey = Object.keys(rejections[0])[0];
-      console.log('curKey       =>', curKey);
       let menuKeys = rejections[0][curKey].reduce(
         (keys, obj) =>
           keys.concat(Object.keys(obj).filter(key => keys.indexOf(key) === -1)),
         [],
       );
-      console.log('menuKeys     =>', menuKeys);
-      console.log('');
       setRejReasons(menuKeys);
     });
 
@@ -136,7 +131,6 @@ export default function RawMaterial(props) {
   };
 
   const handlePickerValue = (value, index) => {
-    console.log(value, index);
     setRejReason(value);
     setRejIndex(index);
   };
@@ -237,14 +231,10 @@ export default function RawMaterial(props) {
     apiData.process_name = appProcess.process_name;
     apiData.stage_name = await AsyncStorage.getItem('stage');
 
-    console.log('rejReasons==>', rejReasons);
-
     let rejReasonObj = {};
     rejReasonObj[rejReasons[rejIndex]] = rejWeight.reject_weight; // parseInt(rejWeight.reject_weight);
-    console.log('rejReasonObj==>', rejReasonObj);
     let rejObj = {};
     rejObj['Shearing'] = rejReasonObj;
-    console.log('rejObj==>', rejObj);
     apiData.rejections = rejObj;
 
     setApiStatus(true);
@@ -595,11 +585,17 @@ export default function RawMaterial(props) {
                 )}
 
                 <View
-                  style={{display: 'flex', flexDirection: 'row', padding: 10,maxHeight:"18%",flex:1}}>
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    padding: 10,
+                    maxHeight: '18%',
+                    flex: 1,
+                  }}>
                   <Text
                     style={[
                       AppStyles.filterLabel,
-                      {flex: 1, padding: 10, fontSize: 14,alignSelf:"center"},
+                      {flex: 1, padding: 10, fontSize: 14, alignSelf: 'center'},
                     ]}>
                     Enter Weight (kg)
                   </Text>

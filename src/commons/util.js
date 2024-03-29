@@ -93,7 +93,7 @@ util.validateFormData = async obj => {
     if (
       item.value != undefined &&
       item.value != null &&
-      (item.type !== 'number' || item.type !== 'decimal') &&
+      (item.type !== 'number' || item.type !== 'decimal') && // by Rakshith
       item.value.toString().length
     ) {
       item.value =
@@ -104,21 +104,22 @@ util.validateFormData = async obj => {
       item.value = parseInt(value);
     }
 
-    //UI_Enhancement issue 29
+    // to set the decimal values to 3 digits
     if (item.type === 'decimal' && item.value.toString().length > 0) {
-      item.value = Number(value).toFixed(3); //UI_Enhancement issue 34
+      item.value = Number(value).toFixed(3);
     }
 
+    // to validate the Heat Number that should accept only Alpha_numeric Values
     if (item.type === 'regex' && item.value.toString().length > 0) {
       const regex = /^[0-9a-zA-Z-_]$/i;
       item.value = value
         .split('')
         .filter(char => regex.test(char))
-        .join(''); //UI_Enhancement issue 34
+        .join(''); // by Rakshith
     }
 
     if (
-      (item.type === 'number' || item.type === 'decimal') &&
+      (item.type === 'number' || item.type === 'decimal') && // by Rakshith
       item.value.toString().length == 0
     )
       item.value = 0;
@@ -138,11 +139,11 @@ util.validateFormData = async obj => {
     if (
       item.nonZero &&
       Number(item.value) === 0 &&
-      (item.type === 'number' || item.type === 'decimal')
+      (item.type === 'number' || item.type === 'decimal') // by Rakshith
     )
       item.error = 'Please enter valid ' + item.label + '';
 
-    let validValue = true;
+    let validValue = true; // by Rakshith
     if (item.type === 'number' || item.type === 'decimal') {
       if (
         item.value === null ||

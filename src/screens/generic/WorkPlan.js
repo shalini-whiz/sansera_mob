@@ -107,7 +107,7 @@ export const WorkPlan = React.memo(props => {
   //UI_Enhancement issue 7
   const openDialog = e => {
     showDialog(true);
-    let dialogTitle = 'Confirm Component Details'; //UI_Enhancement issue 31
+    let dialogTitle = 'Confirm Component Details'; //  Confirmation Dialog msg change
     let dialogMessage = '';
     setDialogType('update');
     setDialogTitle(dialogTitle);
@@ -252,8 +252,8 @@ export const WorkPlan = React.memo(props => {
                   alignItems: 'center',
                 }}>
                 <Text style={{color: 'black', fontSize: 20}}>
-                  {/* //UI_Enhancement issue 31 */}
-                   Entered ok component{' '}
+                  {/* //  Confirmation Dialog msg change */}
+                  Entered ok component{' '}
                   <Text
                     style={{
                       color: appTheme.colors.cardTitle,

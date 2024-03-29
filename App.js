@@ -54,7 +54,7 @@ function App() {
       if (Platform.OS === 'android') {
         SplashScreen.hide();
       }
-    }, 1);
+    }, 5000);
 
     initNotification(openNotificationHandler);
     const getData = async () => {

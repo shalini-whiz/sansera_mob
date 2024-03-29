@@ -345,7 +345,9 @@ export default function ProcessList() {
                           styles.subtitle,
                           { textAlign: 'center', flex: 1 },
                         ]}>
-                        Finished Count
+                        {item.status === 'FINISHED'
+                          ? 'Finished Count'
+                          : 'Process Count'}
                       </Text>
 
                       <Text
@@ -426,7 +428,9 @@ export default function ProcessList() {
                           styles.tableContent,
                           { textAlign: 'center', flex: 1 },
                         ]}>
-                        {item.process[6].ok_component}
+                        {item.status === 'FINISHED'
+                          ? item.finished_component
+                          : item.process[6].ok_component}
                       </Text>
 
                       <Text
@@ -507,32 +511,47 @@ export default function ProcessList() {
                 dialogMessage={dialogMessage}
                 closeDialog={closeDialog}
                 okDialog={updateProcess}
-                height={'70%'}
+                height={'50%'}
                 container={
-                  <View>
-                <View style={{ flexDirection: 'row', margin: 10, padding: 10 }}>
-                  <Text style={{ fontSize: 14, fontFamily: appTheme.fonts.regular, textAlign: 'left', flex: 0.5 }}>{"Finished Count"}</Text>
-                  <TextInput
-                    style={{
-                      opacity: finishCount && finishCount.length ? 1 : 0.6, flex: 0.5,
-                      backgroundColor:
-                        '#ECF0FA', textAlign: 'left',
-                      fontSize: 14,
-                      color: 'black',
-                      fontFamily: appTheme.fonts.regular,
-                    }}
-                    placeholder={""}
-                    placeholderTextColor="#fafafa"
-                    keyboardType={'numeric'}
-                    value={finishCount + ''}
-                    //onChangeText={this.props.handleChange(item.key)}
-                    onChangeText={value => validateFinishCount(value)}
-                  />
-
-                </View>
-                    {finishCount < processDet.process[6].ok_component || finishCount > processDet.component_count ?
-                    <Text style={{fontSize:12,color:'red'}}>Invalid count</Text> : false}
-                  </View>}
+                  <View
+                    style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        margin: 10,
+                        padding: 10,
+                        maxWidth: '40%',
+                      }}>
+                      <Text style={{ fontSize: 14, fontFamily: appTheme.fonts.regular, textAlign: 'left', flex: 0.5 }}>{"Finished Count"}</Text>
+                      <TextInput
+                        style={{
+                          opacity: finishCount && finishCount.length ? 1 : 0.6,
+                          flex: 0.5,
+                          backgroundColor: '#ECF0FA',
+                          textAlign: 'left',
+                          fontSize: 14,
+                          color: 'black',
+                          shadowColor: 'black',
+                          fontFamily: appTheme.fonts.regular,
+                        }}
+                        placeholder={''}
+                        placeholderTextColor="#fafafa"
+                        keyboardType={'numeric'}
+                        value={finishCount + ''}
+                        //onChangeText={this.props.handleChange(item.key)}
+                        onChangeText={value => validateFinishCount(value)}
+                      />
+                    </View>
+                    {finishCount < processDet.process[6].ok_component ||
+                    finishCount > processDet.component_count ? (
+                      <Text style={{fontSize: 12, color: 'red'}}>
+                        Invalid count
+                      </Text>
+                    ) : (
+                      false
+                    )}
+                  </View>
+                }
               />
             ) : (
               false

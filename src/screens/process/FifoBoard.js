@@ -104,10 +104,10 @@ export const FifoBoard = React.memo(props => {
 
   const renderItem = ({item, index}) => {
     let color;
-    if (item.status === 'CREATED') color = '#2b96d4';
-    if (item.status === 'HOLD') color = '#ce8807';
-    if (item.status === 'RUNNING') color = 'green';
-    if (item.status === 'FINISHED') color = 'red';
+    if (item.status === 'CREATED') color = appTheme.colors.statusCreated;
+    if (item.status === 'HOLD') color = appTheme.colors.statusHold;
+    if (item.status === 'RUNNING') color = appTheme.colors.statusApproved;
+    if (item.status === 'FINISHED') color = appTheme.colors.statusRejected;
 
     return (
       <View style={[styles.tableData, {flexDirection: 'row'}]} key={index}>
