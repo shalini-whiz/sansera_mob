@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,20 +12,21 @@ import {
   SegmentedControlIOSComponent,
   ToastAndroid,
 } from 'react-native';
-import {dateUtil, util} from '../../commons';
+import { dateUtil, util } from '../../commons';
 import FormGen from '../../lib/FormGen';
 import CustomHeader from '../../components/CustomHeader';
-import {ApiService} from '../../httpservice';
+import { ApiService } from '../../httpservice';
 import UserContext from '../UserContext';
 import CustomModal from '../../components/CustomModal';
-import {useIsFocused} from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import FormGrid from '../../lib/FormGrid';
 import AppStyles from '../../styles/AppStyles';
 import ErrorModal from '../../components/ErrorModal';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import {appTheme} from '../../lib/Themes';
+import { appTheme } from '../../lib/Themes';
 import RNFetchBlob from 'rn-fetch-blob';
-import {PermissionsAndroid} from 'react-native';
+import { PermissionsAndroid } from 'react-native';
+import { min } from 'moment';
 
 let batchSchema = [
   {
@@ -206,14 +207,14 @@ export default function BatchDetails(props) {
     if (isFocused) {
       loadForm();
     }
-    return () => {};
+    return () => { };
   }, [isFocused, props.content && props.content._id, props]);
 
   useEffect(() => {
     if (!props._id) {
       getSuppliers();
     }
-    return () => {};
+    return () => { };
   }, [count]);
 
   const onRefresh = React.useCallback(() => {
@@ -292,6 +293,30 @@ export default function BatchDetails(props) {
     }
   };
 
+
+  const loadMaterialCode = () => {
+    let formData = [...batchFormData];
+    let mIndex = formData.findIndex( materialItem => materialItem.key === 'material_code', );
+    let mItem = formData[mIndex]
+    let mgIndex = formData.findIndex( materialItem => materialItem.key === 'material_grade', );
+
+    if (mIndex != -1) {
+      let selectedSupplierIndex = mItem.options.findIndex( item => item.material_code === mItem.value, );
+      if (selectedSupplierIndex > -1) {
+        let updatedMaterialGrade = formData[mgIndex];
+        updatedMaterialGrade.options = mItem.options[selectedSupplierIndex].material_grade;
+        updatedMaterialGrade.value = mItem.options[selectedSupplierIndex].material_grade[0];
+        let updatedBatchData = [
+          ...formData.slice(0, mgIndex),
+          updatedMaterialGrade,
+          ...formData.slice(mgIndex + 1),
+        ];
+        updatedBatchData[mgIndex] = updatedMaterialGrade;
+        setBatchFormData([...updatedBatchData]);
+      }
+    }
+  }
+
   const loadSupplierMaterials = () => {
     let formData = [...batchFormData];
     let sIndex = formData.findIndex(item => item.key === 'supplier_id');
@@ -319,7 +344,6 @@ export default function BatchDetails(props) {
           updatedItem.options = material_details;
           updatedMaterialGrade.options = material_details[0].material_grade;
           updatedMaterialGrade.value = material_details[0].material_grade[0];
-          updatedMaterialGrade.options = material_details[0].material_grade;
           let updatedBatchData = [
             ...formData.slice(0, mIndex),
             updatedItem,
@@ -347,6 +371,7 @@ export default function BatchDetails(props) {
       if (name === 'supplier_id') {
         loadSupplierMaterials();
       }
+      else if (name === 'material_code') loadMaterialCode();
     }
   };
 
@@ -391,7 +416,7 @@ export default function BatchDetails(props) {
         Alert.alert('Storage permission denied. Cannot download the file.');
         return;
       }
-      const {fs, config} = RNFetchBlob;
+      const { fs, config } = RNFetchBlob;
       const pdfLocation = `${fs.dirs.DownloadDir}//${date}/${fileName}`;
 
       try {
@@ -490,7 +515,7 @@ export default function BatchDetails(props) {
           false
         ) : (
           <View
-            style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
+            style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
             <CustomHeader
               title={props.title ? props.title : ''}
               align="center"
@@ -501,7 +526,7 @@ export default function BatchDetails(props) {
         {props._id ? (
           <FormGrid labelDataInRow={true} formData={batchFormData} />
         ) : (
-          <View style={{width: '70%', margin: 10, padding: 5}}>
+          <View style={{ width: '70%', margin: 10, padding: 5 }}>
             <FormGen
               handleChange={handleChange}
               editMode={true}
@@ -537,7 +562,7 @@ export default function BatchDetails(props) {
               justifyContent: 'center',
             }}>
             <TouchableOpacity
-              style={[AppStyles.successBtn, {flexDirection: 'row'}]}
+              style={[AppStyles.successBtn, { flexDirection: 'row' }]}
               onPress={e => handleSubmit(e)}>
               <Text style={AppStyles.successText}>SAVE</Text>
             </TouchableOpacity>
@@ -545,12 +570,12 @@ export default function BatchDetails(props) {
         )}
       </View>
       {props.pdf ? (
-        <View style={{flex: 1, flexDirection: 'row'}}>
-          <Text style={{margin: 9, fontFamily: appTheme.fonts.regular}}>
+        <View style={{ flex: 1, flexDirection: 'row' }}>
+          <Text style={{ margin: 9, fontFamily: appTheme.fonts.regular }}>
             Certificate
           </Text>
           <View
-            style={{flex: 1, flexDirection: 'row', marginHorizontal: '20%'}}>
+            style={{ flex: 1, flexDirection: 'row', marginHorizontal: '20%' }}>
             <Icon
               name={'download'}
               size={20}
