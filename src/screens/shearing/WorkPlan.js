@@ -49,7 +49,7 @@ let stageWeightSchema = [
     error: '',
     required: false,
     label: 'Billet Weight',
-    type: 'decimal',
+    type: 'decimal', // by Rakshith
     defaultValue: 0,
   },
   {
@@ -60,7 +60,7 @@ let stageWeightSchema = [
     error: '',
     required: false,
     label: 'Hold Material Weight',
-    type: 'decimal',
+    type: 'decimal', // by Rakshith
     defaultValue: 0,
   },
   {
@@ -82,7 +82,7 @@ let stageWeightSchema = [
     error: '',
     required: false,
     label: 'End Billets Weight',
-    type: 'decimal',
+    type: 'decimal', // by Rakshith
     defaultValue: 0,
   },
   // {
@@ -170,7 +170,7 @@ export default function WorkPlan(props) {
   const openDialog = e => {
     console.log('BatchFormData', batchFormData);
     showDialog(true);
-    let dialogTitle = 'Confirm Billet Details'; //UI_Enhancement issue 30
+    let dialogTitle = 'Confirm Billet Details'; //  Confirmation Dialog msg change
     let dialogMessage = 'Entred Billet Data are adding To';
     setDialogTitle(dialogTitle);
     setDialogMessage(dialogMessage);
@@ -222,6 +222,11 @@ export default function WorkPlan(props) {
     if (!isError) {
       let ok_bits_count_index = validFormData.findIndex(
         item => item.key === 'ok_bits_count',
+      ); 
+
+      // added avlidation to hold materials weight
+      let hold_materials_weight_index = validFormData.findIndex(
+        item => item.key === 'hold_materials_weight',
       );
       let ok_bits_weight_index = validFormData.findIndex(
         item => item.key === 'ok_bits_weight',
@@ -229,13 +234,26 @@ export default function WorkPlan(props) {
       let ok_bits_count_obj = validFormData[ok_bits_count_index];
       let ok_bits_weight_obj = validFormData[ok_bits_weight_index];
 
-      if (ok_bits_count_obj.value > 0 && ok_bits_weight_obj.value == 0) {
+      let hold_materials_weight_obj =
+        validFormData[hold_materials_weight_index];
+
+      if (hold_materials_weight_obj.value.toString() === 'NaN') {
+        validFormData[hold_materials_weight_index].error =
+          'Weight of Hold Materials required';
+      }
+      if (
+        (ok_bits_count_obj.value > 0 && ok_bits_weight_obj.value == 0) ||
+        ok_bits_weight_obj.value.toString() === 'NaN'
+      ) {
         validFormData[ok_bits_weight_index].error =
           'Weight of End Billets required';
-      } else if (ok_bits_weight_obj.value > 0 && ok_bits_count_obj.value == 0)
+      } else if (
+        (ok_bits_weight_obj.value > 0 && ok_bits_count_obj.value == 0) ||
+        ok_bits_count_obj.value.toString() === 'NaN'
+      ) {
         validFormData[ok_bits_count_index].error =
           'Count of End Billets required';
-
+      }
       let ok_component_index = validFormData.findIndex(
         item => item.key === 'ok_component',
       );
@@ -246,12 +264,15 @@ export default function WorkPlan(props) {
       let ok_end_billets_weight_obj =
         validFormData[ok_end_billets_weight_index];
 
-      if (ok_component_obj.value > 0 && ok_end_billets_weight_obj.value == 0) {
+      if (
+        (ok_component_obj.value > 0 && ok_end_billets_weight_obj.value == 0) ||
+        ok_end_billets_weight_obj.value.toString() === 'NaN'
+      ) {
         validFormData[ok_end_billets_weight_index].error =
           'Weight of OK Billets required';
       } else if (
-        ok_end_billets_weight_obj.value > 0 &&
-        ok_component_obj.value == 0
+        (ok_end_billets_weight_obj.value > 0 && ok_component_obj.value == 0) ||
+        ok_component_obj.value.toString() === 'NaN'
       )
         validFormData[ok_component_index].error =
           'Count of OK Billets required';
@@ -294,8 +315,36 @@ export default function WorkPlan(props) {
           //openDialog(apiRes.response.message);
           util.resetForm(batchFormData);
         }
-      } else if (apiRes && apiRes.response.message)
-        setApiError(apiRes.response.message);
+      } else if (apiRes && apiRes.response.message) {
+        let msg = apiRes.response.message;
+        console.log('msg', msg);
+
+        if (msg.includes('component-weight-less-than-ok-end-billets-weight')) {
+          setApiError("OK Billets weight can't be more than Component Weight");
+        } else {
+          const replacements = {
+            ok_bits: 'End Billets',
+            'ok-bits': 'End Billets',
+            ok_end_billets: 'Billets',
+            'ok-end-billets': 'Billets',
+
+            // component: 'Billets',
+          };
+
+          let newString = msg.toLowerCase();
+          console.log('afetr msg ', msg);
+          // Loop through replacements object
+          for (const pattern in replacements) {
+            // Replace all occurrences using a regular expression
+            newString = newString.replace(
+              new RegExp(pattern, 'g'),
+              replacements[pattern],
+            );
+          }
+
+          setApiError(newString);
+        }
+      }
     });
   };
 
@@ -425,7 +474,7 @@ export default function WorkPlan(props) {
                     alignSelf: 'center',
                     // backgroundColor: 'green',
                   }}>
-                  {/* //UI_Enhancement issue 30 */}
+                  {/* //  Confirmation Dialog msg change */}
                   <Text
                     style={{color: 'black', fontSize: 20, marginBottom: 20}}>
                     Confirm entred billet data are adding To{' '}

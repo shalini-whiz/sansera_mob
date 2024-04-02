@@ -89,7 +89,7 @@ let batchSchema = [
     required: true,
     label: 'heat number',
     // type: 'string',
-    type: 'regex',
+    type: 'regex', // rakshith
   },
   {
     key: 'total_weight',
@@ -99,7 +99,7 @@ let batchSchema = [
     error: '',
     required: true,
     label: 'quantity',
-    type: 'decimal',
+    type: 'decimal', // rakshith
     nonZero: true,
   },
 ];
@@ -151,7 +151,7 @@ let createdBatch = [
     required: true,
     label: 'heat number',
     // type: 'string',
-    type: 'regex',
+    type: 'regex', // rakshith
   },
   {
     key: 'total_weight',
@@ -161,7 +161,7 @@ let createdBatch = [
     error: '',
     required: true,
     label: 'quantity',
-    type: 'decimal',
+    type: 'decimal', // rakshith
   },
   {
     key: 'created_by',

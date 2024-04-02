@@ -5,7 +5,6 @@ import {
   View,
   ActivityIndicator,
   FlatList,
-  Pressable,
 } from 'react-native';
 import {appTheme} from '../../lib/Themes';
 import {ApiService} from '../../httpservice';
@@ -39,10 +38,7 @@ export const BatchBoard = React.memo(props => {
       status: ['NEW', 'APPROVED', 'REJECTED'],
       unit_num: userState.user.unit_number,
       sort_by: 'status',
-      // sort_order: 'DSC',
     };
-    // apiData.sort_by = 'updated_on'
-    //apiData.sort_order = 'DSC'
     setRefreshing(false);
     setProcess([]);
     ApiService.getAPIRes(apiData, 'POST', 'batch').then(apiRes => {
@@ -68,16 +64,20 @@ export const BatchBoard = React.memo(props => {
   };
 
   const renderItem = ({item, index}) => {
-    {/* //UI_Enhancement issue 3 */}
+    {
+      /* // Inventory and FIFO board SWAP */
+    }
 
     let color;
     if (item.status === 'NEW') {
-      color = '#ce8807';
+      color = appTheme.colors.statusHold;
     } else if (item.status === 'APPROVED') {
-      color = 'green';
-    } else color = 'red';
+      color = appTheme.colors.statusApproved;
+    } else color = appTheme.colors.statusRejected;
 
-    {/* //UI_Enhancement issue 3 */}
+    {
+      /* // Inventory and FIFO board SWAP */
+    }
     return (
       <View style={[styles.tableData, {flexDirection: 'row'}]} key={index}>
         <Text style={[styles.tableDataCell, {borderLeftWidth: 0.5}]}>
@@ -97,7 +97,7 @@ export const BatchBoard = React.memo(props => {
             },
           ]}>
           {item.status && item.status === 'NEW' ? 'HOLD' : item.status}
-          {/* //UI_Enhancement issue 3 */}
+          {/* // Inventory and FIFO board SWAP */}
         </Text>
       </View>
     );
@@ -128,50 +128,7 @@ export const BatchBoard = React.memo(props => {
   };
 
   return (
-    // <ScrollView
-    //   contentContainerStyle={styles.scrollView}
-    //   refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }
-    // >
     <View style={styles.container}>
-      {/* {process.length ? (
-        <View style={{padding: 5, margin: 0, justifyContent: 'space-between'}}>
-          <Pressable
-            style={{transform: [{rotate: '-90deg'}]}}
-            onPress={onPressFunctionTop}>
-            <Icon
-              name="step-forward"
-              size={35}
-              color={appTheme.colors.gradientColor1}
-            />
-          </Pressable>
-          <Pressable onPress={onPressFunctionUp}>
-            <Icon
-              name="angle-up"
-              size={50}
-              color={appTheme.colors.gradientColor1}
-            />
-          </Pressable>
-          <Pressable onPress={onPressFunctionDown}>
-            <Icon
-              name="angle-down"
-              size={50}
-              color={appTheme.colors.gradientColor1}
-            />
-          </Pressable>
-          <Pressable
-            style={{transform: [{rotate: '90deg'}]}}
-            onPress={onPressFunctionBottom}>
-            <Icon
-              name="step-forward"
-              size={35}
-              color={appTheme.colors.gradientColor1}
-            />
-          </Pressable>
-        </View>
-      ) : (
-        false
-      )} */}
-
       <View style={{flex: 1}}>
         {process.length ? (
           <View style={{backgroundColor: 'white', margin: 2, padding: 5}}>

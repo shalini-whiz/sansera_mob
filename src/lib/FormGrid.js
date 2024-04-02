@@ -98,7 +98,7 @@ export default class FormGrid extends Component {
               )}
               <View
                 style={{
-                  flex: this.props.dataFlex ? this.props.dataFlex : 2,
+                  flex: this.props.dataFlex ? this.props.dataFlex : 1,
                 }}>
                 <Text
                   name={item.key}

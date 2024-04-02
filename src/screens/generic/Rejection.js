@@ -148,8 +148,14 @@ export const Rejection = React.memo(props => {
   const validateRejection = () => {
     setRejError('');
     let valid = true;
-    if (rejReason.length === 0 || rejCount < 1) {
+    if (rejReason.length === 0 || parseInt(rejCount) === 0) {
       setRejError('Please enter mandatory fields');
+      valid = false;
+    } else if (
+      Number(rejCount.toString()) == NaN ||
+      Number(rejCount.toString()) == 'NaN'
+    ) {
+      setRejError('Rejection Count should be a number');
       valid = false;
     }
 

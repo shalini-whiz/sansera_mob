@@ -23,6 +23,9 @@ import BatchDetails from '../batch/BatchDetails';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FormGrid from '../../lib/FormGrid';
 import ErrorModal from '../../components/ErrorModal';
+
+//diameter
+import {EmptyBinContext} from '../../context/EmptyBinContext';
 import AppStyles from '../../styles/AppStyles';
 import {ok} from 'assert';
 
@@ -91,7 +94,7 @@ let batchSchema = [
     error: '',
     required: true,
     label: 'component weight',
-    type: 'decimal',
+    type: 'decimal', // by Rakshith
     nonZero: true,
   },
 ];
@@ -128,9 +131,21 @@ let created_process_schema = [
     type: 'string',
   },
   // //UI_Enhancement issue 13
+
+  //schema for diameter
+  {
+    key: 'diameter',
+    displayName: 'Diameter',
+    placeholder: '',
+    value: '',
+    error: '',
+    required: true,
+    label: 'diameter',
+    type: 'number',
+  },
   {
     key: 'component_count',
-    displayName: 'Required Components',
+    displayName: 'Target Components (count)', // required Components
     placeholder: '',
     value: '',
     error: '',
@@ -146,7 +161,7 @@ let created_process_schema = [
     error: '',
     required: true,
     label: 'component_weight',
-    type: 'decimal',
+    type: 'decimal', // by Rakshith
     nonZero: true,
   },
   {
@@ -231,6 +246,7 @@ export default function ProcessDetails(props) {
   const [forgeErr, setForgeErr] = useState('');
   const [groups, setGroups] = useState([]);
   const userState = React.useContext(UserContext);
+  const {appProcess} = React.useContext(EmptyBinContext); // to get batch_num and unit_num
 
   useEffect(() => {
     if (isFocused) {
@@ -251,7 +267,17 @@ export default function ProcessDetails(props) {
     loadForm();
   }, []);
 
-  const loadForm = () => {
+  const loadForm = async () => {
+    // api call for batchdetails
+    // added diameter
+    let apiData = {
+      op: 'get_batch_details',
+      batch_num: appProcess.batch_num,
+      unit_num: appProcess.unit_num,
+    };
+    let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'batch');
+    const diameter = apiRes.response.message.diameter;
+
     if (props && props.processEntity) {
       if (props.fields && props.fields.length) {
         let rejIndex = created_process_schema.findIndex(
@@ -280,6 +306,8 @@ export default function ProcessDetails(props) {
         }
       }
       created_process_schema.map(item => {
+        // added diameter
+
         item['value'] = props.processEntity[item.key]
           ? props.processEntity[item.key] + ''
           : '';
@@ -293,6 +321,9 @@ export default function ProcessDetails(props) {
           );
 
           //item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
+        }
+        if (item.key === 'diameter') {
+          item.value = diameter + '';
         }
         if (item.key === 'created_by') {
           item.value =
@@ -504,14 +535,12 @@ export default function ProcessDetails(props) {
     setForgeErr('');
     let apiData = await util.filterFormData([...batchFormData]);
     (apiData.op = 'add_process'), setBatchFormData(validFormData);
-    console.log('apiData', apiData.component_count, apiData.component_id);
 
     let supplier = await ApiService.getAPIRes(
       {op: 'get_suppliers'},
       'POST',
       'get_supplier',
     );
-    console.log(JSON.stringify('supplier', supplier));
 
     if (!forgeId.length) setForgeErr('Forge Machine required');
 
