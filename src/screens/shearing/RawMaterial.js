@@ -75,6 +75,7 @@ export default function RawMaterial(props) {
   const [rejReasons, setRejReasons] = useState([]);
   const [rejReason, setRejReason] = useState([]);
   const [rejIndex, setRejIndex] = useState([]);
+  const [rejName, setRejName] = useState([]);
 
   useEffect(() => {
     if (isFocused) {
@@ -99,6 +100,7 @@ export default function RawMaterial(props) {
     ApiService.getAPIRes(apiData, 'POST', 'rejection').then(apiRes => {
       const rejections = apiRes.response.message.rejections;
       let curKey = Object.keys(rejections[0])[0];
+      setRejName(curKey)
       let menuKeys = rejections[0][curKey].reduce(
         (keys, obj) =>
           keys.concat(Object.keys(obj).filter(key => keys.indexOf(key) === -1)),
@@ -234,7 +236,7 @@ export default function RawMaterial(props) {
     let rejReasonObj = {};
     rejReasonObj[rejReasons[rejIndex]] = rejWeight.reject_weight; // parseInt(rejWeight.reject_weight);
     let rejObj = {};
-    rejObj['Shearing'] = rejReasonObj;
+    rejObj[rejName] = rejReasonObj;
     apiData.rejections = rejObj;
 
     setApiStatus(true);

@@ -571,9 +571,11 @@ export default function BatchDetails(props) {
       </View>
       {props.pdf ? (
         <View style={{ flex: 1, flexDirection: 'row' }}>
-          <Text style={{ margin: 9, fontFamily: appTheme.fonts.regular }}>
-            Certificate
-          </Text>
+          <View style={{flex:1}} >
+            <Text style={{ margin: 9, fontFamily: appTheme.fonts.regular }}>
+              Certificate
+            </Text>
+          </View>
           <View
             style={{ flex: 1, flexDirection: 'row', marginHorizontal: '20%' }}>
             <Icon
