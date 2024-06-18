@@ -295,7 +295,7 @@ export const Rejection = React.memo(props => {
                   <Text
                     key={index}
                     style={[
-                      // Font&AlignmentChanges 7
+                      // Maintain consistency in font sizes for rejection data
                       AppStyles.sideMenu,
                       {
                         fontSize: 16, 

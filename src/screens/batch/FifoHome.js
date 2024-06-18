@@ -4,7 +4,7 @@ import {BatchBoard} from './BatchBoard';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {FifoBoard} from '../process/FifoBoard';
 import {appTheme} from '../../lib/Themes';
-import ClearInventory from './ClearInventory'; //UI_Enhancement issue 2
+import ClearInventory from './ClearInventory'; //Inventory and FIFO board SWAP.
 
 const FifoHome = () => {
   const [Fifo, setFifo] = useState('Batch');
@@ -64,7 +64,7 @@ const FifoHome = () => {
         </TouchableOpacity>
       </View>
       {Fifo && Fifo === 'Batch' ? <ClearInventory /> : <FifoBoard />}
-      {/* //UI_Enhancement issue 2 */}
+      {/* //Inventory and FIFO board SWAP. */}
     </View>
   );
 };

@@ -268,7 +268,7 @@ export default function ProcessInfo(props) {
         processSchema.push(total_count_schema);
       }
 
-      // Font&AlignmentChanges 4
+      // Excluding Rejection weight field for Oiling process
       if (currentStage && currentStage.toLowerCase() === stageType.oiling) {
         processSchema = [...created_process_schema];
         processSchema.push(total_count_schema);

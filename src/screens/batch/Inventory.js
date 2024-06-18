@@ -13,7 +13,7 @@ import {appTheme} from '../../lib/Themes';
 import {EmptyBinContext} from '../../context/EmptyBinContext';
 import ClearInventory from './ClearInventory';
 import {RackData} from './RackData';
-import {BatchBoard} from './BatchBoard'; //UI_Enhancement issue 2
+import {BatchBoard} from './BatchBoard'; //Inventory and FIFO board SWAP.
 
 export default Inventory = React.memo(props => {
   const [refreshing, setRefreshing] = useState(false);
@@ -90,7 +90,7 @@ export default Inventory = React.memo(props => {
       </View>
       <View style={[styles.mainContainer, {flex: 4}]}>
         {tab === 'batchInventory' ? <BatchBoard /> : false}
-        {/* UI_Enhancement issue 2 */}
+        {/* Inventory and FIFO board SWAP. */}
         {tab === 'rackData' ? <RackData /> : false}
       </View>
     </View>

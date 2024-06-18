@@ -42,7 +42,7 @@ export default function ApproveBatch({navigation}) {
   const [apiError, setApiError] = useState('');
   const [apiStatus, setApiStatus] = useState(false);
   const [apiIndicator, setApiIndicator] = useState(true);
-  //Font&AlignmentChanges 2
+  //Avoid loading symbol when there are batches
   const [batchNum, setBatchNum] = useState('');
   const [status, setStatus] = useState('NEW');
   const [reason, setReason] = useState('');
@@ -83,7 +83,7 @@ export default function ApproveBatch({navigation}) {
     return () => {};
   }, [navigation, isFocused, status, batchDet]);
 
-  //Font&AlignmentChanges 2
+  //Avoid loading symbol when there are batches
   useEffect(() => {
     setTimeout(() => {
       setApiIndicator(false);
@@ -162,7 +162,7 @@ export default function ApproveBatch({navigation}) {
   const handleStatusChange = value => {
     setBatchNum('');
     setApiIndicator(true);
-    //Font&AlignmentChanges 2
+    //Avoid loading symbol when there are batches
     setBatchDet({});
     setStatus(value);
     setDoc(null);
@@ -487,7 +487,7 @@ export default function ApproveBatch({navigation}) {
                           <RadioButton value="new" />
                           <Text
                             style={[
-                              //UI_Enhancement issue 22
+                              //Radio button and text alinment
                               styles.radioText,
                               {
                                 color: '#ff7b00',
@@ -511,7 +511,7 @@ export default function ApproveBatch({navigation}) {
                           <RadioButton value="approved" />
                           <Text
                             style={[
-                              //UI_Enhancement issue 22
+                              //Radio button and text alinment
                               styles.radioText,
                               {
                                 color: 'green',
@@ -535,7 +535,7 @@ export default function ApproveBatch({navigation}) {
                           <RadioButton value="rejected" />
                           <Text
                             style={[
-                              //UI_Enhancement issue 22
+                              //Radio button and text alinment
                               styles.radioText,
                               {
                                 color: 'red',
@@ -747,7 +747,7 @@ export default function ApproveBatch({navigation}) {
                 flexDirection: 'column',
                 margin: 100,
               }}>
-              {/* Font&AlignmentChanges 2 */}
+              {/* Avoid loading symbol when there are batches */}
               {apiIndicator ? (
                 <ActivityIndicator size="large" animating={apiIndicator} />
               ) : (

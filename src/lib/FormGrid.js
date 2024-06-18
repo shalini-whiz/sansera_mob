@@ -65,7 +65,7 @@ export default class FormGrid extends Component {
       });
     } else {
       content = this.props.formData.map((item, index) => {
-        //UI_Enhancement issue 1
+        // highlight the status of the batch
         let color;
         if (item.value === 'HOLD') color = '#ff7b00';
         else if (item.value === 'APPROVED') color = 'green';

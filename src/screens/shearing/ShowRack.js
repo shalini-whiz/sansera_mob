@@ -104,7 +104,7 @@ export default function ShowRack(props) {
           styles.container,
           {alignItems: 'center', flexDirection: 'column'},
         ]}>
-        <Text // Font&AlignmentChanges 4
+        <Text // Highlighting the Rack number font size
           style={{
             fontSize: 20,
             fontWeight: 'bold',
