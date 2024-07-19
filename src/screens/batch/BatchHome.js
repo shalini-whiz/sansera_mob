@@ -11,6 +11,7 @@ import Inventory from './Inventory';
 import { FifoBoard } from '../process/FifoBoard';
 import { BatchBoard } from './BatchBoard';
 import FifoHome from './FifoHome';
+import DowntimeHome from '../Downtime/DowntimeHome';
 
 
 
@@ -31,15 +32,14 @@ export default function BatchHome() {
             lazy:true
           })}
       >
-        <Tab.Screen name="Create Batch" component={BatchDetails} 
-            listeners={({ navigation, route }) => ({
-              tabPress: e => {
-                if (route.state && route.state.routeNames.length > 0) {
-                  navigation.navigate('Create Batch')
-                }
-              },
-            })}
-        />
+              <Tab.Screen name="Inventory" component={Inventory}
+                  listeners={({ navigation, route }) => ({
+                    tabPress: e => {
+                      if (route.state && route.state.routeNames.length > 0) {
+                        navigation.navigate('Inventory')
+                      }
+                    },
+                  })} />
         <Tab.Screen name="Load Raw Material" component={LoadRM}
             listeners={({ navigation, route }) => ({
               tabPress: e => {
@@ -51,14 +51,17 @@ export default function BatchHome() {
         <Tab.Screen name="Approve Batch" component={ApproveBatch} 
         
            />
-        <Tab.Screen name="Inventory" component={Inventory}
-            listeners={({ navigation, route }) => ({
+        <Tab.Screen
+            name="Downtime"
+            component={DowntimeHome}
+            listeners={({navigation, route}) => ({
               tabPress: e => {
                 if (route.state && route.state.routeNames.length > 0) {
-                  navigation.navigate('Inventory')
+                  navigation.navigate('Downtime');
                 }
               },
-            })} />
+            })}
+          />
           <Tab.Screen name="FIFO Board" component={FifoHome}
             listeners={({ navigation, route }) => ({
               tabPress: e => {

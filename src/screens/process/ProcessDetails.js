@@ -268,15 +268,6 @@ export default function ProcessDetails(props) {
   }, []);
 
   const loadForm = async () => {
-    // api call for batchdetails
-    // added diameter
-    let apiData = {
-      op: 'get_batch_details',
-      batch_num: appProcess.batch_num,
-      unit_num: appProcess.unit_num,
-    };
-    let apiRes = await ApiService.getAPIRes(apiData, 'POST', 'batch');
-    const diameter = apiRes.response.message.diameter;
 
     if (props && props.processEntity) {
       if (props.fields && props.fields.length) {
@@ -321,9 +312,6 @@ export default function ProcessDetails(props) {
           );
 
           //item.value = dateUtil.toDateFormat(item.value, "DD MMM YYYY hh:mm");
-        }
-        if (item.key === 'diameter') {
-          item.value = diameter + '';
         }
         if (item.key === 'created_by') {
           item.value =

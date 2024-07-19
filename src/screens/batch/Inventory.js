@@ -14,6 +14,7 @@ import {EmptyBinContext} from '../../context/EmptyBinContext';
 import ClearInventory from './ClearInventory';
 import {RackData} from './RackData';
 import {BatchBoard} from './BatchBoard'; //Inventory and FIFO board SWAP.
+import BatchDetails from './BatchDetails';
 
 export default Inventory = React.memo(props => {
   const [refreshing, setRefreshing] = useState(false);
@@ -22,7 +23,7 @@ export default Inventory = React.memo(props => {
 
   useEffect(() => {
     if (isFocused) {
-      if (tab === '') setTab('batchInventory');
+      if (tab === '') setTab('createBatch');
     }
     return () => {};
   }, [isFocused]);
@@ -39,6 +40,32 @@ export default Inventory = React.memo(props => {
     <View style={{flexDirection: 'column', flex: 1}}>
       <View
         style={{flexDirection: 'row', backgroundColor: 'white', padding: 10}}>
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            padding: 8,
+            borderRadius: 15,
+            backgroundColor:
+              tab === 'createBatch'
+                ? appTheme.colors.cardTitle
+                : appTheme.colors.inactiveTab,
+          }}
+          onPress={e => tabChange('createBatch')}>
+          <Text
+            style={[
+              styles.filterText,
+              {
+                fontFamily: appTheme.fonts.bold,
+                color:
+                  tab === 'createBatch'
+                    ? 'white'
+                    : appTheme.colors.cardTitle,
+              },
+            ]}>
+            Create Batch{' '}
+          </Text>
+        </TouchableOpacity>
+        <Text style={{padding: 8}}> / </Text>
         <TouchableOpacity
           style={{
             flexDirection: 'row',
@@ -89,6 +116,7 @@ export default Inventory = React.memo(props => {
         </TouchableOpacity>
       </View>
       <View style={[styles.mainContainer, {flex: 4}]}>
+        {tab === 'createBatch' ? <BatchDetails /> : false}
         {tab === 'batchInventory' ? <BatchBoard /> : false}
         {/* Inventory and FIFO board SWAP. */}
         {tab === 'rackData' ? <RackData /> : false}

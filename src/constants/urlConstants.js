@@ -4,6 +4,9 @@
 var liveAddress = 'http://103.162.246.109:8086/';
 var mqttAddress = 'mqtt://103.162.246.109:1883';  // old mysore VM
 
+// var liveAddress = 'http://192.168.100.122:8080/';
+// var mqttAddress = 'mqtt://103.162.246.109:1883';  // localhost VM
+
 // var liveAddress = 'http://203.129.243.94:8086/';
 // var mqttAddress = 'mqtt://203.129.243.94:1883';  // new Mysore VM
 
@@ -72,6 +75,7 @@ const urls = {
   task: SERVER_URL + 'api/operator-task',
   process_consumption: SERVER_URL + 'api/process-consumption',
   compartment: SERVER_URL + 'api/compartment',
+  downtime: SERVER_URL + 'api/downtime',
 };
 
 export {urls, SERVER_URL, mqttOptions, binMqttOptions};

@@ -7,6 +7,7 @@ import ProcessDetails from './ProcessDetails';
 import {appTheme} from '../../lib/Themes';
 import ProcessList from './ProcessList';
 import ConsumptionFilters from '../generic/ConsumptionFilters';
+import DowntimeHome from '../Downtime/DowntimeHome';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -39,6 +40,17 @@ export default function ProcessHome() {
               tabPress: e => {
                 if (route.state && route.state.routeNames.length > 0) {
                   navigation.navigate('Create Process');
+                }
+              },
+            })}
+          />
+          <Tab.Screen
+            name="Downtime"
+            component={DowntimeHome}
+            listeners={({navigation, route}) => ({
+              tabPress: e => {
+                if (route.state && route.state.routeNames.length > 0) {
+                  navigation.navigate('Downtime');
                 }
               },
             })}

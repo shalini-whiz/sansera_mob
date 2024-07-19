@@ -154,6 +154,17 @@ let createdBatch = [
     type: 'regex', // rakshith
   },
   {
+    key: 'diameter',
+    displayName: 'Diameter',
+    placeholder: '',
+    value: '',
+    error: '',
+    required: true,
+    lowerCase: true,
+    label: 'diameter',
+    type: 'number',
+  },
+  {
     key: 'total_weight',
     displayName: 'Total Quantity (in Kg)',
     placeholder: '',

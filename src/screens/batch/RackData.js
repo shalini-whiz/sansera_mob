@@ -59,7 +59,6 @@ export const RackData = React.memo(props => {
       if (apiRes && apiRes.status) {
         if (apiRes.response.message && apiRes.response.message) {
           setColumns(apiRes.response.message.matrix.column);
-          //setColumns(4)
           setRows(apiRes.response.message.matrix.row);
           setRacks(apiRes.response.message.compartments);
         } else {
@@ -116,36 +115,27 @@ export const RackData = React.memo(props => {
             backgroundColor: 'white',
             margin: 5,
             padding: 5,
-            flex: 1,
             alignItems: 'center', //UI_Enhancement issue 4
+            // width:"100%",
+            minWidth:150
           }}
           onPress={e => openDialog(e, item, item.element_name)}
           key={index}>
+           <View style={{flex:1,justifyContent:"center",alignItems:"center",padding:0,margin:0}} >
           <Text
             style={[
               AppStyles.titleWithBold,
-              {backgroundColor: 'white', flex: 1, padding: 2},
+              {padding: 2,color: item.color, textShadowColor: '#b3aaaa',
+                textShadowOffset: { width: -1, height: -1 },
+                textShadowRadius: 0.5,
+
+            },
             ]}>
             {item.element_name}
           </Text>
           <Text style={[AppStyles.subtitle, {flex: 3, padding: 0}]}>
-            {'Batch : ' + item.batch_num}
+            {item.batch_num}
           </Text>
-          <View
-            style={{
-              height: 25,
-              width: 25,
-              borderRadius: 11,
-              borderWidth: 1,
-              borderColor: 'grey',
-              justifyContent: 'center',
-              alignContent: 'center',
-              alignItems: 'center',
-            }}>
-            <FontAwesome
-              name="circle"
-              size={23}
-              style={{color: item.color}}></FontAwesome>
           </View>
         </TouchableOpacity>
       );
@@ -158,39 +148,47 @@ export const RackData = React.memo(props => {
             margin: 5,
             padding: 5,
             flex: 1,
+            minWidth:150
           }}
           key={index}>
-          <Text
-            style={[
-              AppStyles.titleWithBold,
-              {backgroundColor: 'white', flex: 1, padding: 2},
-            ]}>
-            {item.element_name}
-          </Text>
+          
           <View
             style={[
               AppStyles.subtitle,
               {flex: 3, alignItems: 'center', padding: 2},
-            ]}></View>
+            ]}>
+              <Text
+            style={[
+              AppStyles.titleWithBold,
+              {backgroundColor: 'white', flex: 1, padding: 2,color:"black"},
+            ]}>
+            {item.element_name}
+          </Text>
+            </View>
         </View>
       );
     }
   };
   return (
     <View style={[styles.container, {flexDirection: 'column', flex: 1}]}>
+      <ScrollView horizontal refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      style={{flex:1}}>
       {racks.length ? (
         <FlatList
           data={racks}
           horizontal={false}
           renderItem={renderItem}
           keyExtractor={item => item.element_name}
-          onRefresh={() => onRefresh()}
-          refreshing={refreshing}
+          // onRefresh={() => onRefresh()}
+          // refreshing={refreshing}
           numColumns={columns}
         />
       ) : (
         <ActivityIndicator size={'large'} /> ////UI_Enhancement issue 20
       )}
+      </ScrollView>
       {dialog ? (
         <CustomModal
           modalVisible={dialog}
