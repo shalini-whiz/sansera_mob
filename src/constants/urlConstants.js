@@ -4,8 +4,20 @@
 var liveAddress = 'http://103.162.246.109:8086/';
 var mqttAddress = 'mqtt://103.162.246.109:1883';  // old mysore VM
 
+// var liveAddress = 'http://103.162.246.109:8086/';
+// var mqttAddress = 'mqtts://103.162.246.109:8883'; // old mysore VM SSL
+
 // var liveAddress = 'http://192.168.100.122:8080/';
-// var mqttAddress = 'mqtt://103.162.246.109:1883';  // localhost VM
+// var mqttAddress = 'mqtt://103.162.246.109:1883';  // localhost VM  // ssl://103.162.246.109:8883 
+
+// var liveAddress = 'http://192.168.0.38:8080/';
+// var mqttAddress = 'mqtt://103.162.246.109:1883';  // ganesh localhost VM
+
+// var liveAddress = 'http://192.168.100.18:8086/';
+// var mqttAddress = 'mqtt://103.162.246.109:1883';  // banglore localhost VM
+
+// var liveAddress = 'http://192.168.100.18:8086/';
+// var mqttAddress = 'mqtts://103.162.246.109:8883';  // banglore localhost VM SSL
 
 // var liveAddress = 'http://203.129.243.94:8086/';
 // var mqttAddress = 'mqtt://203.129.243.94:1883';  // new Mysore VM

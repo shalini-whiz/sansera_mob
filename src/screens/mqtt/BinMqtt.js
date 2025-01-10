@@ -134,7 +134,7 @@ const BinMqtt = props => {
                 setLoadBatteryData(false);
                 //client.disconnect()
               }
-            }, 1000 * index);
+            }, 3000 * index);
           });
         });
       }

@@ -27,7 +27,7 @@ export default TaskHome = React.memo(props => {
     }
   }, [isFocused, appProcess]);
 
-  console.log('Stage++++', stage);
+  // console.log('Stage++++', stage);
 
   const tabChange = value => {
     setTab(value);

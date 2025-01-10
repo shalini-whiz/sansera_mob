@@ -118,6 +118,7 @@ function ProcessFilter(props, ref) {
           margin: 2,
           padding: 5,
           backgroundColor: 'white',
+          alignItems:"center"
         }}>
         <Text style={[AppStyles.filterLabel, {margin: 1}]}>Process</Text>
         <ScrollView
@@ -137,6 +138,7 @@ function ProcessFilter(props, ref) {
                 alignSelf: 'center',
               }}>
               {process.map((item, index) => {
+                // console.log('item', item);
                 return (
                   <View
                     style={{
@@ -149,20 +151,34 @@ function ProcessFilter(props, ref) {
                     }}
                     key={index}>
                     <RadioButton value={item.process_name} />
-                    <Text
-                      style={[
-                        styles.radioText,
-                        {
-                          marginRight: 10,
-                          color:
-                            item.process_name === processName
-                              ? appTheme.colors.cardTitle
-                              : appTheme.colors.warnAction,
-                          fontFamily: appTheme.fonts.bold,
-                        },
-                      ]}>
-                      {item.process_name}
-                    </Text>
+                    <View style={{alignItems:"center"}} >
+                      <Text
+                        style={[
+                          styles.radioText,
+                          {
+                            marginRight: 10,
+                            color:
+                              item.process_name === processName
+                                ? appTheme.colors.cardTitle
+                                : appTheme.colors.warnAction,
+                            fontFamily: appTheme.fonts.bold,
+                          },
+                        ]}>
+                        {item.process_name}
+                      </Text>
+                      <Text style={[
+                          styles.radioText,
+                          {
+                            marginRight: 10,
+                            color:
+                              item.process_name === processName
+                                ? appTheme.colors.cardTitle
+                                : appTheme.colors.warnAction,
+                            fontFamily: appTheme.fonts.bold,
+                            fontSize: 14,
+                          },
+                        ]}>( {item.component_id} )</Text>
+                    </View>
                   </View>
                 );
               })}

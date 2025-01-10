@@ -133,7 +133,8 @@ const EndDowntime = () => {
             const arr = apiRes.response.message;
             arr.filter(
               dt => {
-                console.log(dt) ;setMinDate(dt.downtime[dt.downtime.length - 1].start_time)}
+                // console.log(dt) ;
+                setMinDate(dt.downtime[dt.downtime.length - 1].start_time)}
             );
           }
         } else if (apiRes && apiRes.response.message) {
@@ -165,7 +166,7 @@ const EndDowntime = () => {
           showDialog(false)
         } else if (apiRes && apiRes.response.message) {
           showDialog(false)
-          console.log(apiRes.response.message)
+          // console.log(apiRes.response.message)
           setApiError(apiRes.response.message);
         }
       });

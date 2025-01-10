@@ -58,23 +58,23 @@ let created_process_schema = [
   },
   {
     key: 'ok_bits_count',
-    displayName: 'End Billets (count)', //UI_Enhancement issue 14
+    displayName: 'Salvation Billets (count)', //UI_Enhancement issue 14
     placeholder: '',
     value: 0,
     error: '',
     required: false,
-    label: 'End Billets Count',
+    label: 'Salvation Billets Count',
     type: 'number',
     defaultValue: 0,
   },
   {
     key: 'ok_bits_weight',
-    displayName: 'End Billets Weight (kg)', //UI_Enhancement issue 14
+    displayName: 'Salvation Billets Weight (kg)', //UI_Enhancement issue 14
     placeholder: '',
     value: 0,
     error: '',
     required: false,
-    label: 'End Billets Weight',
+    label: 'Salvation Billets Weight',
     type: 'number',
     defaultValue: 0,
   },

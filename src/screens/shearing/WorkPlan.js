@@ -65,23 +65,23 @@ let stageWeightSchema = [
   },
   {
     key: 'ok_bits_count',
-    displayName: 'End Billets Count', //UI_Enhancement issue 12
+    displayName: 'Salvation Billets Count', //UI_Enhancement issue 12
     placeholder: '',
     value: 0,
     error: '',
     required: false,
-    label: 'End Billets Count',
+    label: 'Salvation Billets Count',
     type: 'number',
     defaultValue: 0,
   },
   {
     key: 'ok_bits_weight',
-    displayName: 'End Billets Weight (kg)', //UI_Enhancement issue 12
+    displayName: 'Salvation Billets Weight (kg)', //UI_Enhancement issue 12
     placeholder: '',
     value: 0,
     error: '',
     required: false,
-    label: 'End Billets Weight',
+    label: 'Salvation Billets Weight',
     type: 'decimal', // by Rakshith
     defaultValue: 0,
   },
