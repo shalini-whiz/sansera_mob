@@ -1,26 +1,30 @@
-// var liveAddress = 'http://10.11.2.32:8086/';
-// var mqttAddress = 'mqtt://10.11.2.32:1883';  // Sansera VM
+const VM = {
+  sansera: {
+    liveAddress: 'http://10.11.2.32:8086/',
+    mqttAddress: 'mqtt://10.11.2.32:1883',
+  },
+  testServer: {
+    liveAddress: 'http://49.249.241.171:8086/',
+    mqttAddress: 'mqtt://49.249.241.171:1883',
+  },
+  oldMysore: {
+    liveAddress: 'http://103.162.246.109:8086/',
+    mqttAddress: 'mqtt://103.162.246.109:1883',
+    ssl: 'mqtts://103.162.246.109:8883',
+  },
+  ganeshLH: {
+    liveAddress: 'http://192.168.0.38:8080/',
+    mqttAddress: 'mqtt://103.162.246.109:1883',
+  },
+  banloreLH: {
+    liveAddress: 'http://192.168.100.18:8086/',
+    mqttAddress: 'mqtt://103.162.246.109:1883',
+    ssl: 'mqtts://103.162.246.109:8883',
+  },
+};
 
-var liveAddress = 'http://103.162.246.109:8086/';
-var mqttAddress = 'mqtt://103.162.246.109:1883';  // old mysore VM
-
-// var liveAddress = 'http://103.162.246.109:8086/';
-// var mqttAddress = 'mqtts://103.162.246.109:8883'; // old mysore VM SSL
-
-// var liveAddress = 'http://192.168.100.122:8080/';
-// var mqttAddress = 'mqtt://103.162.246.109:1883';  // localhost VM  // ssl://103.162.246.109:8883 
-
-// var liveAddress = 'http://192.168.0.38:8080/';
-// var mqttAddress = 'mqtt://103.162.246.109:1883';  // ganesh localhost VM
-
-// var liveAddress = 'http://192.168.100.18:8086/';
-// var mqttAddress = 'mqtt://103.162.246.109:1883';  // banglore localhost VM
-
-// var liveAddress = 'http://192.168.100.18:8086/';
-// var mqttAddress = 'mqtts://103.162.246.109:8883';  // banglore localhost VM SSL
-
-// var liveAddress = 'http://203.129.243.94:8086/';
-// var mqttAddress = 'mqtt://203.129.243.94:1883';  // new Mysore VM
+var liveAddress = VM.oldMysore.liveAddress;
+var mqttAddress = VM.oldMysore.mqttAddress;
 
 let oldmqttOptions = {
   uri: 'mqtt://mqtt.meti.in:1884',

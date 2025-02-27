@@ -86,17 +86,17 @@ let batchSchema = [
     type: 'number',
     nonZero: true,
   }, // by Rakshith
-  {
-    key: 'component_weight',
-    displayName: 'Component Weight',
-    placeholder: '',
-    value: '',
-    error: '',
-    required: true,
-    label: 'component weight',
-    type: 'decimal', // by Rakshith
-    nonZero: true,
-  },
+  // {
+  //   key: 'component_weight',
+  //   displayName: 'Component Weight',
+  //   placeholder: '',
+  //   value: '',
+  //   error: '',
+  //   required: true,
+  //   label: 'component weight',
+  //   type: 'decimal', // by Rakshith
+  //   nonZero: true,
+  // },
 ];
 
 //Total Weight (kg)

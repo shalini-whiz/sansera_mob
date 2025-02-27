@@ -23,6 +23,7 @@ const Home = () => {
   const [dialogTitle, setDialogTitle] = React.useState('');
   const [dialogMessage, setDialogMessage] = React.useState('');
   const isFocused = useIsFocused();
+  const {setAppProcessData} = React.useContext(EmptyBinContext);
   const {setProcessStage} = React.useContext(AppContext);
   let {setUnReadEmptyBinData, setUnReadFilledBinData, resetTaskData} =
     React.useContext(EmptyBinContext);
@@ -56,6 +57,7 @@ const Home = () => {
     setUnReadFilledBinData('');
     setUser(null);
     clearTopics(userState && userState.user && userState.user.id);
+    setAppProcessData({})  // clearing Process data
   };
 
   return (

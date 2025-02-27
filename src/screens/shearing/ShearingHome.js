@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef, memo} from 'react';
 
-import {Text, View} from 'react-native';
+import {Image, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import {appTheme} from '../../lib/Themes';
@@ -117,7 +117,16 @@ export const ShearingHome = memo(props => {
         ref={processRef}
         style={{margin: 5}}
       />
-      <TabNavigation style={{flex: 2}} />
+      {appProcess && Object.keys(appProcess).length ? (
+        <TabNavigation style={{flex: 2}} />
+      ) : (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Image
+            source={require('../../images/noProcess.png')}
+            style={{height: 1000, width: 1000}}
+          />
+        </View>
+      )}
     </View>
   );
 });

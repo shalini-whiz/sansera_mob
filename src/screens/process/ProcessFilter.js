@@ -67,14 +67,14 @@ function ProcessFilter(props, ref) {
               let currentProObj = apiRes.response.message.find(
                 item => item.process_name === selectedProcess,
               );
-              // props.processEntity(currentProObj)
-              setProcessName(currentProObj.process_name);
-              setAppProcessData(currentProObj);
+              // // props.processEntity(currentProObj)
+              // setProcessName(currentProObj.process_name);
+              // setAppProcessData(currentProObj);
             } else {
               let processEntity = apiRes.response.message[0];
-              // props.processEntity(processEntity)
-              setProcessName(processEntity.process_name);
-              setAppProcessData(processEntity);
+              // // props.processEntity(processEntity)
+              // setProcessName(processEntity.process_name);
+              // setAppProcessData(processEntity);
             }
           }
 
@@ -160,7 +160,7 @@ function ProcessFilter(props, ref) {
                             color:
                               item.process_name === processName
                                 ? appTheme.colors.cardTitle
-                                : appTheme.colors.warnAction,
+                                : appTheme.colors.statusHold,
                             fontFamily: appTheme.fonts.bold,
                           },
                         ]}>
@@ -173,7 +173,7 @@ function ProcessFilter(props, ref) {
                             color:
                               item.process_name === processName
                                 ? appTheme.colors.cardTitle
-                                : appTheme.colors.warnAction,
+                                : appTheme.colors.statusHold,
                             fontFamily: appTheme.fonts.bold,
                             fontSize: 14,
                           },

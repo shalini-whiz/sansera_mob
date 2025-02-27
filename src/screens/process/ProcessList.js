@@ -240,7 +240,7 @@ export default function ProcessList() {
                   <View style={styles.processContainer} key={index}>
                     <View style={{ flexDirection: 'row' }} key={index}>
                       <Text style={[styles.title, { textAlign: 'left' }]}>
-                        {item.process_name}
+                        {item.process_name} ({item.component_id})
                       </Text>
                       <View
                         style={{
@@ -347,7 +347,7 @@ export default function ProcessList() {
                         ]}>
                         {item.status === 'FINISHED'
                           ? 'Finished Count'
-                          : 'Process Count'}
+                          : 'Parts Forged'}
                       </Text>
 
                       <Text
@@ -430,7 +430,7 @@ export default function ProcessList() {
                         ]}>
                         {item.status === 'FINISHED'
                           ? item.finished_component
-                          : item.process[6].ok_component}
+                          : item.process[1].ok_component}
                       </Text>
 
                       <Text

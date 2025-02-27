@@ -27,8 +27,8 @@ const shearing_consumption_schema = [
   {key: 'component_id', displayName: 'Component'},
   {key: 'ok_end_billets', displayName: 'OK Billets'},
   {key: 'ok_end_billets_in_kg', displayName: 'OK Billets (kg)'},
-  {key: 'ok_bits_count', displayName: 'OK End Billets'},
-  {key: 'ok_bits_weight', displayName: 'OK End Billets (kg)'},
+  {key: 'ok_bits_count', displayName: 'Salvation Billets'},
+  {key: 'ok_bits_weight', displayName: 'Salvation Billets (kg)'},
   {key: 'total_quantity', displayName: 'Total Quanity (kg)'},
   {key: 'balance_quantity', displayName: 'Balance Quanity (kg)'},
 ];
