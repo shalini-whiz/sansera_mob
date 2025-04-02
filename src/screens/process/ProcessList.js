@@ -345,6 +345,13 @@ export default function ProcessList() {
                           styles.subtitle,
                           { textAlign: 'center', flex: 1 },
                         ]}>
+                        Target Weight
+                      </Text>
+                      <Text
+                        style={[
+                          styles.subtitle,
+                          { textAlign: 'center', flex: 1 },
+                        ]}>
                         {item.status === 'FINISHED'
                           ? 'Finished Count'
                           : 'Parts Forged'}
@@ -421,6 +428,14 @@ export default function ProcessList() {
                           { textAlign: 'center', flex: 1 },
                         ]}>
                         {item.component_count}
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.tableContent,
+                          { textAlign: 'center', flex: 1 },
+                        ]}>
+                        {item.component_weight}
                       </Text>
 
                       <Text

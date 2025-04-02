@@ -133,6 +133,7 @@ export const WorkPlan = React.memo(props => {
 
     setApiStatus(true);
     ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
+      closeDialog()
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {

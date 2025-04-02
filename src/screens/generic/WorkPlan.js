@@ -136,6 +136,7 @@ export const WorkPlan = React.memo(props => {
 
     setApiStatus(true);
     ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
+      closeDialog()
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {
@@ -143,7 +144,7 @@ export const WorkPlan = React.memo(props => {
           // props.setProcessEntity(apiRes.response.message)
           props.updateProcess();
 
-          // setBatchDet(apiRes.response.message);
+           setBatchDet(apiRes.response.message);
           //openDialog(apiRes.response.message);
           util.resetForm(formData);
         }

@@ -166,7 +166,17 @@ let createdBatch = [
   },
   {
     key: 'total_weight',
-    displayName: 'Total Quantity (in Kg)',
+    displayName: 'Total Weight (in Kg)',
+    placeholder: '',
+    value: '',
+    error: '',
+    required: true,
+    label: 'quantity',
+    type: 'decimal', // rakshith
+  },
+  {
+    key: 'current_weight',
+    displayName: 'Current Weight (in Kg)',
     placeholder: '',
     value: '',
     error: '',

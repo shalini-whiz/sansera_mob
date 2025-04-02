@@ -85,6 +85,44 @@ function ProcessFilter(props, ref) {
       }
     });
   };
+  const uploadProcess = selectedProcess => {
+    setApiStatus(true);
+    let apiData = {
+      op: 'get_process',
+      status: ['RUNNING'],
+      unit_num: userState.user.unit_number,
+    };
+
+    setRefreshing(false);
+    ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
+      setApiStatus(false);
+      if (apiRes && apiRes.status) {
+        if (apiRes.response.message && apiRes.response.message.length) {
+          let currentProcess = apiRes.response.message[0];
+
+          if (currentProcess) {
+            if (selectedProcess && selectedProcess.length > 0) {
+              let currentProObj = apiRes.response.message.find(
+                item => item.process_name === selectedProcess,
+              );
+              // props.processEntity(currentProObj)
+              setProcessName(currentProObj.process_name);
+              setAppProcessData(currentProObj);
+            } else {
+              let processEntity = apiRes.response.message[0];
+              // props.processEntity(processEntity)
+              setProcessName(processEntity.process_name);
+              setAppProcessData(processEntity);
+            }
+          }
+
+          setProcess(apiRes.response.message);
+        }
+      } else {
+        setProcess([]);
+      }
+    });
+  };
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -102,7 +140,7 @@ function ProcessFilter(props, ref) {
   };
 
   const reload = processName => {
-    loadProcess(processName);
+    uploadProcess(processName);
   };
 
   return (

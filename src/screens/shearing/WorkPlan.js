@@ -52,17 +52,17 @@ let stageWeightSchema = [
     type: 'decimal', // by Rakshith
     defaultValue: 0,
   },
-  {
-    key: 'hold_materials_weight',
-    displayName: 'Hold Material Weight (kg)',
-    placeholder: '',
-    value: 0,
-    error: '',
-    required: false,
-    label: 'Hold Material Weight',
-    type: 'decimal', // by Rakshith
-    defaultValue: 0,
-  },
+  // {
+  //   key: 'hold_materials_weight',
+  //   displayName: 'Hold Material Weight (kg)',
+  //   placeholder: '',
+  //   value: 0,
+  //   error: '',
+  //   required: false,
+  //   label: 'Hold Material Weight',
+  //   type: 'decimal', // by Rakshith
+  //   defaultValue: 0,
+  // },
   {
     key: 'ok_bits_count',
     displayName: 'Salvation Billets Count', //UI_Enhancement issue 12
@@ -225,22 +225,22 @@ export default function WorkPlan(props) {
       ); 
 
       // added avlidation to hold materials weight
-      let hold_materials_weight_index = validFormData.findIndex(
-        item => item.key === 'hold_materials_weight',
-      );
+      // let hold_materials_weight_index = validFormData.findIndex(
+      //   item => item.key === 'hold_materials_weight',
+      // );
       let ok_bits_weight_index = validFormData.findIndex(
         item => item.key === 'ok_bits_weight',
       );
       let ok_bits_count_obj = validFormData[ok_bits_count_index];
       let ok_bits_weight_obj = validFormData[ok_bits_weight_index];
 
-      let hold_materials_weight_obj =
-        validFormData[hold_materials_weight_index];
+      // let hold_materials_weight_obj =
+      //   validFormData[hold_materials_weight_index];
 
-      if (hold_materials_weight_obj.value.toString() === 'NaN') {
-        validFormData[hold_materials_weight_index].error =
-          'Weight of Hold Materials required';
-      }
+      // if (hold_materials_weight_obj.value.toString() === 'NaN') {
+      //   validFormData[hold_materials_weight_index].error =
+      //     'Weight of Hold Materials required';
+      // }
       if (
         (ok_bits_count_obj.value > 0 && ok_bits_weight_obj.value == 0) ||
         ok_bits_weight_obj.value.toString() === 'NaN'
@@ -301,9 +301,9 @@ export default function WorkPlan(props) {
       (apiData.process_name = appProcess.process_name);
     apiData.stage_name = await AsyncStorage.getItem('stage');
 
-    setApiStatus(true);
-
+    setApiStatus(true);   
     ApiService.getAPIRes(apiData, 'POST', 'process').then(apiRes => {
+      closeDialog()
       setApiStatus(false);
       if (apiRes && apiRes.status) {
         if (apiRes.response.message) {

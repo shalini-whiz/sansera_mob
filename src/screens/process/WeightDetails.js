@@ -18,15 +18,15 @@ import FormGrid from '../../lib/FormGrid';
 import {json} from 'stream/consumers';
 
 let created_process_schema = [
-  {
-    key: 'hold_materials_weight',
-    displayName: 'Hold Materials Weight', //UI_Enhancement issue 14
-    placeholder: '',
-    value: '',
-    error: '',
-    label: 'Hold Weight',
-    type: 'string',
-  },
+  // {
+  //   key: 'hold_materials_weight',
+  //   displayName: 'Hold Materials Weight', //UI_Enhancement issue 14
+  //   placeholder: '',
+  //   value: '',
+  //   error: '',
+  //   label: 'Hold Weight',
+  //   type: 'string',
+  // },
   {
     key: 'total_rejections',
     displayName: 'Rejected Weight',
@@ -126,13 +126,13 @@ export default function WeightDetails(props) {
         if (item.type === 'date') {
           item.value = dateUtil.toDateFormat(item.value, 'DD MMM YYYY hh:mm');
         }
-        if (
-          item.key === 'hold_materials_weight' &&
-          props.processEntity.process[stage_ok_comp_index]
-        ) {
-          item.value =
-            props.processEntity.process[stage_ok_comp_index][item.key] + '';
-        }
+        // if (
+        //   item.key === 'hold_materials_weight' &&
+        //   props.processEntity.process[stage_ok_comp_index]
+        // ) {
+        //   item.value =
+        //     props.processEntity.process[stage_ok_comp_index][item.key] + '';
+        // }
         if (
           value.toLowerCase() === 'shearing' &&
           item.key === 'ok_end_billets_weight' &&

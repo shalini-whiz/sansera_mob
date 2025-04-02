@@ -62,7 +62,7 @@ export default Inventory = React.memo(props => {
                     : appTheme.colors.cardTitle,
               },
             ]}>
-            Create Batch{' '}
+            CREATE BATCH{' '}
           </Text>
         </TouchableOpacity>
         <Text style={{padding: 8}}> / </Text>

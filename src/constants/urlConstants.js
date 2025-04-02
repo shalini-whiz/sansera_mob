@@ -23,8 +23,8 @@ const VM = {
   },
 };
 
-var liveAddress = VM.oldMysore.liveAddress;
-var mqttAddress = VM.oldMysore.mqttAddress;
+var liveAddress = VM.sansera.liveAddress;
+var mqttAddress = VM.sansera.mqttAddress;
 
 let oldmqttOptions = {
   uri: 'mqtt://mqtt.meti.in:1884',
